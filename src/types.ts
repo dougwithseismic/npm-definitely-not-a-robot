@@ -9,6 +9,14 @@ export type MovementOptions = {
     minPause?: number
     debug?: boolean
     fadeDuration?: number
+    startX?: number
+    startY?: number
+    target?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+    endX?: number
+    endY?: number
+    jitterMin?: number
+    jitterMax?: number
+    jitterCount?: number
 }
 
 // Function type for debug visualization of mouse positions.
@@ -16,4 +24,9 @@ export type DebugShowPositionFunction = (page: Page, x: number, y: number) => Pr
 
 export type DebugOptions = {
     fadeDuration?: number // Duration (in ms) before the debug visuals fade away. If not provided, they won't fade.
+}
+
+export interface CustomWindow extends Window {
+    debugCanvas: HTMLCanvasElement | undefined
+    debugCanvasCtx: CanvasRenderingContext2D
 }
