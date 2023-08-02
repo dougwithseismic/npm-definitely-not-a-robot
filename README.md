@@ -1,5 +1,7 @@
 # dougwithseismic/definitely-not-a-human 🤖
 
+Be a human pretending to be a robot being a human robot human-being. 
+
 ![GitHub Badge](https://img.shields.io/github/stars/dougwithseismic/definitely-not-a-robot?style=social&label=Star)
 
 ![Definitely Not A Robot](definitely-not-a-robot.gif)
@@ -50,6 +52,7 @@ await browser.launch({
   defaultViewport: { width: 1440, height: 900 }
 })
 ```
+
 Anything you can do with a regular `puppeteer` instance, you can do here.
 
 ### Navigating to a URL
