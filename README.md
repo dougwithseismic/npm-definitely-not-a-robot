@@ -1,16 +1,16 @@
 # dougwithseismic/definitely-not-a-human 🤖
 
-Be a human pretending to be a robot being a human robot human-being. 
+Be a human pretending to be a robot being a human robot human-being so you can do all those things that humans do, but as a robot. Or something like that ♻. This is Puppeteer but with some extra human imperfections baked in.
 
 ![GitHub Badge](https://img.shields.io/github/stars/dougwithseismic/definitely-not-a-robot?style=social&label=Star)
 
 ![Definitely Not A Robot](definitely-not-a-robot.gif)
 
-HumanBrowser is a super simple wrapper around the Puppeteer browser that emulates human-like interactions for automation testing or web scraping tasks.
+definitely-not-a-human is a super simple wrapper around the Puppeteer browser that emulates human-like interactions for automation testing or web scraping tasks.
 
 By leveraging puppeteer-extra and its StealthPlugin, it offers enhanced bot detection circumvention so you can keep on scraping and stay one step ahead.
 
-The primary goal of HumanBrowser is to simulate behaviors that are indistinguishable from real human users. This is achieved by introducing randomness in various interactions, making the actions less predictable and more "human-like."
+The primary goal of definitely-not-a-human is to simulate behaviors that are indistinguishable from real human users. This is achieved by introducing randomness in various interactions, making the actions less predictable and more "human-like."
 
 Beep Boop. I don't condone this behaviour.
 
@@ -31,9 +31,9 @@ In the world of automation, predictability is often the enemy. Web servers, espe
 Start by creating a new instance:
 
 ```typescript
-import HumanBrowser from 'path-to-humanbrowser'
+import definitelyNotAHuman from 'path-to-definitely-not-a-human'
 
-const browser = new HumanBrowser()
+const browser = new definitelyNotAHuman()
 ```
 
 ### Launching the browser
@@ -65,7 +65,7 @@ await browser.navigate('https://www.example.com')
 
 ### Human-like Mouse Movement to Elements
 
-Move the mouse to an element in a non-linear, humanized path:
+Move the mouse to an element in a non-linear, humanized path, then click it.
 
 ```typescript
 await browser.moveToElement('#my-element-id')
