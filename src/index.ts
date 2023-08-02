@@ -1,72 +1,91 @@
-import { PuppeteerExtra } from 'puppeteer-extra'
 import HumanBrowser from './HumanBrowser'
-;(async () => {
-    const browser = new HumanBrowser()
 
-    // Launch a browser window
-    await browser.launch({
-        headless: false, // Open a browser window visibly. Set to true to run in the background.
-        // args: ['--start-maximized'], // Open the browser window maximized.
-    })
+const HEADLESS_MODE = false
+// const BROWSER_WINDOW_ARGUMENTS = ['--start-maximized'];
 
-    // Navigate to a sample website
-    await browser.navigate('https://ui.shadcn.com/')
+const DEFAULT_PAUSE_OPTIONS = {
+    maxPause: 2,
+    minPause: 0,
+    hesitationBeforeClick: true,
+}
 
-    await browser.moveToElement('input[type*="search"]', {
-        scrollBeforeMove: true, // Scroll to bring the element to the center before moving the mouse
-        variablePath: true, // Add randomness to the movement path
-        hesitationBeforeClick: true, // Pause a bit before performing the click
-        maxPause: 2, // Maximum possible pause (in milliseconds) during various actions
-        minPause: 0, // Minimum possible pause (in milliseconds) during various actions
-    })
-    await browser.jitterMouse({
-        jitterMin: 10,
-        jitterMax: 100,
-        jitterCount: 2, // Jitter the mouse 5 times
-    })
+const JITTER_DEFAULT = {
+    jitterMin: 3,
+    jitterMax: 30,
+    jitterCount: 3,
+    debug: true,
+}
+const URL = `https://ui.shadcn.com`
+const SEARCH_BOX_SELECTOR = 'input[type*="search"]'
+const TEAM_SELECT_BUTTON = 'button[aria-label="Select a team"]'
+const MONSTER_SELECTION = '[data-value="monsters inc."]'
+const NAVIGATION_LINK = 'a[href*="/examples/playground"]'
+const TEXT_AREA_SELECTOR = 'textarea'
 
-    await browser.humanType('Hello World', 86) //Types 'Hello World' with a delay that mimics a humon's words per minute. (under the hood, we check the ascii difference between keys to add some randomness, too)
+async function typeInSearchBox(browser: HumanBrowser, text: string, wordsPerMinute: number) {
+    await browser.moveToElement(SEARCH_BOX_SELECTOR, DEFAULT_PAUSE_OPTIONS)
+    await browser.jitterMouse(JITTER_DEFAULT)
+    await browser.humanType(text, wordsPerMinute)
     await browser.jitterMouse()
+}
 
-    await browser.moveToElement('button[aria-label="Select a team"]', {
-        hesitationBeforeClick: true, // Pause a bit before performing the click
-        maxPause: 1, // Maximum possible pause (in milliseconds) during various actions
-        minPause: 0, // Minimum possible pause (in milliseconds) during various actions
-    })
+async function selectTeam(browser: HumanBrowser) {
+    await browser.moveToElement(TEAM_SELECT_BUTTON, DEFAULT_PAUSE_OPTIONS)
     await browser.jitterMouse()
+}
 
+async function typeMonsterName(browser: HumanBrowser, text: string, keyboardStretch: number) {
     await browser.wait(300, 500)
     await browser.jitterMouse({
         jitterMin: 1,
         jitterMax: 30,
-        jitterCount: 2, // Jitter the mouse 5 times
+        jitterCount: 2,
     })
-    await browser.humanType('Monste', 30) //Types 'Hello World' with a delay that mimics a humon's keyboard stretch (under the hood, we check the ascii difference between keys)
-
+    await browser.humanType(text, keyboardStretch)
     await browser.wait(300, 500)
     await browser.jitterMouse()
+}
 
-    await browser.moveToElement('[data-value="monsters inc."]', {
-        hesitationBeforeClick: true, // Pause a bit before performing the click
-    })
-
+async function selectMonster(browser: HumanBrowser) {
+    await browser.moveToElement(MONSTER_SELECTION, DEFAULT_PAUSE_OPTIONS)
     await browser.jitterMouse()
+}
 
-    await browser.moveToElement('a[href*="/examples/playground"]')
-    // Let's assume the click opens a new page. Wait for some time before taking any action.
-
+async function navigateToPlayground(browser: HumanBrowser) {
+    await browser.moveToElement(NAVIGATION_LINK)
     await browser.wait(300, 500)
-
     await browser.jitterMouse()
-    await browser.moveToElement('textarea', {
+}
+
+async function typeTextArea(browser: HumanBrowser, text: string) {
+    await browser.moveToElement(TEXT_AREA_SELECTOR, {
         target: 'top-left',
+        ...DEFAULT_PAUSE_OPTIONS,
+    })
+    await browser.jitterMouse({
+        jitterCount: 2,
+    })
+    await browser.humanType(text)
+}
+
+;(async () => {
+    const browser = new HumanBrowser()
+
+    await browser.launch({
+        headless: HEADLESS_MODE,
+        // args: BROWSER_WINDOW_ARGUMENTS
     })
 
-    const HUMAN_TEXT = `Hello World! I am definitely a human, and not a robot mimicking small micro-stutters between words based on their distance on a physical keyboard! ah ah ah ah ah. `
-    await browser.humanType(HUMAN_TEXT) 
+    await browser.navigate(URL)
 
-    // ... You can add other actions or interactions as needed ...
+    await typeInSearchBox(browser, 'Hello World', 86)
+    await selectTeam(browser)
+    await typeMonsterName(browser, 'Monste', 30)
+    await selectMonster(browser)
+    await navigateToPlayground(browser)
+    await typeTextArea(browser, `Hello World! I am definitely a human...`)
 
-    // Finally, close the browser after observing the result
-    // await browser.close()
+    // ... Continue with other actions ...
+
+    // await browser.close();
 })()

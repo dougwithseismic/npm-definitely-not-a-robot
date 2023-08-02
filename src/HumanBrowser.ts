@@ -85,6 +85,8 @@ class HumanBrowser {
             throw new Error('Page is not initialized. Call launch() first.')
         }
 
+        options = { ...options, debug: true, fadeDuration: 800 }
+
         const jitterMin = options.jitterMin ?? 20
         const jitterMax = options.jitterMax ?? 95
         const jitterCount = options.jitterCount ?? 1 // default to one jitter
