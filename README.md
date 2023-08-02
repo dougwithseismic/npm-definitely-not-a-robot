@@ -2,6 +2,8 @@
 
 ![GitHub Badge](https://img.shields.io/github/stars/dougwithseismic/definitely-not-a-robot?style=social&label=Star)
 
+![Definitely Not A Robot](definitely-not-a-robot.gif)
+
 HumanBrowser is a super simple wrapper around the Puppeteer browser that emulates human-like interactions for automation testing or web scraping tasks.
 
 By leveraging puppeteer-extra and its StealthPlugin, it offers enhanced bot detection circumvention so you can keep on scraping and stay one step ahead.
