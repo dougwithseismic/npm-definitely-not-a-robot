@@ -1,7 +1,7 @@
 import { Browser, Page, BrowserLaunchArgumentOptions, KeyInput } from 'puppeteer'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
-import { drawBezierMovement, humanMouseMove } from './mouseUtils'
+import { drawBezierMovement, drawBezierMovementWithJitter, humanMouseMove } from './mouseUtils'
 import { MovementOptions } from './types'
 
 puppeteer.use(StealthPlugin())
@@ -50,36 +50,6 @@ class HumanBrowser {
         await this.page.goto(url)
     }
 
-    async moveToElement(selector: string, moveOptions?: MovementOptions) {
-        if (!this.page) {
-            throw new Error('Page is not initialized. Call launch() first.')
-        }
-        const element = await this.page.$(selector)
-        if (!element) {
-            throw new Error(`Element with selector "${selector}" not found.`)
-        }
-
-        const boundingBox = await element.boundingBox()
-        if (!boundingBox) {
-            throw new Error(`Failed to get bounding box for element with selector "${selector}".`)
-        }
-
-        let endX = boundingBox.x + boundingBox.width / 2
-        let endY = boundingBox.y + boundingBox.height / 2
-
-        const { x: startX, y: startY } = this.lastMousePosition
-        const { x, y } = await humanMouseMove(this.page, element, {
-            startX,
-            startY,
-            endX,
-            endY,
-            ...moveOptions,
-        })
-
-        // Remember the new position
-        this.lastMousePosition = { x, y }
-    }
-
     async jitterMouse(options: MovementOptions = {}): Promise<void> {
         if (!this.page) {
             throw new Error('Page is not initialized. Call launch() first.')
@@ -114,6 +84,39 @@ class HumanBrowser {
             await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 100))
         }
     }
+
+    async humanMove(selector: string, moveOptions?: MovementOptions) {
+        if (!this.page) {
+            throw new BrowserNotInitializedError()
+        }
+
+        const element = await this.page.$(selector)
+        if (!element) {
+            throw new ElementNotFoundError(selector)
+        }
+
+        const boundingBox = await element.boundingBox()
+        if (!boundingBox) {
+            throw new Error(`Failed to get bounding box for element with selector "${selector}".`)
+        }
+
+        let endX = boundingBox.x + boundingBox.width / 2
+        let endY = boundingBox.y + boundingBox.height / 2
+
+        const { x: startX, y: startY } = this.lastMousePosition
+
+        const { x, y } = await humanMouseMove(this.page, element, {
+            startX,
+            startY,
+            endX,
+            endY,
+            ...moveOptions,
+        })
+
+        // Remember the new position
+        this.lastMousePosition = { x, y }
+    }
+
     async humanType(text: string, wpm: number = 250) {
         if (!this.page) {
             throw new Error('Page is not initialized. Call launch() first.')

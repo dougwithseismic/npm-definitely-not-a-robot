@@ -23,14 +23,14 @@ const NAVIGATION_LINK = 'a[href*="/examples/playground"]'
 const TEXT_AREA_SELECTOR = 'textarea'
 
 async function typeInSearchBox(browser: HumanBrowser, text: string, wordsPerMinute: number) {
-    await browser.moveToElement(SEARCH_BOX_SELECTOR, DEFAULT_PAUSE_OPTIONS)
+    await browser.humanMove(SEARCH_BOX_SELECTOR, DEFAULT_PAUSE_OPTIONS)
     await browser.jitterMouse(JITTER_DEFAULT)
     await browser.humanType(text, wordsPerMinute)
     await browser.jitterMouse()
 }
 
 async function selectTeam(browser: HumanBrowser) {
-    await browser.moveToElement(TEAM_SELECT_BUTTON, DEFAULT_PAUSE_OPTIONS)
+    await browser.humanMove(TEAM_SELECT_BUTTON, DEFAULT_PAUSE_OPTIONS)
     await browser.jitterMouse()
 }
 
@@ -47,23 +47,23 @@ async function typeMonsterName(browser: HumanBrowser, text: string, keyboardStre
 }
 
 async function selectMonster(browser: HumanBrowser) {
-    await browser.moveToElement(MONSTER_SELECTION, DEFAULT_PAUSE_OPTIONS)
+    await browser.humanMove(MONSTER_SELECTION, DEFAULT_PAUSE_OPTIONS)
     await browser.jitterMouse()
 }
 
 async function navigateToPlayground(browser: HumanBrowser) {
-    await browser.moveToElement(NAVIGATION_LINK)
+    await browser.humanMove(NAVIGATION_LINK)
     await browser.wait(300, 500)
     await browser.jitterMouse()
 }
 
 async function typeTextArea(browser: HumanBrowser, text: string) {
-    await browser.moveToElement(TEXT_AREA_SELECTOR, {
+    await browser.humanMove(TEXT_AREA_SELECTOR, {
         target: 'top-left',
         ...DEFAULT_PAUSE_OPTIONS,
     })
     await browser.jitterMouse({
-        jitterCount: 2,
+        jitterCount: 1,
     })
     await browser.humanType(text)
 }
@@ -83,7 +83,7 @@ async function typeTextArea(browser: HumanBrowser, text: string) {
     await typeMonsterName(browser, 'Monste', 30)
     await selectMonster(browser)
     await navigateToPlayground(browser)
-    await typeTextArea(browser, `Hello World! I am definitely a human...`)
+    await typeTextArea(browser, `Hello World! I am definitely a human doing human things. How about those student loans and depression, huh? ah ah ah aH AH AHHH.`)
 
     // ... Continue with other actions ...
 

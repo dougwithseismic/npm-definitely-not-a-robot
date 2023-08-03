@@ -30,3 +30,26 @@ export interface CustomWindow extends Window {
     debugCanvas: HTMLCanvasElement | undefined
     debugCanvasCtx: CanvasRenderingContext2D
 }
+
+
+export interface MouseState {
+    x: number
+    y: number
+}
+
+
+
+export interface Point {
+    x: number;
+    y: number;
+}
+
+export interface SegmentDeltas {
+    segmentDxs: number[];
+    segmentDys: number[];
+}
+
+export interface MovementCalculations {
+    speed: number;
+    acceleration: number;
+}

@@ -65,10 +65,10 @@ await browser.navigate('https://www.example.com')
 
 ### Human-like Mouse Movement to Elements
 
-Move the mouse to an element in a non-linear, humanized path, then click it.
+Move the mouse to an element in a non-linear, humanized path, then click it. To act like a human, you must first move like a human so we split our mouse movement into segments and introduce randomness into each, depending on the distance between the current and target positions.
 
 ```typescript
-await browser.moveToElement('#my-element-id')
+await browser.humanMove('#my-element-id', { hesitationBeforeClick: true })
 ```
 
 Additional movement options, like `duration` and `steps`, allow for even more varied mouse movement behaviors.
@@ -108,3 +108,11 @@ Cleanly close the browser post interactions:
 ```typescript
 await browser.close()
 ```
+
+## Changelog
+
+For a list of changes, check out the [Changelog](CHANGELOG.md).
+
+## Author
+
+Doug withSeismic - <doug@withseismic.com> twitter.com/dougiesilkstone
