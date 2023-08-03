@@ -1,4 +1,4 @@
-# dougwithseismic/definitely-not-a-human 🤖
+# dougwithseismic/definitely-not-a-robot 🤖
 
 Be a human pretending to be a robot being a human robot human-being so you can do all those things that humans do, but as a robot. Or something like that ♻. This is Puppeteer but with some extra human imperfections baked in.
 
@@ -6,11 +6,11 @@ Be a human pretending to be a robot being a human robot human-being so you can d
 
 ![Definitely Not A Robot](definitely-not-a-robot.gif)
 
-definitely-not-a-human is a super simple wrapper around the Puppeteer browser that emulates human-like interactions for automation testing or web scraping tasks.
+definitely-not-a-robot is a super simple wrapper around the Puppeteer browser that emulates human-like interactions for automation testing or web scraping tasks.
 
 By leveraging puppeteer-extra and its StealthPlugin, it offers enhanced bot detection circumvention so you can keep on scraping and stay one step ahead.
 
-The primary goal of definitely-not-a-human is to simulate behaviors that are indistinguishable from real human users. This is achieved by introducing randomness in various interactions, making the actions less predictable and more "human-like."
+The primary goal of definitely-not-a-robot is to simulate behaviors that are indistinguishable from real human users. This is achieved by introducing randomness in various interactions, making the actions less predictable and more "human-like."
 
 Beep Boop. I don't condone this behaviour.
 
@@ -31,7 +31,7 @@ In the world of automation, predictability is often the enemy. Web servers, espe
 Start by creating a new instance:
 
 ```typescript
-import definitelyNotAHuman from 'path-to-definitely-not-a-human'
+import definitelyNotAHuman from 'path-to-definitely-not-a-robot'
 
 const browser = new definitelyNotAHuman()
 ```
