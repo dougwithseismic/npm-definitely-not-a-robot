@@ -10,6 +10,11 @@ What's new, newest first. Each entry says what you can do now.
   click did. Now it presses the right arrow key to reach the end first, on every platform, with
   Playwright and Puppeteer. An empty field gets no extra key press.
 
+### A misspelled cursor colour is caught straight away · Fixed
+- `visibleCursor({ color: 'blu' })` and `trail({ color: 'blu' })` now throw when you create them,
+  saying what they got and what a colour looks like. Before, the browser ignored the colour and the
+  cursor was drawn in nothing.
+
 ### A README that says who it's for and why (PRD 04) · Improved
 - The top of the README now says who the library is for and what sets it apart: every input
   humanized, not just the cursor; the real mouse moved, so hover menus open on the way; and any

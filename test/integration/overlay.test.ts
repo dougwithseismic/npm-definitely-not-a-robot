@@ -2,6 +2,7 @@ import type { Page } from 'playwright'
 import { describe, expect, it } from 'vitest'
 import { createHuman, playwrightDriver, presets, trail, visibleCursor } from '../../src'
 import { boxCenter } from '../../src/geometry'
+import { CSS_COLOR_NAMES } from '../../src/plugins/css-color'
 import type { OverlayState } from '../../src/plugins/overlay-page'
 import { events, failure, fast, useFixture } from './fixture'
 
@@ -36,6 +37,14 @@ async function drawnAt(page: Page, p: { x: number; y: number }): Promise<boolean
 }
 
 describe('visibleCursor', () => {
+    it('knows the same colour names as the browser', async () => {
+        const unknown = await fx.page.evaluate(
+            (names) => names.filter((name) => !CSS.supports('color', name)),
+            [...CSS_COLOR_NAMES]
+        )
+        expect(unknown).toEqual([])
+    })
+
     it('draws a cursor where the mouse is, without getting in the way of clicks', async () => {
         const human = createHuman(fx.page, { ...fast, plugins: [visibleCursor()] })
         const point = await human.click('#signup')

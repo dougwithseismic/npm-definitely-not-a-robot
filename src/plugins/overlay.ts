@@ -1,5 +1,6 @@
-import { HumanError, requireOption } from '../errors'
+import { describeValue, HumanError, requireOption } from '../errors'
 import { inPage } from '../in-page'
+import { isCssColor } from './css-color'
 import { definePlugin, type HumanPlugin } from './index'
 import { type OverlayParts, overlayInPage } from './overlay-page'
 
@@ -39,7 +40,8 @@ function overlayPlugin(name: string, parts: OverlayParts): HumanPlugin {
     })
 }
 
-const isColor = (value: unknown): value is string => typeof value === 'string' && value !== ''
+const COLOR_HINT =
+    "Use a colour name like 'tomato', a hex code like '#111827', or rgb(), hsl() or oklch()."
 const isPositive = (value: number) => Number.isFinite(value) && value > 0
 
 /**
@@ -50,12 +52,16 @@ const isPositive = (value: number) => Number.isFinite(value) && value > 0
  */
 export function visibleCursor(options: VisibleCursorOptions = {}): HumanPlugin {
     const { color = '#111827', size = 24, ripple = true } = options
-    requireOption(isColor(color), 'visibleCursor color must be a CSS colour.', "Try '#111827'.")
+    requireOption(
+        isCssColor(color),
+        `visibleCursor color must be a CSS colour, but got ${describeValue(color)}.`,
+        COLOR_HINT
+    )
     requireOption(isPositive(size), 'visibleCursor size must be above 0.', 'Try 24.')
     requireOption(
-        typeof ripple === 'boolean' || isColor(ripple),
-        'visibleCursor ripple must be a CSS colour, true or false.',
-        "Try '#3b82f6', or false for no ring."
+        typeof ripple === 'boolean' || isCssColor(ripple),
+        `visibleCursor ripple must be a CSS colour, true or false, but got ${describeValue(ripple)}.`,
+        `${COLOR_HINT} Or false for no ring.`
     )
     return overlayPlugin('visibleCursor', {
         cursor: { color, size, ripple: ripple === true ? '#3b82f6' : ripple },
@@ -65,7 +71,11 @@ export function visibleCursor(options: VisibleCursorOptions = {}): HumanPlugin {
 /** Draws the path the mouse took as a line that fades, for seeing and debugging motion. */
 export function trail(options: TrailOptions = {}): HumanPlugin {
     const { color = '#ef4444', width = 3, fade = 1200 } = options
-    requireOption(isColor(color), 'trail color must be a CSS colour.', "Try '#ef4444'.")
+    requireOption(
+        isCssColor(color),
+        `trail color must be a CSS colour, but got ${describeValue(color)}.`,
+        COLOR_HINT
+    )
     requireOption(isPositive(width), 'trail width must be above 0.', 'Try 3.')
     requireOption(isPositive(fade), 'trail fade must be above 0 ms.', 'Try 1200.')
     return overlayPlugin('trail', { trail: { color, width, fade } })
