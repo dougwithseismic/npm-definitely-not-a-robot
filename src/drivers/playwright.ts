@@ -112,9 +112,7 @@ function elementRef(
         box,
         scrollIntoView: () => target.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {}),
         hitTest: async (point, box) => (await target.evaluate(hitTest, { point, box })) as HitTest,
-        caretToEnd: async () => {
-            await target.evaluate(caretToEnd)
-        },
+        caretToEnd: () => target.evaluate(caretToEnd) as Promise<string | undefined>,
     }
 }
 

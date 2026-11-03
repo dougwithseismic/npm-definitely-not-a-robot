@@ -12,6 +12,9 @@ export const FIXTURE_HTML = /* html */ `<!doctype html>
   #email { position: absolute; left: 100px; top: 300px; width: 260px; height: 32px; }
   #notes { position: absolute; left: 100px; top: 360px; width: 260px; height: 60px; }
   #prefilled { position: absolute; left: 400px; top: 300px; width: 200px; height: 32px; }
+  /* Narrower than their text, so a click lands in the middle of it. */
+  #prefilled-email { position: absolute; left: 400px; top: 360px; width: 120px; height: 32px; }
+  #prefilled-number { position: absolute; left: 400px; top: 410px; width: 120px; height: 32px; }
   #far { position: absolute; left: 300px; top: 2200px; width: 160px; height: 40px; }
   #covered { position: absolute; left: 100px; top: 500px; width: 120px; height: 40px; }
   #overlay { position: absolute; left: 80px; top: 480px; width: 200px; height: 90px;
@@ -30,6 +33,8 @@ export const FIXTURE_HTML = /* html */ `<!doctype html>
   <input id="email" />
   <textarea id="notes"></textarea>
   <input id="prefilled" value="old value" />
+  <input id="prefilled-email" type="email" value="ada.lovelace@example" />
+  <input id="prefilled-number" type="number" value="123456789012" />
   <button id="far">Far away</button>
   <button id="covered">Covered</button>
   <div id="overlay" class="cookie-banner"></div>

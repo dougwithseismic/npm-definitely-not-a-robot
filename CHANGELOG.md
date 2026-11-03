@@ -4,6 +4,12 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Typing adds to the end of email and number fields · Fixed
+- `human.type('#email', '.org')` on an email or number field that already has text now adds it at
+  the end. Those fields don't let scripts move the caret, so the text used to land wherever the
+  click did. Now it presses the right arrow key to reach the end first, on every platform, with
+  Playwright and Puppeteer. An empty field gets no extra key press.
+
 ### A README that says who it's for and why (PRD 04) · Improved
 - The top of the README now says who the library is for and what sets it apart: every input
   humanized, not just the cursor; the real mouse moved, so hover menus open on the way; and any

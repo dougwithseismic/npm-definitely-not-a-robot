@@ -687,8 +687,11 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
                     await wait(random.range(60, 160))
                     await pressKey('Backspace', between(timing.clickHold))
                 } else {
-                    // The click left the caret wherever it landed; add the text at the end.
-                    await ref?.caretToEnd()
+                    // The click left the caret wherever it landed; add the text at the end. Email
+                    // and number fields need a key press for that, sent before a recording can
+                    // show their text selected.
+                    const key = await ref?.caretToEnd()
+                    if (typeof key === 'string') await pressCombo(key)
                 }
                 await wait(between(timing.hesitation))
                 await typeText(text)

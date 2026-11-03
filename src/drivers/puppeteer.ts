@@ -81,9 +81,8 @@ function actions(
         scrollIntoView: () => withElement((el) => el.scrollIntoView()).catch(() => {}),
         hitTest: (point: Point, box: Box) =>
             withElement((el) => el.evaluate(hitTest, { point, box })) as Promise<HitTest>,
-        caretToEnd: async () => {
-            await withElement((el) => el.evaluate(caretToEnd))
-        },
+        caretToEnd: () =>
+            withElement((el) => el.evaluate(caretToEnd)) as Promise<string | undefined>,
     }
 }
 

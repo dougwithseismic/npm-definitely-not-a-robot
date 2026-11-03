@@ -61,18 +61,25 @@ export function hitTestInPage(el: Element, { point, box }: { point: Point; box: 
     return { ok: false, covering: `${hit.tagName.toLowerCase()}${id}${cls}` }
 }
 
-/** Runs inside the page. Puts the caret after the last character of a text field. */
-export function caretToEndInPage(el: Element): void {
+/**
+ * Runs inside the page. Puts the caret after the last character of a text field. Email and number
+ * fields with text in them need a key press to get there: it selects their text and returns the
+ * key, for the caller to press straight away.
+ */
+export function caretToEndInPage(el: Element): string | undefined {
     const field = el as HTMLInputElement
     if (typeof field.value === 'string' && typeof field.setSelectionRange === 'function') {
         try {
             field.setSelectionRange(field.value.length, field.value.length)
         } catch {
-            // Some input types (email, number) don't support selection; the caret stays put.
+            // These refuse setSelectionRange but allow select(), and the right arrow then leaves the
+            // caret at the end on every platform. (End scrolls the page on a Mac.)
+            if ((field.type === 'email' || field.type === 'number') && field.value !== '') {
+                field.select()
+                return 'ArrowRight'
+            }
         }
-        return
-    }
-    if ((el as HTMLElement).isContentEditable) {
+    } else if ((el as HTMLElement).isContentEditable) {
         const range = document.createRange()
         range.selectNodeContents(el)
         range.collapse(false)
@@ -80,4 +87,5 @@ export function caretToEndInPage(el: Element): void {
         selection?.removeAllRanges()
         selection?.addRange(range)
     }
+    return undefined
 }

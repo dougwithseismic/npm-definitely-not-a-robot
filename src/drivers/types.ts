@@ -39,8 +39,12 @@ export interface ElementRef {
      * is the element's box as just measured, both in top-level viewport pixels.
      */
     hitTest(point: Point, box: Box): Promise<HitTest>
-    /** Put the caret at the end of a text field, so typing adds to what's there. */
-    caretToEnd(): Promise<void>
+    /**
+     * Put the caret at the end of a text field, so typing adds to what's there. Resolves to a key
+     * to press straight away when the field needs one to finish the job (email and number inputs
+     * with text in them), or to nothing.
+     */
+    caretToEnd(): Promise<string | undefined> | Promise<void>
 }
 
 /**

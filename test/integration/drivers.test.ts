@@ -142,6 +142,40 @@ describe.each(Object.entries(backends))('on %s', (name, start) => {
             expect(keys.slice(0, 6)).toEqual(['Shift', 'A', 'd', 'a', 'Shift', '!'])
         }))
 
+    it('adds to the end of email and number fields, which keep their caret to themselves', () =>
+        onFixture(async (page) => {
+            const human = createHuman(page, fast)
+            await human.type('#prefilled-email', '.org')
+            await human.type('#prefilled-number', '34')
+            const values = await page.evaluate(
+                (ids) => ids.map((id) => (document.getElementById(id) as HTMLInputElement).value),
+                ['prefilled-email', 'prefilled-number']
+            )
+            expect(values).toEqual(['ada.lovelace@example.org', '12345678901234'])
+            const keys = (await events(page)).filter((e) => e.type === 'keydown').map((e) => e.key)
+            expect(keys).toEqual(['ArrowRight', '.', 'o', 'r', 'g', 'ArrowRight', '3', '4'])
+
+            // An empty one has nowhere to move to, so nothing extra is pressed.
+            await page.evaluate(() => {
+                ;(document.getElementById('prefilled-email') as HTMLInputElement).value = ''
+            })
+            await human.type('#prefilled-email', 'a')
+            const after = (await events(page)).filter((e) => e.type === 'keydown').map((e) => e.key)
+            expect(after.slice(keys.length)).toEqual(['a'])
+        }))
+
+    it('fixes its typos with Backspace', () =>
+        onFixture(async (page) => {
+            const human = createHuman(page, { ...fast, typing: { typos: 0.3 } })
+            await human.type('#email', 'hello there')
+            const value = await page.evaluate(
+                () => (document.getElementById('email') as HTMLInputElement).value
+            )
+            expect(value).toBe('hello there')
+            const keys = (await events(page)).filter((e) => e.type === 'keydown').map((e) => e.key)
+            expect(keys).toContain('Backspace')
+        }))
+
     it('presses keys and combinations, and editing shortcuts edit', () =>
         onFixture(async (page) => {
             const human = createHuman(page, fast)

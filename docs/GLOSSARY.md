@@ -87,6 +87,14 @@ and thin out towards its edges, so we sample from a bell curve rather than unifo
 **Log-normal distribution.** A skewed bell curve with a long tail on the slow side. Gaps between
 keystrokes look like this: mostly quick, sometimes a long pause, never negative.
 
+**Caret.** The blinking line in a text field that marks where typing goes; not the mouse cursor.
+`type()` puts it after the existing text. Email and number fields don't let a script place it, so
+there the library selects their text and presses the right arrow, which leaves it at the end.
+
+**Editing command (macOS).** On a Mac, Chromium turns shortcuts like Cmd+A into commands
+(`selectAll`) through the operating system, which synthetic key presses skip. Playwright sends the
+command with the key; the Puppeteer driver does the same for the shortcuts it knows.
+
 ## Clicking safely
 
 **Target.** What an action is aimed at: a selector, a Playwright locator, an element handle or a
