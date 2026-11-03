@@ -54,9 +54,10 @@ database backups (no server-side product). "Can pay" means sponsorship.
 
 ## UX
 
-- [ ] Targets inside scrolling panels and iframes are brought into view with an instant
+- [~] Targets inside scrolling panels and iframes are brought into view with an instant
       `scrollIntoViewIfNeeded`. A person would move over the panel and turn the wheel; do that
       (needs the clipping box from the driver, see PRD 01 notes).
+      (building since 2026-11-03, autopilot session)
 - [~] Use-case and gallery cards are blank until their video loads (`preload="none"`), which shows
       on slow connections and in full-page screenshots. Give each video a poster frame.
       (building since 2026-11-03, autopilot session)
