@@ -27,8 +27,8 @@ beside anything. 10 and 11 both change `src/human.ts` playback, so they run one 
 
 - [x] 09 Trackpad scrolling: smooth, momentum scrolling as a strategy, used by the `demo` preset (`docs/prds/09-trackpad-scroll.md`)
       (shipped 2026-11-03, PR 19; reaches npm with the version after 1.0.0)
-- [~] 11 Every point reaches slow browsers: send moves without waiting for each, so WebKit and remote browsers get the whole path (`docs/prds/11-pipelined-moves.md`)
-      (building since 2026-11-03, autopilot session)
+- [x] 11 Every point reaches slow browsers: send moves without waiting for each, so WebKit and remote browsers get the whole path (`docs/prds/11-pipelined-moves.md`)
+      (shipped 2026-11-03, PR 20; reaches npm with the version after 1.0.0)
 - [ ] 10 Touch input: `human.tap()` and `human.swipe()` for mobile emulation, with a touch marker in videos (`docs/prds/10-touch.md`)
 - [ ] 12 Human-looking AI agent recordings: drive Playwright MCP and agent frameworks through `createHuman` (`docs/prds/12-agent-recordings.md`)
 - [ ] 13 "Move like me": record your own mouse on the website and get a persona to pass to `createHuman` (`docs/prds/13-move-like-me.md`)
