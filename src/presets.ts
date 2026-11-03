@@ -1,7 +1,7 @@
 import type { BezierMotionOptions, MotionStrategy } from './motion'
 import type { HumanPlugin } from './plugins'
 import { visibleCursor } from './plugins/overlay'
-import type { ScrollStrategy, WheelScrollOptions } from './scroll'
+import { type ScrollStrategy, trackpadScroll, type WheelScrollOptions } from './scroll'
 import type { NaturalTypingOptions, TypingStrategy } from './typing'
 
 /** Pauses around actions, each a [min, max] range in ms. */
@@ -57,7 +57,7 @@ const fast: Preset = {
     },
 }
 
-/** For recordings: smooth, unhurried, readable, with the cursor drawn. */
+/** For recordings: smooth, unhurried, readable, with the cursor drawn and trackpad scrolling. */
 const demo: Preset = {
     motion: { fitts: { a: 110, b: 170 }, curvature: 0.2, overshoot: 0.15, tremor: 0 },
     typing: { wpm: 50, variance: 0.15 },
@@ -67,6 +67,8 @@ const demo: Preset = {
         think: [700, 1200],
         clickHold: [110, 160],
     },
+    // A glide reads better on video than the wheel's jumps of 100 px.
+    scroll: trackpadScroll(),
     // Recordings are usually shown smaller than they're filmed, so a slightly larger arrow.
     plugins: [visibleCursor({ size: 28 })],
 }

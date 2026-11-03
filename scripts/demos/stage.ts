@@ -1,7 +1,8 @@
 /**
  * The page every demo is filmed on: a header naming the feature, the scene in the middle, and a
  * code bar along the bottom showing the line that's running (`window.code(text)`). With `keys`,
- * a strip in the corner shows each key press and wheel notch as it happens.
+ * a strip in the corner shows each key press as it happens, and each burst of scrolling with the
+ * distance it covers.
  */
 export interface StageOptions {
     /** Right side of the header, such as "Typing". */
@@ -80,18 +81,35 @@ window.code = (text) => {
 }
 const keys = document.getElementById('keys')
 const NAMES = { ' ': '␣', Shift: '⇧ Shift', Backspace: '⌫', Enter: '⏎' }
+/** Show a chip, or keep one showing while it changes. */
+const fadeLater = (el) => {
+    clearTimeout(el.fade)
+    el.fade = setTimeout(() => { el.style.opacity = '0' }, 1400)
+}
 const chip = (text, kind) => {
     const el = document.createElement('span')
     el.textContent = text
     if (kind) el.className = kind
     keys.prepend(el)
     while (keys.children.length > 10) keys.lastChild.remove()
-    setTimeout(() => { el.style.opacity = '0' }, 1400)
+    fadeLater(el)
+    return el
 }
+// Wheel events close together, one way, make one chip that counts up the distance.
+let burst = { el: null, at: 0, way: '', px: 0 }
 if (keys) {
     addEventListener('keydown', (e) => chip(NAMES[e.key] ?? e.key,
         e.key === 'Shift' ? 'mod' : e.key === 'Backspace' ? 'fix' : ''), true)
-    addEventListener('wheel', (e) => chip(e.deltaY > 0 ? 'wheel ↓' : 'wheel ↑', 'mod'), true)
+    addEventListener('wheel', (e) => {
+        const way = Math.abs(e.deltaY) >= Math.abs(e.deltaX)
+            ? (e.deltaY > 0 ? '↓' : '↑') : (e.deltaX > 0 ? '→' : '←')
+        if (!burst.el || e.timeStamp - burst.at > 90 || burst.way !== way)
+            burst = { el: chip('', 'mod'), at: 0, way, px: 0 }
+        burst.at = e.timeStamp
+        burst.px += Math.hypot(e.deltaX, e.deltaY)
+        burst.el.textContent = 'wheel ' + way + ' ' + Math.round(burst.px) + ' px'
+        fadeLater(burst.el)
+    }, true)
 }
 ${script}
 </script>

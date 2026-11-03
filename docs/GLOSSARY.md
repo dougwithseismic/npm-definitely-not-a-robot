@@ -112,6 +112,12 @@ app's main area (CSS `overflow: auto`). The wheel scrolls whatever is under the 
 something hidden in one, the cursor first moves over the panel, as a hand would. The hit test
 reports the part of the page the panel shows (the *clip*) so we know where to go.
 
+**Trackpad scrolling, flick and momentum.** On a laptop trackpad, two fingers sliding up are a
+*flick*. The browser gets a wheel event about once a frame (every 16 ms), small while the fingers
+speed up, then the page keeps going on its own and slows to a stop: that glide is *momentum*. A
+mouse wheel instead sends one event per notch, 100 px each. `trackpadScroll()` plans the first;
+`wheelScroll()` the second.
+
 **Strict mode (Playwright).** A locator must match exactly one element when you act on it. If it
 matches several, Playwright refuses, and we say so as `TARGET_AMBIGUOUS`.
 

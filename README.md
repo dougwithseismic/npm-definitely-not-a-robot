@@ -111,8 +111,9 @@ wrong when your automation needs to look or behave like a person:
   click through a cookie banner or modal that's covering the target, and tell you what's in the way.
 - **Typing with rhythm**: uneven gaps between keys, faster common letter pairs, pauses between
   words and sentences, Shift held for capitals, and optional typos that get noticed and fixed.
-- **Wheel scrolling** in notches and bursts. Targets off-screen are scrolled into view before
-  the cursor heads for them.
+- **Scrolling like a mouse wheel or a trackpad**: wheel notches in bursts, or a trackpad's flicks
+  that speed up and glide to a stop. Targets off-screen are scrolled into view before the cursor
+  heads for them.
 - **Hover, drag and drop, double-click, right-click and key combinations.**
 - **A Playwright Test fixture**: import `test` from `definitely-not-a-robot/playwright` and every
   test gets a `human`.
@@ -136,8 +137,9 @@ Every clip below was recorded by the library itself, with `preset: 'demo'` and P
 <table>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/curved-paths.gif" alt="Curved paths, timed by distance and size, with an overshoot on long moves"><br>Curved paths, timed by distance and size, with an overshoot on long moves</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/typing.gif" alt="Typing with a rhythm, Shift for capitals, and a typo fixed on the spot"><br>Typing with a rhythm, Shift for capitals, and a typo fixed on the spot</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hover-menu.gif" alt="Hover opens menus on the way, then clicks inside them"><br>Hover opens menus on the way, then clicks inside them</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/drag-and-drop.gif" alt="Drag and drop, holding the button the whole way"><br>Drag and drop, holding the button the whole way</td></tr>
-<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-into-view.gif" alt="Off-screen targets are scrolled into view with the wheel, in bursts"><br>Off-screen targets are scrolled into view with the wheel, in bursts</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/cookie-banner.gif" alt="Won’t click through a cookie banner, and says what’s in the way"><br>Won’t click through a cookie banner, and says what’s in the way</td></tr>
-<tr><td colspan="2" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-panel.gif" alt="A message deep in a scrolling list. Left: Playwright jumps the list and the cursor there. Right: the cursor moves over the list and turns the wheel"><br>A message deep in a scrolling list. Left: Playwright jumps the list and the cursor there. Right: the cursor moves over the list and turns the wheel</td></tr>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-into-view.gif" alt="Off-screen targets are scrolled into view before the cursor heads for them"><br>Off-screen targets are scrolled into view before the cursor heads for them</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/cookie-banner.gif" alt="Won’t click through a cookie banner, and says what’s in the way"><br>Won’t click through a cookie banner, and says what’s in the way</td></tr>
+<tr><td colspan="2" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/trackpad-scroll.gif" alt="Two ways to scroll. Left: a mouse wheel, 100 px a notch, in bursts. Right: a trackpad, flicks that glide to a stop (the demo preset’s)"><br>Two ways to scroll. Left: a mouse wheel, 100 px a notch, in bursts. Right: a trackpad, flicks that glide to a stop (the demo preset’s)</td></tr>
+<tr><td colspan="2" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-panel.gif" alt="A message deep in a scrolling list. Left: Playwright jumps the list and the cursor there. Right: the cursor moves over the list and scrolls it"><br>A message deep in a scrolling list. Left: Playwright jumps the list and the cursor there. Right: the cursor moves over the list and scrolls it</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/playwright-test.gif" alt="In Playwright Test: one import, and every test gets a human"><br>In Playwright Test: one import, and every test gets a human</td></tr>
 <tr><td colspan="2" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/puppeteer.gif" alt="The same calls on a page from Playwright and a page from Puppeteer"><br>The same calls on a page from Playwright and a page from Puppeteer</td></tr>
 </table>
@@ -201,7 +203,7 @@ own actions do.
 | `speed` | `1` | Multiplies every timing. `2` is twice as fast; `'instant'` skips waiting |
 | `typing` | 65 wpm | `{ wpm, variance, typos }`, or your own typing strategy |
 | `motion` | Bezier | `{ fitts, curvature, overshoot, tremor }`, or your own motion strategy |
-| `scroll` | wheel | `{ notch, burst }`, or your own scroll strategy |
+| `scroll` | wheel | `{ notch, burst }`, `trackpadScroll({ flick })`, or your own scroll strategy |
 | `timing` | | `{ hesitation, hoverDwell, think, clickHold, doubleClickGap }` as `[min, max]` ms |
 | `timeout` | `10000` | How long to wait for a target to appear, in ms |
 | `plugins` | `[]` | Hooks that run around actions and cursor moves |
@@ -217,7 +219,7 @@ A preset bundles how someone moves, types and pauses. Pick one by name:
 | `average` (default) | Someone on a site they know | 65 wpm | Tests and synthetic sessions |
 | `careful` | Someone reading as they go | 42 wpm, longer pauses before clicks | Slow, deliberate walkthroughs |
 | `fast` | A power user | 95 wpm, short pauses | Quicker runs that still send every event |
-| `demo` | A presenter | A steady 50 wpm, smooth moves, the cursor drawn | Recording videos |
+| `demo` | A presenter | A steady 50 wpm, smooth moves, trackpad scrolling, the cursor drawn | Recording videos |
 
 Anything else you pass changes just that part of the preset, and `definePreset()` makes your own:
 
@@ -257,7 +259,8 @@ console.log('Saved', await page.video().path())
 await browser.close()
 ```
 
-`preset: 'demo'` moves smoothly, types at a steady 50 words a minute and draws the cursor. The
+`preset: 'demo'` moves smoothly, types at a steady 50 words a minute, scrolls with a trackpad's
+glide and draws the cursor. The
 cursor follows the page's real mouse events, so it shows exactly what the page received.
 Playwright saves WebM; `ffmpeg -i videos/<file>.webm demo.mp4` makes an MP4. In Playwright Test,
 set `use: { video: 'on', humanOptions: { preset: 'demo' } }` and use the `human` fixture.
@@ -322,7 +325,18 @@ const straight = defineMotion({
 createHuman(page, { motion: straight })
 ```
 
-Typing (`defineTyping`) and scrolling (`defineScroll`) work the same way.
+Typing (`defineTyping`) and scrolling (`defineScroll`) work the same way. Two scroll strategies come
+built in: `wheelScroll()`, the default, and `trackpadScroll()`, which the `demo` preset uses:
+
+```ts
+import { createHuman, trackpadScroll } from 'definitely-not-a-robot'
+
+createHuman(page, { scroll: trackpadScroll() }) // flicks of 300 to 700 px that glide to a stop
+createHuman(page, { scroll: trackpadScroll({ flick: [150, 300] }) }) // shorter flicks
+```
+
+Wheel options such as `scroll: { notch: 50 }` on top of the `demo` preset switch it back to the
+wheel, since they describe a wheel.
 
 ### Hook into every action
 

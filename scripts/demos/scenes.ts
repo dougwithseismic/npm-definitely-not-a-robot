@@ -1,5 +1,5 @@
 import type { Page } from 'playwright'
-import { type Human, type HumanOptions, trail } from '../../src'
+import { type Human, type HumanOptions, trail, wheelScroll } from '../../src'
 import type { StageOptions } from './stage'
 
 export interface Take {
@@ -335,35 +335,64 @@ const typing: Scene = {
 
 // ---- scrolling into view ----
 
+const articleStage = {
+    label: 'Scrolling',
+    keys: true,
+    css: `article { max-width: 760px; margin: 0 auto; padding: 40px 24px 200px; }
+        h1 { font-size: 40px; letter-spacing: -.03em; margin: 0 0 12px; }
+        .lead { font-size: 21px; color: var(--muted); }
+        .block { height: 150px; margin: 26px 0; border-radius: 14px;
+            background: linear-gradient(135deg, #eef2ff, #f1f5f9); }
+        .line { height: 14px; margin: 12px 0; border-radius: 7px; background: #e2e8f0; }
+        .cta { text-align: center; padding: 40px; margin-top: 40px; }
+        .cta .btn { font-size: 19px; padding: 15px 30px; }`,
+    body: `<article><h1>Ship demos that look human</h1>
+          <p class="lead">Record product videos straight from your Playwright tests.</p>
+          ${'<div class="block"></div><div class="line"></div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div>'.repeat(6)}
+          <div class="card cta"><h2>Ready?</h2><button class="btn" id="trial">Start free trial</button></div>
+        </article>`,
+}
+
 const scroll: Scene = {
     name: 'scroll-into-view',
     viewport: wide,
     start: { x: 640, y: 420 },
     sides: [
         {
-            stage: {
-                label: 'Scrolling',
-                keys: true,
-                css: `article { max-width: 760px; margin: 0 auto; padding: 40px 24px 200px; }
-                h1 { font-size: 40px; letter-spacing: -.03em; margin: 0 0 12px; }
-                .lead { font-size: 21px; color: var(--muted); }
-                .block { height: 150px; margin: 26px 0; border-radius: 14px;
-                    background: linear-gradient(135deg, #eef2ff, #f1f5f9); }
-                .line { height: 14px; margin: 12px 0; border-radius: 7px; background: #e2e8f0; }
-                .cta { text-align: center; padding: 40px; margin-top: 40px; }
-                .cta .btn { font-size: 19px; padding: 15px 30px; }`,
-                body: `<article><h1>Ship demos that look human</h1>
-                  <p class="lead">Record product videos straight from your Playwright tests.</p>
-                  ${'<div class="block"></div><div class="line"></div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div>'.repeat(6)}
-                  <div class="card cta"><h2>Ready?</h2><button class="btn" id="trial">Start free trial</button></div>
-                </article>`,
-            },
+            stage: articleStage,
             options: { seed: 5 },
             async run({ page, human, code }) {
                 await page.waitForTimeout(900)
                 await code("await human.click('#trial')  // scrolls there first")
                 await human.click('#trial')
             },
+        },
+    ],
+}
+
+// ---- a mouse wheel next to a trackpad ----
+
+const scrollDown = async ({ page, human, code }: Take) => {
+    await page.waitForTimeout(700)
+    await code('await human.scroll({ by: 1400 })')
+    await human.scroll({ by: 1400 })
+    await page.waitForTimeout(900)
+}
+
+const trackpad: Scene = {
+    name: 'trackpad-scroll',
+    viewport: half,
+    start: { x: 360, y: 300 },
+    sides: [
+        {
+            stage: { ...articleStage, label: 'scroll: wheelScroll()', plain: true },
+            options: { seed: 5, scroll: wheelScroll() },
+            run: scrollDown,
+        },
+        {
+            stage: { ...articleStage, label: 'scroll: trackpadScroll()' },
+            options: { seed: 5 },
+            run: scrollDown,
         },
     ],
 }
@@ -675,6 +704,7 @@ export const scenes: Scene[] = [
     drag,
     typing,
     scroll,
+    trackpad,
     panel,
     cover,
     seed,

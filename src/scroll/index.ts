@@ -34,6 +34,11 @@ export interface WheelScrollOptions {
  * and longer pauses between bursts while the finger resets.
  */
 export function wheelScroll(options: WheelScrollOptions = {}): ScrollStrategy {
+    requireOption(
+        !('flick' in options),
+        'scroll.flick is a trackpadScroll() option, but scroll was given as wheel options.',
+        'Pass scroll: trackpadScroll({ flick: [min, max] }).'
+    )
     const notch = options.notch ?? 100
     const [burstMin, burstMax] = options.burst ?? [3, 7]
     requireOption(
@@ -83,6 +88,84 @@ export function wheelScroll(options: WheelScrollOptions = {}): ScrollStrategy {
                     delay: Math.round(delay),
                 })
             }
+            return steps
+        },
+    }
+}
+
+export interface TrackpadScrollOptions {
+    /** Pixels per flick of two fingers, before they lift and flick again. Default 300 to 700. */
+    flick?: [min: number, max: number]
+}
+
+/**
+ * Scrolling on a laptop trackpad: each flick sends a stream of small wheel events, about one a
+ * frame, that speed up while the fingers move and then glide to a stop.
+ */
+export function trackpadScroll(options: TrackpadScrollOptions = {}): ScrollStrategy {
+    const [flickMin, flickMax] = options.flick ?? [300, 700]
+    requireOption(
+        flickMin > 0 && flickMax >= flickMin && Number.isFinite(flickMax),
+        `scroll.flick must be [min, max] with 0 < min ≤ max, got [${flickMin}, ${flickMax}].`,
+        'Default [300, 700] px per flick.'
+    )
+
+    /** How far each frame of one flick goes, as shares of the flick that add up to 1. */
+    const flickShape = (random: Random): number[] => {
+        const speeds: number[] = []
+        // The fingers speed up over a few frames...
+        const rise = random.int(3, 6)
+        for (let i = 1; i <= rise; i++) speeds.push(Math.sin(((i / rise) * Math.PI) / 2))
+        // ...then lift, and the page glides on, slowing by the same fraction every frame.
+        const friction = Math.exp(-random.range(0.08, 0.12))
+        for (let speed = friction; speed > 0.05; speed *= friction) speeds.push(speed)
+        const total = speeds.reduce((sum, speed) => sum + speed, 0)
+        return speeds.map((speed) => speed / total)
+    }
+
+    return {
+        name: 'trackpad',
+        plan({ dy, dx = 0, random }) {
+            const x = Math.round(dx)
+            const y = Math.round(dy)
+            if (!x && !y) return []
+            // Frames as shares of the whole distance, with how long to wait before each.
+            const frames: { share: number; delay: number }[] = []
+            const count = Math.ceil(Math.hypot(x, y) / random.range(flickMin, flickMax))
+            const sizes = Array.from({ length: count }, () => random.range(0.9, 1.1))
+            const total = sizes.reduce((sum, size) => sum + size, 0)
+            sizes.forEach((size, flick) => {
+                flickShape(random).forEach((share, i) => {
+                    const delay =
+                        i > 0
+                            ? random.range(14, 19) // about one event a frame
+                            : flick > 0
+                              ? random.range(100, 250) // the fingers come back for another flick
+                              : random.range(20, 60)
+                    frames.push({ share: (share * size) / total, delay })
+                })
+            })
+
+            // Round the running total, not each frame, so the steps land exactly on the distance.
+            // Frames that round to nothing send no event; their time passes before the next one.
+            const steps: WheelStep[] = []
+            let done = 0
+            let sent = { dx: 0, dy: 0 }
+            let waited = 0
+            frames.forEach((frame, i) => {
+                done = i === frames.length - 1 ? 1 : done + frame.share
+                const at = { dx: Math.round(x * done), dy: Math.round(y * done) }
+                waited += frame.delay
+                if (at.dx === sent.dx && at.dy === sent.dy) return
+                // `|| 0` keeps an axis that hasn't moved at 0, not -0.
+                steps.push({
+                    dx: at.dx - sent.dx || 0,
+                    dy: at.dy - sent.dy || 0,
+                    delay: Math.round(waited),
+                })
+                sent = at
+                waited = 0
+            })
             return steps
         },
     }

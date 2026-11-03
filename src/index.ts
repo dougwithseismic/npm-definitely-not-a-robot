@@ -28,7 +28,13 @@ export { defaultTiming, definePreset, presets } from './presets'
 export type { Random } from './random'
 
 export { createRandom } from './random'
-export type { ScrollRequest, ScrollStrategy, WheelScrollOptions, WheelStep } from './scroll'
-export { defineScroll, wheelScroll } from './scroll'
+export type {
+    ScrollRequest,
+    ScrollStrategy,
+    TrackpadScrollOptions,
+    WheelScrollOptions,
+    WheelStep,
+} from './scroll'
+export { defineScroll, trackpadScroll, wheelScroll } from './scroll'
 export type { Keystroke, NaturalTypingOptions, TypingRequest, TypingStrategy } from './typing'
 export { defineTyping, naturalTyping } from './typing'

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { createHuman, definePlugin, HumanError } from '../../src'
+import {
+    createHuman,
+    definePlugin,
+    defineScroll,
+    HumanError,
+    playwrightDriver,
+    trackpadScroll,
+} from '../../src'
 import { BROWSER, events, failure, moveTrace, useFixture } from './fixture'
 
 const fx = useFixture()
@@ -205,6 +212,47 @@ describe('scrolling', () => {
         expect(await scrollY()).toBeGreaterThan(2000)
         await human.scroll({ to: 'top' })
         expect(await scrollY()).toBe(0)
+    })
+
+    // WebKit takes so long to answer each wheel event that most steps go together (PRD 11).
+    it.skipIf(BROWSER === 'webkit')(
+        'glides in many small steps with trackpad scrolling, the demo preset’s',
+        async () => {
+            const human = createHuman(fx.page, { preset: 'demo', seed: 2 })
+            await human.scroll({ by: 600 })
+            await expect.poll(scrollY).toBeGreaterThan(500)
+            // The wheel would send 6. Steps that fall behind the clock go together, so allow for a
+            // busy machine.
+            const wheels = (await events(fx.page)).filter((e) => e.type === 'wheel')
+            expect(wheels.length).toBeGreaterThan(8)
+        }
+    )
+
+    it('still covers the whole distance, on time, when the browser answers slowly', async () => {
+        const base = playwrightDriver(fx.page)
+        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+        const slow = {
+            ...base,
+            wheel: (dx: number, dy: number) => sleep(30).then(() => base.wheel(dx, dy)),
+        }
+        // Note how long the plan takes, to compare with how long scrolling took.
+        let planned = 0
+        const trackpad = trackpadScroll()
+        const scroll = defineScroll({
+            name: 'noted',
+            plan(request) {
+                const steps = trackpad.plan(request)
+                planned = steps.reduce((total, step) => total + step.delay, 0)
+                return steps
+            },
+        })
+        const human = createHuman(fx.page, { driver: slow, scroll, seed: 2 })
+        const started = performance.now()
+        await human.scroll({ by: 600 })
+        const took = performance.now() - started
+        await expect.poll(async () => Math.abs((await scrollY()) - 600)).toBeLessThan(5)
+        // Waiting 30 ms on each of its dozens of steps would make it about a second late.
+        expect(took).toBeLessThan(planned + 400)
     })
 
     it('wheels an off-screen target into view before clicking it', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bezierMotion, createRandom, naturalTyping, wheelScroll } from '../../src'
+import { bezierMotion, createRandom, naturalTyping, trackpadScroll, wheelScroll } from '../../src'
 import { distance, pickSpot, placeInBox } from '../../src/geometry'
 
 describe('createRandom', () => {
@@ -203,5 +203,59 @@ describe('wheelScroll', () => {
 
     it('returns nothing for zero', () => {
         expect(wheelScroll().plan({ dy: 0, random: createRandom(1) })).toEqual([])
+    })
+})
+
+describe('trackpadScroll', () => {
+    const plan = (dy: number, seed = 1, dx = 0) =>
+        trackpadScroll().plan({ dy, dx, random: createRandom(seed) })
+    const sum = (steps: { dy: number }[]) => steps.reduce((s, x) => s + x.dy, 0)
+
+    it('lands exactly on the distance in many small steps', () => {
+        for (const seed of [1, 2, 3, 4, 5]) {
+            const steps = plan(1000, seed)
+            expect(sum(steps)).toBe(1000)
+            expect(steps.length).toBeGreaterThanOrEqual(20)
+            expect(steps.every((s) => s.dy > 0 && s.dy < 60)).toBe(true)
+        }
+    })
+
+    it('speeds up, then glides to a stop', () => {
+        const steps = plan(400)
+        const second = steps.findIndex((s, i) => i > 0 && s.delay > 100)
+        const flick = second === -1 ? steps : steps.slice(0, second)
+        const fastest = flick.reduce((best, s, i) => (s.dy > flick[best]!.dy ? i : best), 0)
+        expect(fastest).toBeGreaterThan(0)
+        expect(fastest).toBeLessThan(flick.length / 3)
+        expect(flick.at(-1)!.dy).toBeLessThan(flick[fastest]!.dy / 4)
+    })
+
+    it('splits a long distance into flicks with pauses between', () => {
+        const steps = plan(3000)
+        expect(steps.filter((s) => s.delay > 100).length).toBeGreaterThanOrEqual(3)
+        expect(steps.filter((s) => s.delay < 40).length).toBeGreaterThan(steps.length / 2)
+    })
+
+    it('scrolls up, sideways and diagonally', () => {
+        expect(sum(plan(-700))).toBe(-700)
+        const diagonal = plan(-300, 1, 450)
+        expect(sum(diagonal)).toBe(-300)
+        expect(diagonal.reduce((s, x) => s + x.dx, 0)).toBe(450)
+        const nearlyFlat = plan(-1, 1, 450)
+        expect(nearlyFlat.every((s) => !Object.is(s.dy, -0) && !Object.is(s.dx, -0))).toBe(true)
+    })
+
+    it('replays a seed, and returns nothing for zero', () => {
+        expect(plan(800, 7)).toEqual(plan(800, 7))
+        expect(plan(0)).toEqual([])
+        expect(plan(0.3)).toEqual([])
+    })
+
+    it('rejects flick ranges that make no sense', () => {
+        expect(() => trackpadScroll({ flick: [0, 100] })).toThrow(/scroll\.flick/)
+        expect(() => trackpadScroll({ flick: [300, 200] })).toThrow(/scroll\.flick/)
+        expect(() => trackpadScroll({ flick: [300, Infinity] })).toThrow(/scroll\.flick/)
+        // Wheel options can't carry a flick: that would silently scroll with the wheel.
+        expect(() => wheelScroll({ flick: [300, 700] } as never)).toThrow(/trackpadScroll/)
     })
 })

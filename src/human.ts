@@ -16,7 +16,7 @@ import { type BezierMotionOptions, bezierMotion, type MotionStrategy } from './m
 import type { Action, HumanPlugin, PluginContext } from './plugins'
 import { defaultTiming, type Preset, type PresetName, presets, type Timing } from './presets'
 import { createRandom, type Random, randomSeed, streamSeed } from './random'
-import { type ScrollStrategy, type WheelScrollOptions, wheelScroll } from './scroll'
+import { type ScrollStrategy, type WheelScrollOptions, type WheelStep, wheelScroll } from './scroll'
 import { type NaturalTypingOptions, naturalTyping, needsShift, type TypingStrategy } from './typing'
 
 /** An element: a selector string, a Playwright locator, or an element handle. */
@@ -279,6 +279,14 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     /** Wait a human-scale duration, scaled by speed. */
     const wait = (ms: number) => (instant ? Promise.resolve() : realSleep(ms / speed))
     const between = ([min, max]: [number, number]) => random.range(min, max)
+    /** A clock in the plan's time, started now: wait until `t`, or ask whether `t` has passed. */
+    const startClock = () => {
+        const start = performance.now()
+        return {
+            passed: (t: number) => performance.now() > start + t / speed,
+            until: (t: number) => realSleep(start + t / speed - performance.now()),
+        }
+    }
     /** Run `body` drawing from `stream`, leaving the action's own stream where it was. */
     async function drawingFrom<T>(stream: Random, body: () => Promise<T>): Promise<T> {
         const own = random
@@ -305,14 +313,13 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
 
     /** Send planned points on an absolute clock, dropping points rather than drifting late. */
     async function playPath(points: TimedPoint[]): Promise<void> {
-        const start = performance.now()
+        const clock = startClock()
         for (let i = 0; i < points.length; i++) {
             const point = points[i] as TimedPoint
             if (!instant) {
                 const next = points[i + 1]
-                const now = performance.now()
-                if (next && now > start + next.t / speed) continue
-                await realSleep(start + point.t / speed - now)
+                if (next && clock.passed(next.t)) continue
+                await clock.until(point.t)
             }
             await driver.moveMouse(point.x, point.y)
             position = { x: point.x, y: point.y }
@@ -391,14 +398,28 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
 
     async function playWheel(dx: number, dy: number): Promise<void> {
         const steps = scrolling.plan({ dx, dy, random })
-        const merged = runs(steps, INSTANT_EVENTS).map((run) => ({
-            dx: run.reduce((sum, step) => sum + step.dx, 0),
-            dy: run.reduce((sum, step) => sum + step.dy, 0),
-            delay: 0,
-        }))
-        for (const step of instant ? merged : steps) {
-            await wait(step.delay)
-            await driver.wheel(step.dx, step.dy)
+        if (instant) {
+            for (const run of runs(steps, INSTANT_EVENTS)) {
+                const sum = (axis: 'dx' | 'dy') =>
+                    run.reduce((total, step) => total + step[axis], 0)
+                await driver.wheel(sum('dx'), sum('dy'))
+            }
+            return
+        }
+        // On a clock, like a path. A step that's late joins the next one rather than being dropped,
+        // so a slow browser still scrolls the whole distance in the planned time.
+        let at = 0
+        const times = steps.map((step) => (at += step.delay))
+        const clock = startClock()
+        let [owedX, owedY] = [0, 0]
+        for (let i = 0; i < steps.length; i++) {
+            owedX += (steps[i] as WheelStep).dx
+            owedY += (steps[i] as WheelStep).dy
+            const next = times[i + 1]
+            if (next !== undefined && clock.passed(next)) continue
+            await clock.until(times[i] as number)
+            await driver.wheel(owedX, owedY)
+            ;[owedX, owedY] = [0, 0]
         }
     }
 

@@ -4,6 +4,14 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Scroll like a trackpad, now the demo preset's default (PRD 09) · New
+- `scroll: trackpadScroll()` scrolls the way a laptop trackpad does: each flick sends a stream of
+  small steps that speed up, then glide to a stop, instead of the mouse wheel's jumps of 100 px.
+- The `demo` preset scrolls this way now, so recordings glide. The other presets keep the wheel.
+- Scrolling keeps to its planned time when the browser is slow to answer, like mouse paths do.
+- Try it: `createHuman(page, { scroll: trackpadScroll() })`. The README and the website show the
+  wheel and the trackpad side by side.
+
 ### Tested in Firefox and WebKit, not just Chromium · Improved
 - Every change is now tested in Chromium, Firefox and WebKit (the engine under Safari): clicks,
   drags, typing, scrolling and the visible cursor, above modal dialogs and across iframes.
