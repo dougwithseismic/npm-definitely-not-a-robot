@@ -64,8 +64,9 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] Typing into an email or number field that already has text lands where the click did,
       because those inputs don't allow moving the caret. Select the text and press the right
       arrow, which leaves the caret at the end on every platform. (fixed 2026-11-03, PR 13)
-- [ ] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
+- [~] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
       toggle events), and run the integration tests there in CI.
+      (building since 2026-11-03, autopilot session)
 - [~] The visible cursor stops at the edge of an iframe inside a shadow root, and is offset over a
       CSS-transformed iframe. (building since 2026-11-03, autopilot session)
 - [x] `visibleCursor({ color: 'blu' })` is accepted and draws nothing; check colours when the
