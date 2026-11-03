@@ -74,11 +74,27 @@ are fully determined by a starting value. We use *Mulberry32*, a tiny, fast one.
 replays identical paths and timings, which makes a flaky test reproducible and a demo video
 re-recordable frame for frame.
 
+**Random stream.** One seed split into several independent sequences. Each action draws from its
+own stream, so if one action has to retry (a slow page, a banner that takes a while to go), the
+extra numbers it uses can't change what the actions after it do.
+
 **Gaussian (normal) distribution.** The bell curve. Click points cluster near an element's centre
 and thin out towards its edges, so we sample from a bell curve rather than uniformly.
 
 **Log-normal distribution.** A skewed bell curve with a long tail on the slow side. Gaps between
 keystrokes look like this: mostly quick, sometimes a long pause, never negative.
+
+## Clicking safely
+
+**Hit test.** Asking the browser "what's the topmost element at this point?" before pressing. If
+it isn't the target, the click would land on something else.
+
+**Covered vs clipped.** *Covered*: something sits on top of the target (a cookie banner, a modal).
+*Clipped*: the target is scrolled out of sight inside a scrolling panel or an iframe, so the point
+shows something else. Covered waits or throws `TARGET_COVERED`; clipped scrolls the panel first.
+
+**Strict mode (Playwright).** A locator must match exactly one element when you act on it. If it
+matches several, Playwright refuses, and we say so as `TARGET_AMBIGUOUS`.
 
 ## Packaging
 

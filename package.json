@@ -1,71 +1,78 @@
 {
-    "name": "template-ts-npm-package",
+    "name": "definitely-not-a-robot",
     "version": "1.0.0",
-    "description": "A template for scaffolding npm packages with Type Support",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "engines": {
-        "node": ">=14.0.0"
+    "description": "Human-like mouse, typing and scrolling for Playwright. Curved cursor paths, real keystroke rhythm, a visible cursor for demo videos, and seeds for reproducible runs.",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        },
+        "./package.json": "./package.json"
     },
     "files": [
-        "dist/",
-        "README.md"
+        "dist",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
     ],
+    "sideEffects": false,
+    "engines": {
+        "node": ">=18"
+    },
     "scripts": {
-        "build:js": "node esbuild.config.js",
-        "build:types": "tsc --emitDeclarationOnly",
-        "build": "npm run build:js && npm run build:types",
-        "dev:build": "nodemon --watch src --exec npm run build",
-        "dev:start": "nodemon dist/index.ts",
-        "dev": "concurrently \"npm run dev:build\" \"npm run dev:start\"",
-        "prepublishOnly": "npm run build",
-        "test": "jest",
-        "lint": "eslint './src/**/*.{ts,tsx}' --quiet",
-        "format": "prettier --write './src/**/*.{ts,tsx,js,json,md}'",
-        "format:check": "prettier --check './src/**/*.{ts,tsx,js,json,md}'"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/dougwithseismic/template-ts-npm-package.git"
-    },
-    "author": "Doug Silkstone (twitter.com/dougiesilkstone)",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/dougwithseismic/template-ts-npm-package.git/issues"
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "typecheck": "tsc --noEmit",
+        "lint": "biome check .",
+        "format": "biome check --write .",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+        "smoke": "node scripts/smoke.mjs",
+        "prepublishOnly": "pnpm check"
     },
     "keywords": [
-        "typescript",
-        "npm",
-        "package",
-        "template",
-        "scaffold",
-        "boilerplate"
+        "playwright",
+        "human",
+        "humanize",
+        "mouse",
+        "cursor",
+        "mouse-movement",
+        "typing",
+        "bezier",
+        "automation",
+        "e2e",
+        "testing",
+        "demo-video",
+        "puppeteer"
     ],
-    "funding": {
-        "type": "gimme",
-        "url": "https://gimme.fan/@dougiesilkstone"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dougwithseismic/npm-definitely-not-a-robot.git"
     },
-    "homepage": "https://github.com/dougwithseismic/template-ts-npm-package.git#readme",
+    "homepage": "https://github.com/dougwithseismic/npm-definitely-not-a-robot#readme",
+    "bugs": {
+        "url": "https://github.com/dougwithseismic/npm-definitely-not-a-robot/issues"
+    },
+    "author": "Doug Silkstone <doug@withseismic.com> (https://withseismic.com)",
+    "license": "MIT",
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^4.28.3",
-        "@typescript-eslint/parser": "^4.28.3",
-        "concurrently": "^8.2.0",
-        "esbuild": "^0.18.17",
-        "eslint": "^7.30.0",
-        "jest": "^27.0.5",
-        "nodemon": "^3.0.1",
-        "prettier": "^3.0.0",
-        "puppeteer": "^20.9.0",
-        "puppeteer-extra": "^3.3.6",
-        "ts-jest": "^27.0.3",
-        "ts-node": "^10.9.1",
-        "tsconfig-paths": "^4.2.0",
-        "typescript": "^4.3.5"
-    },
-    "contributors": [
-        "Doug Silkstone (https://x.withseismic.com)"
-    ],
-    "dependencies": {
-        "puppeteer-extra-plugin-stealth": "^2.11.2"
+        "@biomejs/biome": "^2.6.4",
+        "@playwright/test": "^1.64.1",
+        "@types/node": "^26.6.6",
+        "playwright": "^1.64.1",
+        "tsup": "^9.0.0",
+        "typescript": "^6.0.3",
+        "vitest": "^5.0.5"
     }
 }

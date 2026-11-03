@@ -93,4 +93,47 @@ Options (all optional): `preset`, `seed`, `speed`, `motion`, `typing`, `scroll`,
 
 ## Implementation Notes
 
-(Filled in after shipping.)
+Shipped 2026-11-03.
+
+- **Layout**: `src/random.ts` (Mulberry32 + Box–Muller), `src/geometry.ts`, `src/motion/`,
+  `src/typing/`, `src/scroll/`, `src/drivers/` (`types.ts` contract, `playwright.ts`,
+  `hit-test.ts` in-page check), `src/presets.ts`, `src/plugins/`, `src/errors.ts`,
+  `src/human.ts` (factory, player, actions), `src/index.ts`.
+- **Beyond the PRD**, from the market scan: an in-page hit test before every press
+  (`TARGET_COVERED`, `{ force: true }`), and a player that drops points when the browser lags.
+  Both answer top complaints about the incumbent.
+- **Strategy options merge**: `typing: { typos: 0.02 }` on top of `preset: 'fast'` keeps the
+  preset's 95 wpm; passing a strategy object (with `plan`) replaces wholesale.
+- **Actions are queued**: calls run in order even without `await`, so `Promise.all` can't
+  interleave two cursor paths.
+- **Keys**: printable ASCII goes through key down/up (Shift held for capitals and symbols);
+  everything else (emoji, accents) through `insertText`. In combinations (`ControlOrMeta+A`) the
+  letter is the key, with no Shift.
+- **Numbers**: bundle 36 KB ESM / 37 KB CJS unminified, 17 KB of declarations, 0 dependencies.
+  60 tests (22 unit, 38 in headless Chromium 156), plus compile-time checks of the public types
+  against Playwright's real `Page`, `Frame` and `Locator` (`test/types/public-api.ts`). `pnpm smoke` passes: packed tarball into an
+  empty folder, README quickstart against demo.playwright.dev, CJS require, type check against
+  Playwright 1.64.1's real `Page`.
+- **Tooling note**: TypeScript held on 6.x because tsup's declaration bundling needs the compiler
+  API that TS 7 dropped.
+- **Review fixes** (a review agent ran experiments in Chromium and confirmed 15 defects; all
+  fixed, each with a regression test in `test/integration/edge-cases.test.ts`):
+  - Hit test works inside iframes: the top-level point is shifted into frame pixels by the
+    difference between Playwright's box and the element's own rect. It now tells *clipped*
+    (scrolled out of a panel or frame) from *covered*; clipped targets get one
+    `scrollIntoViewIfNeeded`, and `force` never presses on a clipped target.
+  - `ElementRef.waitForVisible` resolves false on timeout (the driver knows its own timeout
+    error); strict-mode violations become `TARGET_AMBIGUOUS`; other errors pass through.
+  - Seeds replay regardless of polling: `aim` draws one `spot` per aim and places it in whatever
+    box the retries see, each action draws from its own stream of the seed (`streamSeed`), and
+    plugins get a stream of their own.
+  - Plugins get an unqueued, hookless human (no deadlock); a failed `setup` is retried.
+  - `press('+')`, `\r\n` and `\t` typed exactly, `timeout` and strategy options validated
+    (`INVALID_OPTION`), nested options deep-merge, edge-margin targets are wheeled,
+    `scrollOffset(at)` measures the scroll box under the cursor, `type` appends via an optional
+    `ElementRef.caretToEnd`, the course correction re-aims, `createHuman` only accepts a page
+    (or anything with `{ driver }`) at compile time, `scroll({ to })` no longer accepts points.
+- **Open**: Puppeteer driver (PRD 06). Targets in scrolling panels and iframes are scrolled with
+  `scrollIntoViewIfNeeded`, not the wheel over the panel (parking lot). A parent-page element
+  covering an iframe isn't detected (cross-origin frames can't see their parent). Email and
+  number inputs don't support moving the caret, so typing there lands where the click did.

@@ -31,8 +31,12 @@ Settled choices. Don't relitigate; add new calls with a date.
   person: product demo videos recorded from scripts, end-to-end tests that fire the events real
   users fire, and teams testing their own analytics, heatmaps or bot defences.
 - **Positioning** (2026-11-03): "Your Playwright scripts click like robots. Make them move like
-  people." The wedge is demo-ready output: a visible cursor, smooth curved motion and readable
-  typing that show up in Playwright's video recordings with one option.
+  people." The wedge (see `docs/MARKET.md`): every input humanized (mouse, keyboard, scroll) and
+  reproducible with seeds, which nobody else offers. For videos: "Playwright draws a cursor. We
+  move the real one." Playwright 1.64 paints a decorative cursor on recordings; ours sends real
+  events along the path, so hover states fire, and the visible cursor shows what the page got.
+- **Competitors in public copy**: not named in the README, site or package keywords until the user
+  approves each name (they're in Needs you).
 - **Name**: keep `definitely-not-a-robot` (free on npm as of 2026-11-03).
 - **Scope line** (2026-11-03): the library makes *input* human. It does not hide browser
   fingerprints, patch automation flags or solve CAPTCHAs, and the old stealth plugin is gone. The
@@ -44,8 +48,13 @@ Settled choices. Don't relitigate; add new calls with a date.
 - **Factory, not class**: `createHuman(page, options)` returns a `Human`. No `new`, no
   `launch()`: the user brings their own Playwright page, so the library never owns the browser.
 - **Drivers (adapter pattern)**: everything that talks to the automation library sits behind a
-  small `Driver` interface (mouse move/down/up, wheel, key down/up, insert text, viewport, locate
-  a target, inject a script). `createHuman` detects Playwright or Puppeteer pages by shape.
+  small `Driver` interface (mouse move/down/up, wheel, key down/up, insert text, viewport, scroll
+  offset, locate a target, inject a script).
+- **Click safety**: before pressing, an in-page hit test checks that the topmost element at the
+  click point is the target (through shadow roots, labels count). If something covers it, wait
+  until timeout, then throw `TARGET_COVERED` naming what's on top. `{ force: true }` skips it.
+- **Clock**: the player schedules points against an absolute clock and drops points when behind,
+  so a slow or remote browser keeps human durations instead of running long. `createHuman` detects Playwright or Puppeteer pages by shape.
   Custom drivers via `defineDriver()`.
 - **Plan, then play**: motion, typing and scrolling are planned by pure functions that return
   timed steps (`{ x, y, t }[]`, keystrokes with delays, wheel deltas). A small player sends them
@@ -70,6 +79,8 @@ Settled choices. Don't relitigate; add new calls with a date.
 ## Stack and conventions
 
 - TypeScript (strict), ESM and CommonJS builds with type declarations via tsup, Node 18+.
+- TypeScript is held on 6.x (2026-11-03): TypeScript 7 ships no compiler API, and tsup's
+  declaration bundling needs one. Revisit when tsup or tsdown supports TS 7.
 - pnpm. Add packages with `pnpm add <pkg>@latest`, never by hand-editing versions.
 - Vitest for unit tests; integration tests drive real headless Chromium through Playwright.
 - Biome for lint and format: 4 spaces, single quotes, no semicolons, 100 columns (the repo's old

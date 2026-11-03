@@ -1,91 +1,30 @@
-import HumanBrowser from './HumanBrowser'
+export type { PlaywrightPageLike } from './drivers/playwright'
+export { playwrightDriver } from './drivers/playwright'
+export type { Driver, ElementRef, HitTest, MouseButton, ScrollOffset } from './drivers/types'
+export { defineDriver } from './drivers/types'
+export type { HumanErrorCode } from './errors'
+export { HumanError } from './errors'
+export type { Box, Point, Size, TimedPoint } from './geometry'
+export type {
+    ClickOptions,
+    Human,
+    HumanOptions,
+    MoveOptions,
+    ScrollOptions,
+    Target,
+    TypeOptions,
+} from './human'
+export { createHuman } from './human'
+export type { BezierMotionOptions, MotionRequest, MotionStrategy } from './motion'
+export { bezierMotion, defineMotion } from './motion'
+export type { Action, ActionType, HumanPlugin, PluginContext } from './plugins'
+export { definePlugin } from './plugins'
+export type { Preset, PresetName, Timing } from './presets'
+export { defaultTiming, definePreset, presets } from './presets'
+export type { Random } from './random'
 
-const HEADLESS_MODE = false
-// const BROWSER_WINDOW_ARGUMENTS = ['--start-maximized'];
-
-const DEFAULT_PAUSE_OPTIONS = {
-    maxPause: 2,
-    minPause: 0,
-    hesitationBeforeClick: true,
-}
-
-const JITTER_DEFAULT = {
-    jitterMin: 3,
-    jitterMax: 30,
-    jitterCount: 3,
-    debug: true,
-}
-const URL = `https://ui.shadcn.com`
-const SEARCH_BOX_SELECTOR = 'input[type*="search"]'
-const TEAM_SELECT_BUTTON = 'button[aria-label="Select a team"]'
-const MONSTER_SELECTION = '[data-value="monsters inc."]'
-const NAVIGATION_LINK = 'a[href*="/examples/playground"]'
-const TEXT_AREA_SELECTOR = 'textarea'
-
-async function typeInSearchBox(browser: HumanBrowser, text: string, wordsPerMinute: number) {
-    await browser.humanMove(SEARCH_BOX_SELECTOR, DEFAULT_PAUSE_OPTIONS)
-    await browser.jitterMouse(JITTER_DEFAULT)
-    await browser.humanType(text, wordsPerMinute)
-    await browser.jitterMouse()
-}
-
-async function selectTeam(browser: HumanBrowser) {
-    await browser.humanMove(TEAM_SELECT_BUTTON, DEFAULT_PAUSE_OPTIONS)
-    await browser.jitterMouse()
-}
-
-async function typeMonsterName(browser: HumanBrowser, text: string, keyboardStretch: number) {
-    await browser.wait(300, 500)
-    await browser.jitterMouse({
-        jitterMin: 1,
-        jitterMax: 30,
-        jitterCount: 2,
-    })
-    await browser.humanType(text, keyboardStretch)
-    await browser.wait(300, 500)
-    await browser.jitterMouse()
-}
-
-async function selectMonster(browser: HumanBrowser) {
-    await browser.humanMove(MONSTER_SELECTION, DEFAULT_PAUSE_OPTIONS)
-    await browser.jitterMouse()
-}
-
-async function navigateToPlayground(browser: HumanBrowser) {
-    await browser.humanMove(NAVIGATION_LINK)
-    await browser.wait(300, 500)
-    await browser.jitterMouse()
-}
-
-async function typeTextArea(browser: HumanBrowser, text: string) {
-    await browser.humanMove(TEXT_AREA_SELECTOR, {
-        target: 'top-left',
-        ...DEFAULT_PAUSE_OPTIONS,
-    })
-    await browser.jitterMouse({
-        jitterCount: 1,
-    })
-    await browser.humanType(text)
-}
-
-;(async () => {
-    const browser = new HumanBrowser()
-
-    await browser.launch({
-        headless: HEADLESS_MODE,
-        // args: BROWSER_WINDOW_ARGUMENTS
-    })
-
-    await browser.navigate(URL)
-
-    await typeInSearchBox(browser, 'Hello World', 86)
-    await selectTeam(browser)
-    await typeMonsterName(browser, 'Monste', 30)
-    await selectMonster(browser)
-    await navigateToPlayground(browser)
-    await typeTextArea(browser, `Hello World! I am definitely a human doing human things. How about those student loans and depression, huh? ah ah ah aH AH AHHH.`)
-
-    // ... Continue with other actions ...
-
-    // await browser.close();
-})()
+export { createRandom } from './random'
+export type { ScrollRequest, ScrollStrategy, WheelScrollOptions, WheelStep } from './scroll'
+export { defineScroll, wheelScroll } from './scroll'
+export type { Keystroke, NaturalTypingOptions, TypingRequest, TypingStrategy } from './typing'
+export { defineTyping, naturalTyping } from './typing'

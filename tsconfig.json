@@ -1,22 +1,19 @@
 {
-  "compilerOptions": {
-    /* Basic Options */
-    "target": "ES2020", // Specify ECMAScript target version.
-    "module": "CommonJS", // Specify module code generation.
-    "declaration": true, // Generates corresponding '.d.ts' file.
-    "outDir": "./dist", // Redirect output structure to the directory.
-    "rootDir": "./src", // Specify the root directory of input files.
-    "strict": true, // Enable all strict type-checking options.
-
-    /* Module Resolution Options */
-    "moduleResolution": "node", // Resolve modules using Node.js module resolution strategy.
-    "esModuleInterop": true, // Allows default imports from modules with no default export.
-    "resolveJsonModule": true, // Allows importing '.json' files.
-
-    /* Advanced Options */
-    "skipLibCheck": true, // Skip type checking of declaration files.
-    "forceConsistentCasingInFileNames": true // Disallow inconsistently-cased references to the same file.
-  },
-  "include": ["src/**/*.ts", "src/global.d.ts"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "lib": ["ES2022", "DOM"],
+        "types": ["node"],
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "isolatedModules": true,
+        "verbatimModuleSyntax": false,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "declaration": true,
+        "noEmit": true
+    },
+    "include": ["src", "test", "scripts", "*.config.ts"]
 }
