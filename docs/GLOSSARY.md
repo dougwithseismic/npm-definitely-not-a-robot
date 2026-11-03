@@ -89,6 +89,9 @@ keystrokes look like this: mostly quick, sometimes a long pause, never negative.
 
 ## Clicking safely
 
+**Target.** What an action is aimed at: a selector, a Playwright locator, an element handle or a
+point on the page. Every action that moves the mouse takes one, and waits for it to be visible.
+
 **Hit test.** Asking the browser "what's the topmost element at this point?" before pressing. If
 it isn't the target, the click would land on something else.
 

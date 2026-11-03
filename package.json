@@ -1,7 +1,7 @@
 {
     "name": "definitely-not-a-robot",
     "version": "1.0.0",
-    "description": "Human-like mouse, typing and scrolling for Playwright. Curved cursor paths, real keystroke rhythm, a visible cursor for demo videos, and seeds for reproducible runs.",
+    "description": "Human-like mouse, typing and scrolling for Playwright and Puppeteer. Curved cursor paths, real keystroke rhythm, a visible cursor for demo videos, and seeds that replay a run exactly.",
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
@@ -67,18 +67,24 @@
     },
     "keywords": [
         "playwright",
+        "puppeteer",
+        "playwright-test",
         "human",
+        "human-like",
         "humanize",
         "mouse",
-        "cursor",
         "mouse-movement",
+        "cursor",
+        "keyboard",
         "typing",
+        "scroll",
         "bezier",
+        "fitts-law",
         "automation",
         "e2e",
         "testing",
         "demo-video",
-        "puppeteer"
+        "screen-recording"
     ],
     "repository": {
         "type": "git",

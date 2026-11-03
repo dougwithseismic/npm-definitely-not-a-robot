@@ -4,6 +4,16 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### A README that says who it's for and why (PRD 04) · Improved
+- The top of the README now says who the library is for and what sets it apart: every input
+  humanized, not just the cursor; the real mouse moved, so hover menus open on the way; and any
+  run replayed exactly from its seed.
+- A new Presets section compares `average`, `careful`, `fast` and `demo`, and shows how to adjust
+  one or make your own with `definePreset()`.
+- A new recipe wraps the built-in driver to change how input reaches the browser.
+- The FAQ explains why a cursor drawn on by a recorder isn't the same as moving the real mouse.
+- Try it: the README on GitHub or npm, or the FAQ on the website.
+
 ### Works with Puppeteer (PRD 06) · New
 - Pass a Puppeteer page to `createHuman` and every action works as it does on Playwright:
   clicks, drags, typing, key presses, scrolling and the visible cursor. There's nothing to set up;

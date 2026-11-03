@@ -2,25 +2,26 @@
 
 **Your Playwright scripts click like robots. Make them move like people.**
 
-One line wraps any Playwright page (or Puppeteer page). Clicks travel curved paths and land where
-a hand would.
-Typing has a real rhythm. Scrolling turns the wheel. And the same seed replays the same run,
-every time.
+For product demos recorded from scripts, tests of UI that only reacts to real input, and checking
+your own analytics. One line wraps any Playwright or Puppeteer page: the mouse travels curved paths
+and clicks where a hand would, typing has a real rhythm, and scrolling turns the wheel.
 
 <img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hero.gif" width="100%" alt="Left: Playwright on its own fills a sign-up form instantly and the cursor jumps to the button. Right: with definitely-not-a-robot the cursor travels to each field and the text is typed key by key.">
+
+- **Every input, not just the cursor.** Mouse, keyboard and wheel, all humanized, in one library.
+- **The real mouse, not a drawing of one.** Hover menus open on the way and drags arrive point by
+  point, because the page gets every event along the path.
+- **Any run, replayed exactly.** A seed reproduces a flaky test or re-records a demo frame for frame.
+
+```bash
+npm install definitely-not-a-robot
+```
 
 [![CI](https://github.com/dougwithseismic/npm-definitely-not-a-robot/actions/workflows/ci.yml/badge.svg)](https://github.com/dougwithseismic/npm-definitely-not-a-robot/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/definitely-not-a-robot?color=111)](https://www.npmjs.com/package/definitely-not-a-robot)
 [![types](https://img.shields.io/badge/types-included-111)](#api)
 [![dependencies](https://img.shields.io/badge/dependencies-0-111)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-111)](LICENSE)
-
-```bash
-npm install definitely-not-a-robot
-```
-
-**[Try the live demo](https://site-production-4098.up.railway.app)**: click anywhere and watch
-Playwright's click next to a human one, planned by this library in your browser.
 
 ## Quickstart
 
@@ -42,6 +43,9 @@ await browser.close()
 
 Run it and watch: the cursor arcs over to the field, the text goes in key by key, and the
 checkbox gets clicked a little off-centre, the way you'd click it.
+
+Rather see it first? [The live demo](https://site-production-4098.up.railway.app) puts
+Playwright's click next to a human one: click anywhere and both cursors go there.
 
 ### In Playwright Test
 
@@ -121,7 +125,7 @@ wrong when your automation needs to look or behave like a person:
 - **Built to extend**: presets, swappable motion, typing and scroll strategies, plugins, and
   custom drivers.
 - **No dependencies.** TypeScript types included, ESM and CommonJS, Node 18+. Works with
-  `playwright`, `playwright-core` and `@playwright/test`.
+  `playwright`, `playwright-core`, `@playwright/test` and `puppeteer`.
 
 ### See it
 
@@ -163,6 +167,9 @@ page on the website with a video of it.
 const human = createHuman(page, options?)
 ```
 
+Words like *target*, *preset*, *strategy*, *driver* and *Fitts's law* are explained in plain
+language in the [glossary](docs/GLOSSARY.md).
+
 | Method | What it does |
 | --- | --- |
 | `human.click(target, { button?, clickCount? })` | Moves to the target, hesitates, presses, holds, releases |
@@ -197,7 +204,29 @@ own actions do.
 | `timeout` | `10000` | How long to wait for a target to appear, in ms |
 | `plugins` | `[]` | Hooks that run around actions and cursor moves |
 | `startPosition` | lower middle | Where the cursor starts |
-| `driver` | detected | Drive something other than a Playwright page |
+| `driver` | detected | Wrap the built-in driver, or drive another tool |
+
+### Presets
+
+A preset bundles how someone moves, types and pauses. Pick one by name:
+
+| Preset | Moves like | Typing | Good for |
+| --- | --- | --- | --- |
+| `average` (default) | Someone on a site they know | 65 wpm | Tests and synthetic sessions |
+| `careful` | Someone reading as they go | 42 wpm, longer pauses before clicks | Slow, deliberate walkthroughs |
+| `fast` | A power user | 95 wpm, short pauses | Quicker runs that still send every event |
+| `demo` | A presenter | A steady 50 wpm, smooth moves, the cursor drawn | Recording videos |
+
+Anything else you pass changes just that part of the preset, and `definePreset()` makes your own:
+
+```js
+import { createHuman, definePreset } from 'definitely-not-a-robot'
+
+createHuman(page, { preset: 'careful', typing: { typos: 0.02 } }) // still 42 wpm, now with typos
+
+const tired = definePreset({ typing: { wpm: 35, typos: 0.04 }, timing: { think: [1500, 4000] } })
+createHuman(page, { preset: tired })
+```
 
 ## Recipes
 
@@ -267,8 +296,8 @@ const replay = createHuman(page, { seed: 1842273 })
 ### Type faster, slower, or sloppier
 
 ```js
-createHuman(page, { typing: { wpm: 90, typos: 0.02 } })
-createHuman(page, { preset: 'careful' }) // 42 wpm, longer pauses
+createHuman(page, { typing: { wpm: 90, typos: 0.02 } }) // a typo every 50 letters or so, fixed
+createHuman(page, { typing: { variance: 0 } }) // a metronome: every gap the same
 ```
 
 ### Write your own motion
@@ -310,8 +339,25 @@ createHuman(page, { plugins: [log] })
 
 Everything that talks to the browser goes through a small `Driver` interface: mouse move, down
 and up, wheel, key down and up, insert text, viewport, scroll offset, and finding an element.
-Playwright and Puppeteer have one built in, picked from the page you pass. For anything else,
-implement it with `defineDriver()` and pass it as `{ driver }`.
+Playwright and Puppeteer have one built in, picked from the page you pass. To change how input
+reaches the browser, wrap the built-in one. This one logs every press:
+
+```ts
+import { createHuman, defineDriver, playwrightDriver } from 'definitely-not-a-robot'
+
+const base = playwrightDriver(page)
+const logged = defineDriver({
+    ...base,
+    mouseDown: (button, clickCount) => {
+        console.log('press', button)
+        return base.mouseDown(button, clickCount)
+    },
+})
+
+createHuman(page, { driver: logged })
+```
+
+For another tool entirely, write every method with `defineDriver()` and pass it the same way.
 
 ## How it works
 
@@ -331,8 +377,14 @@ on sites you own or have permission to automate: demos, tests and research.
 
 ## FAQ
 
-**Will this get me past bot detection?** No, and it isn't built to. Modern detection looks at much
-more than mouse movement.
+**Will this get me past bot detection?** No, and it isn't built to. Detection looks at the browser
+itself, the network and behaviour over time, not only at how the mouse moves, and this library
+changes nothing but how input is sent. Use it on sites you own or have permission to automate.
+
+**My recorder already draws a cursor. Why do I need this?** A drawn cursor is painted on between
+actions, while the real mouse still jumps, so hover menus never open along the way. This library
+moves the real mouse along the whole path, and its own cursor follows the events the page
+received. It works with any recorder.
 
 **Does it work with `@playwright/test`?** Yes. Import `test` from
 `definitely-not-a-robot/playwright` and every test gets a `human`, or pass the test's `page` to
