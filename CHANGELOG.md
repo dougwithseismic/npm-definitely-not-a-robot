@@ -4,6 +4,11 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### The cursor stays under the mouse over iframes in web components and scaled iframes · Fixed
+- The visible cursor used to stop at the edge of an iframe inside a web component, and to draw in
+  the wrong place over an iframe shrunk or enlarged with CSS, such as a thumbnail preview of
+  another page. It now follows the mouse over both.
+
 ### Scrolling lists, panels and iframes turn with the wheel · Improved
 - When a target is hidden inside something that scrolls on its own (an inbox list, a chat, an
   app's main area or an iframe), the cursor now moves over it and turns the wheel until the target

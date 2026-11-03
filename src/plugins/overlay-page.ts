@@ -26,7 +26,8 @@ export interface OverlayState {
  *   Policy, inside a closed shadow root so page CSS can't reach it, and ignored by clicks.
  * - Shown in the top layer (as a manual popover) and raised again when a dialog opens above it.
  * - Frames don't draw: they pass their pointer events up a private channel to the top page, which
- *   adds the frame's offset, so the cursor keeps moving over iframes.
+ *   adds the frame's offset and scale, so the cursor keeps moving over iframes, including ones
+ *   inside open shadow roots and ones scaled with CSS.
  * - Survives `document.open()` (Playwright's `setContent`) by re-attaching, and starts each new
  *   page of the same site where the last one left off.
  * - Running it again on the same page only updates the options.
@@ -54,6 +55,13 @@ export function overlayInPage(parts: OverlayParts): void {
         attach()
     }
 
+    /** The frame elements in `root`, looking inside open shadow roots too. */
+    const framesIn = (root: Document | ShadowRoot): HTMLElement[] =>
+        Array.from(root.querySelectorAll<HTMLElement>('*')).flatMap((el) => [
+            ...(el.tagName === 'IFRAME' || el.tagName === 'FRAME' ? [el] : []),
+            ...(el.shadowRoot ? framesIn(el.shadowRoot) : []),
+        ])
+
     /**
      * Pointer events from child frames. Each child says hello once with a private line and sends
      * its moves down that, so the page's own message handlers never see them.
@@ -67,11 +75,20 @@ export function overlayInPage(parts: OverlayParts): void {
             const child = e.source
             let from: HTMLElement | undefined
             let edge = { x: 0, y: 0 }
+            let walked = Number.NEGATIVE_INFINITY
             line.onmessage = ({ data }) => {
                 if (!from?.isConnected) {
+                    const isChild = (f: HTMLElement) =>
+                        (f as HTMLIFrameElement).contentWindow === child
                     from = Array.from(doc.querySelectorAll<HTMLElement>('iframe, frame')).find(
-                        (f) => (f as HTMLIFrameElement).contentWindow === child
+                        isChild
                     )
+                    // Walking every shadow root is slower: only when the plain search misses, and
+                    // at most once a second for a frame that can't be found (in a closed root).
+                    if (!from && performance.now() - walked > 1000) {
+                        walked = performance.now()
+                        from = framesIn(doc).find(isChild)
+                    }
                     if (!from) return
                     const css = getComputedStyle(from)
                     edge = {
@@ -80,7 +97,14 @@ export function overlayInPage(parts: OverlayParts): void {
                     }
                 }
                 const rect = from.getBoundingClientRect()
-                pass(data[0], rect.left + edge.x + data[1], rect.top + edge.y + data[2])
+                // A frame scaled with CSS shows each of its pixels bigger or smaller.
+                const sx = from.offsetWidth ? rect.width / from.offsetWidth : 1
+                const sy = from.offsetHeight ? rect.height / from.offsetHeight : 1
+                pass(
+                    data[0],
+                    rect.left + (edge.x + data[1]) * sx,
+                    rect.top + (edge.y + data[2]) * sy
+                )
             }
         }
 

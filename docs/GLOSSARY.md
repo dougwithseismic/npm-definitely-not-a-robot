@@ -125,6 +125,15 @@ through to the page.
 can't reach inside, so a site's styles can't restyle or hide the cursor. *Closed* means page
 scripts can't reach in either.
 
+**Open shadow root, web component.** A shadow root page scripts can reach (`element.shadowRoot`).
+Web components, custom elements such as `<video-player>`, usually keep their insides in one. A
+page-wide search (`querySelectorAll`) doesn't look inside, so finding everything means walking
+into each one.
+
+**CSS transform.** Moving, scaling or rotating an element as it's drawn, without changing its
+layout (`transform: scale(.5)`). Inside a scaled iframe, points are still in the iframe's own
+unscaled pixels, so they have to be scaled to land in the right place on the page.
+
 **Top layer.** Where the browser puts dialogs, popovers and full-screen elements: above every
 z-index. The cursor is shown there as a popover, and moves back to the top when a dialog opens.
 

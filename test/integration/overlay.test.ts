@@ -110,6 +110,33 @@ describe('visibleCursor', () => {
         expect(await fx.page.evaluate(() => (window as any).heard)).toBe(1)
     })
 
+    const near = (x: number, y: number) => ({ x: expect.closeTo(x, 0), y: expect.closeTo(y, 0) })
+
+    it('keeps going over an iframe inside a shadow root', async () => {
+        await fx.page.setContent(`<body style="margin:0"><div id="host"></div>
+            <script>
+              host.attachShadow({ mode: 'open' }).innerHTML =
+                '<iframe style="position:absolute;left:200px;top:100px;width:400px;height:300px;border:0" ' +
+                'srcdoc="<body style=margin:0>Inside</body>"></iframe>'
+            </script>
+        </body>`)
+        await fx.page.frameLocator('iframe').locator('body').waitFor()
+        const human = createHuman(fx.page, { ...fast, plugins: [visibleCursor()] })
+        await human.move({ x: 350, y: 260 })
+        await expect.poll(() => overlay(fx.page)).toMatchObject(near(350, 260))
+    })
+
+    it('stays under the mouse over an iframe scaled with CSS', async () => {
+        await fx.page.setContent(`<body style="margin:0">
+            <iframe style="position:absolute;left:200px;top:100px;width:400px;height:300px;border:4px solid;transform:scale(.5);transform-origin:0 0"
+              srcdoc="<body style='margin:0'>Inside</body>"></iframe>
+        </body>`)
+        await fx.page.frameLocator('iframe').locator('body').waitFor()
+        const human = createHuman(fx.page, { ...fast, plugins: [visibleCursor()] })
+        await human.move({ x: 300, y: 200 })
+        await expect.poll(() => overlay(fx.page)).toMatchObject(near(300, 200))
+    })
+
     it('adds its script to a page once, however many humans draw on it', async () => {
         const counted = countInitScripts(fx.page)
         for (let i = 0; i < 3; i++) {

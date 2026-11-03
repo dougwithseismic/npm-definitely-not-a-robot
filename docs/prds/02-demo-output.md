@@ -130,6 +130,10 @@ Bundle: ESM 47.94 KB, CJS 48.32 KB. 72 tests (12 for the overlay). CI green on m
   here. Re-raising above a modal relies on `<dialog>` toggle events. Belongs with cross-browser
   CI (UX row).
 - An iframe inside a shadow root isn't found by the parent, so the cursor stops at its edge; a
-  CSS-transformed iframe draws the cursor offset.
+  CSS-transformed iframe draws the cursor offset. (Fixed 2026-11-03: the parent walks open
+  shadow roots when the plain search misses, and scales the child's point by the frame's drawn
+  size over its layout size. Still open: frames inside closed shadow roots, and rotated or skewed
+  frames, where the bounding box isn't the frame.)
 - Colours are checked only for being non-empty strings; an invalid one fails silently in the page.
+  (Fixed 2026-11-03, PR 13: checked for the shape of a CSS colour when the plugin is created.)
 - The restored `sessionStorage` position can be stale until the first move on the new page.
