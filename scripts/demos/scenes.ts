@@ -1,5 +1,5 @@
 import type { Page } from 'playwright'
-import { type Human, type HumanOptions, trail, wheelScroll } from '../../src'
+import { type Driver, type Human, type HumanOptions, trail, wheelScroll } from '../../src'
 import type { StageOptions } from './stage'
 
 export interface Take {
@@ -15,6 +15,8 @@ export interface Side {
     options?: HumanOptions
     /** Drive this side through Puppeteer instead of Playwright (which still films it). */
     driver?: 'puppeteer'
+    /** Change how input reaches the browser, for instance to make it slow to answer. */
+    wrapDriver?: (driver: Driver) => Driver
     run(take: Take): Promise<void>
 }
 
@@ -397,6 +399,65 @@ const trackpad: Scene = {
     ],
 }
 
+// ---- a browser far away: waiting for each move next to sending them ahead ----
+
+/** Every move reaches the browser 80 ms late, as a remote browser in another region can. */
+const farAway =
+    (maxInFlight: number) =>
+    (driver: Driver): Driver => ({
+        ...driver,
+        maxInFlight,
+        moveMouse: (x, y) =>
+            new Promise((resolve) => setTimeout(resolve, 80)).then(() => driver.moveMouse(x, y)),
+    })
+
+const farDots = [
+    { id: 'f1', x: 560, y: 150 },
+    { id: 'f2', x: 160, y: 250 },
+    { id: 'f3', x: 570, y: 410 },
+]
+
+const farDotStage = dotStage(farDots, 56)
+
+/** The dots, and a count of the moves that reached the page. */
+const farStage = {
+    css: `${farDotStage.css}
+        .moves { position: absolute; left: 24px; top: 68px; font-size: 15px; color: var(--muted); }
+        .moves b { color: var(--ink); font-variant-numeric: tabular-nums; }`,
+    body: `${farDotStage.body}<div class="moves"><b id="moves">0</b> moves reached the page</div>`,
+    script: `document.querySelectorAll('.dot').forEach((d) =>
+        d.addEventListener('click', () => d.classList.add('hit')))
+        let moves = 0
+        addEventListener('mousemove', () => { document.getElementById('moves').textContent = ++moves })`,
+}
+
+const clickFarDots = async ({ human, code }: Take) => {
+    for (const d of farDots) {
+        await code(`await human.click('#${d.id}')`)
+        await human.click(`#${d.id}`)
+    }
+}
+
+const slowBrowser: Scene = {
+    name: 'slow-browser',
+    viewport: half,
+    start: { x: 140, y: 450 },
+    sides: [
+        {
+            stage: { ...farStage, label: '80 ms away, waiting for each move', plain: true },
+            options: { seed: 11, plugins: [trail({ fade: 5000 })] },
+            wrapDriver: farAway(1),
+            run: clickFarDots,
+        },
+        {
+            stage: { ...farStage, label: '80 ms away, sending moves ahead' },
+            options: { seed: 11, plugins: [trail({ fade: 5000 })] },
+            wrapDriver: farAway(8),
+            run: clickFarDots,
+        },
+    ],
+}
+
 // ---- scrolling a panel inside the page ----
 
 const senders = [
@@ -705,6 +766,7 @@ export const scenes: Scene[] = [
     typing,
     scroll,
     trackpad,
+    slowBrowser,
     panel,
     cover,
     seed,

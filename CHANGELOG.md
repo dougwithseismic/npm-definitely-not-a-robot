@@ -11,6 +11,8 @@ What's new, newest first. Each entry says what you can do now.
 - WebKit now gets as many points along each path as Chromium and Firefox.
 - Drivers you write yourself keep waiting for each answer unless you opt in with `maxInFlight`.
   See "Drive something else" in the README.
+- Try it: the "browser 80 ms away" clip in the README's "See it" section, or "See every feature"
+  on the website, counts the moves that reach the page each way.
 
 ### Scroll like a trackpad, now the demo preset's default (PRD 09) · New
 - `scroll: trackpadScroll()` scrolls the way a laptop trackpad does: each flick sends a stream of

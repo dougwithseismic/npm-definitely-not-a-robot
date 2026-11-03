@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { type Browser, chromium, type Page } from 'playwright'
 import puppeteer from 'puppeteer-core'
-import { createHuman } from '../../src'
+import { createHuman, playwrightDriver, puppeteerDriver } from '../../src'
 import { type Scene, type Side, scenes } from './scenes'
 import { stage } from './stage'
 
@@ -45,11 +45,13 @@ async function film(browser: Browser, scene: Scene, side: Side, dir: string): Pr
     const opened = Date.now()
     await page.setContent(stage(side.stage))
     const driven = side.driver === 'puppeteer' ? await asPuppeteer(page) : undefined
+    const base = driven ? puppeteerDriver(driven.page) : playwrightDriver(page)
     const human = createHuman((driven?.page ?? page) as Page, {
         preset: 'demo',
         seed: 7,
         startPosition: scene.start,
         ...side.options,
+        ...(side.wrapDriver && { driver: side.wrapDriver(base) }),
     })
     await human.move(scene.start) // draws the cursor where it starts
     await page.waitForTimeout(500)
