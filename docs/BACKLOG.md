@@ -16,7 +16,7 @@ describes everything else.
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
 - [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
-- [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`) (building since 2026-11-03, autopilot session)
+- [x] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app/#uses)
 
 ## Launch bar
 
@@ -38,7 +38,7 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [ ] Published to npm with provenance **(you: type npm's one-time code for the first publish)**
 - [ ] Sponsorship link that works **(you: enable GitHub Sponsors, or name another link)**
 - [x] Landing site live with the live demo, Open Graph image, sitemap, 404
-- [ ] Use-case pages from `docs/MARKET.md`
+- [x] Use-case pages from `docs/MARKET.md`
 - [x] Public changelog page fed from `CHANGELOG.md`
 - [ ] Measurement: npm weekly downloads and GitHub stars recorded in `docs/LAUNCH.md` each wave
 
