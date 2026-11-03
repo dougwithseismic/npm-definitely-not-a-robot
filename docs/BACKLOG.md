@@ -15,7 +15,7 @@ describes everything else.
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
-- [ ] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (building since 2026-11-03, autopilot session)
+- [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
 - [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`)
 
 ## Launch bar
@@ -37,9 +37,9 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] Responsible-use statement: what it is for and what it doesn't do
 - [ ] Published to npm with provenance **(you: type npm's one-time code for the first publish)**
 - [ ] Sponsorship link that works **(you: enable GitHub Sponsors, or name another link)**
-- [ ] Landing site live with the live demo, Open Graph image, sitemap, 404
+- [x] Landing site live with the live demo, Open Graph image, sitemap, 404
 - [ ] Use-case pages from `docs/MARKET.md`
-- [ ] Public changelog page fed from `CHANGELOG.md`
+- [x] Public changelog page fed from `CHANGELOG.md`
 - [ ] Measurement: npm weekly downloads and GitHub stars recorded in `docs/LAUNCH.md` each wave
 
 ## Needs you
@@ -67,6 +67,12 @@ database backups (no server-side product). "Can pay" means sponsorship.
 
 ## Parking lot
 
+- Flaky under CPU load: `drags along the whole path at speed 4` expects more than 15 mouse moves,
+  but real-time playback drops late points by design (it saw exactly 15 while Docker was
+  building). Give it a seed and compare against the planned path, or keep the check for instant
+  mode only.
+- The site's demo videos are served under fixed `/media/` names with a one-day cache. Hashed names
+  (through Vite's asset handling) would let them cache for good and refresh when re-recorded.
 - WindMouse motion strategy as an alternative to Bezier curves
 - Trackpad scrolling persona (momentum) next to mouse-wheel notches
 - Touch input: tap, swipe, pinch for mobile emulation
