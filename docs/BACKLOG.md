@@ -66,8 +66,8 @@ database backups (no server-side product). "Can pay" means sponsorship.
       arrow, which leaves the caret at the end on every platform. (fixed 2026-11-03, PR 13)
 - [ ] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
       toggle events), and run the integration tests there in CI.
-- [ ] The visible cursor stops at the edge of an iframe inside a shadow root, and is offset over a
-      CSS-transformed iframe.
+- [~] The visible cursor stops at the edge of an iframe inside a shadow root, and is offset over a
+      CSS-transformed iframe. (building since 2026-11-03, autopilot session)
 - [x] `visibleCursor({ color: 'blu' })` is accepted and draws nothing; check colours when the
       plugin is created. (fixed 2026-11-03, PR 13)
 
