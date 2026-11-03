@@ -9,11 +9,11 @@ merges, 02 + 03 (lane A: `src/plugins/`, `src/presets.ts`, `src/playwright/`), 0
 `.github/`, `scripts/`) and 07 (lane C: `site/`) can run side by side. 04 runs last because it
 describes everything else.
 
-- [~] 01 Core engine and factory: `createHuman`, Playwright driver, motion, typing, scroll, presets, seeds (`docs/prds/01-core-engine.md`) (building since 2026-11-03, autopilot session)
+- [x] 01 Core engine and factory: `createHuman`, Playwright driver, motion, typing, scroll, presets, seeds (`docs/prds/01-core-engine.md`) (shipped 2026-11-03)
 - [ ] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, video recipe (`docs/prds/02-demo-output.md`)
 - [ ] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`)
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
-- [ ] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`)
+- [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks and smoke test shipped 2026-11-03; tagged releases and provenance open)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
 - [ ] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`)
 - [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`)
@@ -23,18 +23,18 @@ describes everything else.
 Adapted for an open-source developer library. Not applicable: accounts, email, payments checkout,
 database backups (no server-side product). "Can pay" means sponsorship.
 
-- [ ] The core job works for a stranger: the packed tarball installs into an empty folder and the
+- [x] The core job works for a stranger: the packed tarball installs into an empty folder and the
       README quickstart runs first time against a real page (`pnpm smoke`)
-- [ ] First value in under two minutes: install plus a quickstart of ten lines or fewer
-- [ ] Errors say what happened and what to do (target not found, not visible, wrong page type)
+- [x] First value in under two minutes: install plus a quickstart of ten lines or fewer
+- [x] Errors say what happened and what to do (target not found, not visible, wrong page type)
 - [ ] README first screen says who it's for, the outcome and why this over the alternatives, with
       one call to action (install)
 - [ ] A real demo, made with the library itself (video or GIF of a recorded run)
-- [ ] Typed, ESM and CommonJS, Node 18+, works with `playwright` and `@playwright/test`
+- [x] Typed, ESM and CommonJS, Node 18+, works with `playwright` and `@playwright/test`
 - [ ] Tests and CI green, with a badge
 - [ ] Versioned changelog and GitHub releases
-- [ ] LICENSE, SECURITY.md, CONTRIBUTING.md, issue templates
-- [ ] Responsible-use statement: what it is for and what it doesn't do
+- [x] LICENSE, SECURITY.md, CONTRIBUTING.md, issue templates
+- [x] Responsible-use statement: what it is for and what it doesn't do
 - [ ] Published to npm with provenance **(you: npm login, then say publish)**
 - [ ] Sponsorship link that works **(you: enable GitHub Sponsors, or name another link)**
 - [ ] Landing site live with the live demo, Open Graph image, sitemap, 404
@@ -46,10 +46,16 @@ database backups (no server-side product). "Can pay" means sponsorship.
 
 - **npm login and first publish.** Run `npm login` in a terminal, then tell me "publish". Unblocks
   the launch bar's npm item and the install instructions everyone else will copy.
+- **OK to name competitors?** The migration guide (PRD 06) and any comparison page name
+  ghost-cursor and Playwright's screencast cursor. Say which names are fine to use in public copy.
 
 ## UX
 
-(UX pass findings land here as rows.)
+- [ ] Targets inside scrolling panels and iframes are brought into view with an instant
+      `scrollIntoViewIfNeeded`. A person would move over the panel and turn the wheel; do that
+      (needs the clipping box from the driver, see PRD 01 notes).
+- [ ] Typing into an email or number field that already has text lands where the click did,
+      because those inputs don't allow moving the caret. Press End (or Cmd+Right on macOS) instead.
 
 ## Parking lot
 
