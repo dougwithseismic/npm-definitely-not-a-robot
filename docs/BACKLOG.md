@@ -18,6 +18,19 @@ describes everything else.
 - [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
 - [x] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app/#uses)
 
+## Wave 2: realism you can see, on every surface
+
+Why: wave 1 made the library sellable; the brief asks to keep beating the alternatives. Each row
+here adds something none of them do, and most show up in the demo videos buyers judge us by.
+Lanes: 09 (lane A: `src/scroll/`, `src/presets.ts`) and 12 (lane C: `examples/`, `site/`) can run
+beside anything. 10 and 11 both change `src/human.ts` playback, so they run one after the other.
+
+- [ ] 09 Trackpad scrolling: smooth, momentum scrolling as a strategy, used by the `demo` preset (`docs/prds/09-trackpad-scroll.md`)
+- [ ] 11 Every point reaches slow browsers: send moves without waiting for each, so WebKit and remote browsers get the whole path (`docs/prds/11-pipelined-moves.md`)
+- [ ] 10 Touch input: `human.tap()` and `human.swipe()` for mobile emulation, with a touch marker in videos (`docs/prds/10-touch.md`)
+- [ ] 12 Human-looking AI agent recordings: drive Playwright MCP and agent frameworks through `createHuman` (`docs/prds/12-agent-recordings.md`)
+- [ ] 13 "Move like me": record your own mouse on the website and get a persona to pass to `createHuman` (`docs/prds/13-move-like-me.md`)
+
 ## Launch bar
 
 Adapted for an open-source developer library. Not applicable: accounts, email, payments checkout,
@@ -64,9 +77,9 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] Typing into an email or number field that already has text lands where the click did,
       because those inputs don't allow moving the caret. Select the text and press the right
       arrow, which leaves the caret at the end on every platform. (fixed 2026-11-03, PR 13)
-- [~] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
+- [x] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
       toggle events), and run the integration tests there in CI.
-      (building since 2026-11-03, autopilot session)
+      (shipped 2026-11-03, PR 17; WebKit's sparse paths moved to PRD 11)
 - [x] The visible cursor stops at the edge of an iframe inside a shadow root, and is offset over a
       CSS-transformed iframe. (fixed 2026-11-03, PR 16; closed shadow roots and rotated frames
       still open, see PRD 02 notes)
