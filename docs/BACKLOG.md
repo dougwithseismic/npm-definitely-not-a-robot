@@ -59,21 +59,18 @@ database backups (no server-side product). "Can pay" means sponsorship.
       (needs the clipping box from the driver, see PRD 01 notes).
 - [ ] Use-case and gallery cards are blank until their video loads (`preload="none"`), which shows
       on slow connections and in full-page screenshots. Give each video a poster frame.
-- [~] Typing into an email or number field that already has text lands where the click did,
-      because those inputs don't allow moving the caret. Press End (or Cmd+Right on macOS) instead. (building since 2026-11-03, autopilot session)
+- [x] Typing into an email or number field that already has text lands where the click did,
+      because those inputs don't allow moving the caret. Select the text and press the right
+      arrow, which leaves the caret at the end on every platform. (fixed 2026-11-03, PR 13)
 - [ ] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
       toggle events), and run the integration tests there in CI.
 - [ ] The visible cursor stops at the edge of an iframe inside a shadow root, and is offset over a
       CSS-transformed iframe.
-- [~] `visibleCursor({ color: 'blu' })` is accepted and draws nothing; check colours when the
-      plugin is created. (building since 2026-11-03, autopilot session)
+- [x] `visibleCursor({ color: 'blu' })` is accepted and draws nothing; check colours when the
+      plugin is created. (fixed 2026-11-03, PR 13)
 
 ## Parking lot
 
-- (fixing since 2026-11-03, autopilot session) Flaky under CPU load: `drags along the whole path at speed 4` expects more than 15 mouse moves,
-  but real-time playback drops late points by design (it saw exactly 15 while Docker was
-  building). Give it a seed and compare against the planned path, or keep the check for instant
-  mode only.
 - The site's demo videos are served under fixed `/media/` names with a one-day cache. Hashed names
   (through Vite's asset handling) would let them cache for good and refresh when re-recorded.
 - WindMouse motion strategy as an alternative to Bezier curves
