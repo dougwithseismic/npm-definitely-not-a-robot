@@ -1,8 +1,8 @@
 // The stranger test: pack the library exactly as npm would publish it, install the tarball into
-// an empty folder next to Playwright, then run the README quickstart, a CommonJS require and a
-// type check against Playwright's real types.
+// an empty folder next to Playwright, then run the README quickstart and demo recording, a CommonJS
+// require and a type check against Playwright's real types.
 import { execSync } from 'node:child_process'
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
@@ -10,10 +10,16 @@ const root = resolve(import.meta.dirname, '..')
 const run = (cmd, cwd = root) => execSync(cmd, { cwd, stdio: 'pipe', encoding: 'utf8' })
 const step = (label) => console.log(`smoke: ${label}`)
 
-const quickstart = readFileSync(join(root, 'examples/quickstart.mjs'), 'utf8')
-if (!readFileSync(join(root, 'README.md'), 'utf8').includes(quickstart.trim())) {
-    throw new Error('README quickstart is out of sync with examples/quickstart.mjs')
+const readme = readFileSync(join(root, 'README.md'), 'utf8')
+const example = (name) => {
+    const source = readFileSync(join(root, 'examples', name), 'utf8')
+    if (!readme.includes(source.trim())) {
+        throw new Error(`README is out of sync with examples/${name}`)
+    }
+    return source
 }
+const quickstart = example('quickstart.mjs')
+const recordDemo = example('record-demo.mjs')
 
 const dir = mkdtempSync(join(tmpdir(), 'dnar-smoke-'))
 try {
@@ -37,6 +43,14 @@ try {
         quickstart.replace('headless: false', 'headless: true')
     )
     run('node quickstart.mjs', dir)
+
+    step('record the README demo video')
+    writeFileSync(join(dir, 'record-demo.mjs'), recordDemo)
+    run('node record-demo.mjs', dir)
+    const video = readdirSync(join(dir, 'videos')).find((f) => f.endsWith('.webm'))
+    if (!video || statSync(join(dir, 'videos', video)).size < 10_000) {
+        throw new Error('the demo recording wrote no video')
+    }
 
     step('require() from CommonJS')
     run(

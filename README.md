@@ -6,6 +6,9 @@ One line wraps any Playwright page. Clicks travel curved paths and land where a 
 Typing has a real rhythm. Scrolling turns the wheel. And the same seed replays the same run,
 every time.
 
+<img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hero.gif" width="100%" alt="Left: Playwright on its own fills a sign-up form instantly and the cursor jumps to the button. Right: with definitely-not-a-robot the cursor travels to each field and the text is typed key by key.">
+
+[![CI](https://github.com/dougwithseismic/npm-definitely-not-a-robot/actions/workflows/ci.yml/badge.svg)](https://github.com/dougwithseismic/npm-definitely-not-a-robot/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/definitely-not-a-robot?color=111)](https://www.npmjs.com/package/definitely-not-a-robot)
 [![types](https://img.shields.io/badge/types-included-111)](#api)
 [![dependencies](https://img.shields.io/badge/dependencies-0-111)](package.json)
@@ -59,6 +62,8 @@ wrong when your automation needs to look or behave like a person:
 - **Wheel scrolling** in notches and bursts. Targets off-screen are scrolled into view before
   the cursor heads for them.
 - **Hover, drag and drop, double-click, right-click and key combinations.**
+- **A visible cursor for demo videos**: `preset: 'demo'` draws a cursor, with a ring on every
+  press, into screenshots and `recordVideo` recordings. Headless browsers draw none of their own.
 - **Seeds**: `createHuman(page, { seed: 42 })` replays identical paths and timings, so a flaky
   run can be reproduced and a demo video re-recorded frame for frame.
 - **Instant mode for CI**: set `DNAR_SPEED=instant` and the same script runs at full speed. It
@@ -67,6 +72,18 @@ wrong when your automation needs to look or behave like a person:
   custom drivers.
 - **No dependencies.** TypeScript types included, ESM and CommonJS, Node 18+. Works with
   `playwright`, `playwright-core` and `@playwright/test`.
+
+### See it
+
+Every clip below was recorded by the library itself, with `preset: 'demo'` and Playwright's
+`recordVideo`.
+
+<table>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/curved-paths.gif" alt="Curved paths, timed by distance and size, with an overshoot on long moves"><br>Curved paths, timed by distance and size, with an overshoot on long moves</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/typing.gif" alt="Typing with a rhythm, Shift for capitals, and a typo fixed on the spot"><br>Typing with a rhythm, Shift for capitals, and a typo fixed on the spot</td></tr>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hover-menu.gif" alt="Hover opens menus on the way, then clicks inside them"><br>Hover opens menus on the way, then clicks inside them</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/drag-and-drop.gif" alt="Drag and drop, holding the button the whole way"><br>Drag and drop, holding the button the whole way</td></tr>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-into-view.gif" alt="Off-screen targets are scrolled into view with the wheel, in bursts"><br>Off-screen targets are scrolled into view with the wheel, in bursts</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/cookie-banner.gif" alt="Won’t click through a cookie banner, and says what’s in the way"><br>Won’t click through a cookie banner, and says what’s in the way</td></tr>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td></td></tr>
+</table>
 
 ## API
 
@@ -98,7 +115,7 @@ own actions do.
 
 | Option | Default | What it does |
 | --- | --- | --- |
-| `preset` | `'average'` | `'average'`, `'careful'` or `'fast'`, or your own preset object |
+| `preset` | `'average'` | `'average'`, `'careful'`, `'fast'` or `'demo'`, or your own preset object |
 | `seed` | random | Replays identical movement and timing |
 | `speed` | `1` | Multiplies every timing. `2` is twice as fast; `'instant'` skips waiting |
 | `typing` | 65 wpm | `{ wpm, variance, typos }`, or your own typing strategy |
@@ -111,6 +128,48 @@ own actions do.
 | `driver` | detected | Drive something other than a Playwright page |
 
 ## Recipes
+
+### Record a demo video
+
+```js
+import { chromium } from 'playwright'
+import { createHuman } from 'definitely-not-a-robot'
+
+const browser = await chromium.launch()
+const context = await browser.newContext({
+    viewport: { width: 1280, height: 720 },
+    recordVideo: { dir: 'videos', size: { width: 1280, height: 720 } },
+})
+const page = await context.newPage()
+await page.goto('https://demo.playwright.dev/todomvc')
+
+const human = createHuman(page, { preset: 'demo' })
+await human.type('.new-todo', 'Record the launch video')
+await human.press('Enter')
+await human.click('.toggle')
+await human.pause()
+
+await context.close() // the video is written when the context closes
+console.log('Saved', await page.video().path())
+await browser.close()
+```
+
+`preset: 'demo'` moves smoothly, types at a steady 50 words a minute and draws the cursor. The
+cursor follows the page's real mouse events, so it shows exactly what the page received.
+Playwright saves WebM; `ffmpeg -i videos/<file>.webm demo.mp4` makes an MP4. In Playwright Test,
+set `use: { video: 'on' }` and create the human with `preset: 'demo'` in your test.
+
+To add the cursor to any other preset, restyle the demo one, or see the path the mouse took (your
+`visibleCursor()` replaces the preset's):
+
+```js
+import { createHuman, trail, visibleCursor } from 'definitely-not-a-robot'
+
+createHuman(page, { plugins: [visibleCursor({ color: '#e11d48', size: 28 }), trail()] })
+```
+
+Using `page.screencast.showActions()` for action titles as well? Pass `{ cursor: 'none' }` so only
+one cursor is drawn.
 
 ### Run at full speed in CI
 

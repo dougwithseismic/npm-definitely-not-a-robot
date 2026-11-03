@@ -25,7 +25,10 @@ export type ElementTarget = string | { boundingBox(): Promise<unknown> }
 export type Target = ElementTarget | Point
 
 export interface HumanOptions extends Preset {
-    /** A named preset (`'average'`, `'careful'`, `'fast'`) or your own. Default `'average'`. */
+    /**
+     * A named preset (`'average'`, `'careful'`, `'fast'`, or `'demo'` for recordings, which also
+     * draws the cursor) or your own. Default `'average'`.
+     */
     preset?: PresetName | Preset
     /** Replay identical paths and timings. Default: a random seed, readable as `human.seed`. */
     seed?: number
@@ -226,7 +229,13 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
         wheelScroll
     )
     const timing: Timing = { ...defaultTiming, ...preset.timing, ...options.timing }
-    const plugins: HumanPlugin[] = [...(preset.plugins ?? []), ...(options.plugins ?? [])]
+    // Your plugins run after the preset's, and one with the same name replaces the preset's, so
+    // { preset: 'demo', plugins: [visibleCursor({ color })] } restyles the demo cursor.
+    const ownPlugins = options.plugins ?? []
+    const plugins: HumanPlugin[] = [
+        ...(preset.plugins ?? []).filter((p) => !ownPlugins.some((own) => own.name === p.name)),
+        ...ownPlugins,
+    ]
     const speed = readSpeed(options.speed)
     const instant = speed === Number.POSITIVE_INFINITY
     const defaultTimeout = readTimeout(options.timeout, DEFAULT_TIMEOUT)

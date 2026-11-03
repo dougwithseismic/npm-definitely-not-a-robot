@@ -88,6 +88,9 @@ export const events = (page: Page): Promise<RecordedEvent[]> =>
     page.evaluate(() => (window as unknown as { events: RecordedEvent[] }).events)
 
 /** One browser per test file and a fresh fixture page for every test. */
+/** Options for tests that check results, not timing: no waits, same random draws every run. */
+export const fast = { speed: 'instant' as const, seed: 1 }
+
 export function useFixture(): { readonly browser: Browser; readonly page: Page } {
     const state = {} as { browser: Browser; page: Page }
     beforeAll(async () => {

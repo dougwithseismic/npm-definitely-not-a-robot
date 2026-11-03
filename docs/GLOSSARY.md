@@ -96,6 +96,29 @@ shows something else. Covered waits or throws `TARGET_COVERED`; clipped scrolls 
 **Strict mode (Playwright).** A locator must match exactly one element when you act on it. If it
 matches several, Playwright refuses, and we say so as `TARGET_AMBIGUOUS`.
 
+## Drawing in the page
+
+**Overlay.** Something we draw on top of the page (the cursor, the click ring, the trail) without
+changing the page itself. It ignores the mouse (`pointer-events: none`), so clicks go straight
+through to the page.
+
+**Shadow DOM, closed shadow root.** A private sub-tree attached to an element. The page's CSS
+can't reach inside, so a site's styles can't restyle or hide the cursor. *Closed* means page
+scripts can't reach in either.
+
+**Top layer.** Where the browser puts dialogs, popovers and full-screen elements: above every
+z-index. The cursor is shown there as a popover, and moves back to the top when a dialog opens.
+
+**Init script.** A script the automation library runs at the start of every new document, before
+the page's own scripts (`page.addInitScript`). It's how the cursor survives navigation.
+
+**CSP (Content Security Policy).** A page's rules about what scripts and styles may run. Strict
+pages block inline `<style>` and `<script>` tags; the overlay uses neither, so it still works.
+
+**`__name` helper.** A function some compilers (esbuild with `keepNames`, which tsx uses) wrap
+around other functions to preserve their names. It only exists in Node, so a function serialised
+into the page would fail. We give the page a stand-in.
+
 ## Packaging
 
 **ESM and CommonJS.** Two module systems in JavaScript: `import`/`export` (ESM, the standard) and

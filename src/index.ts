@@ -19,6 +19,8 @@ export type { BezierMotionOptions, MotionRequest, MotionStrategy } from './motio
 export { bezierMotion, defineMotion } from './motion'
 export type { Action, ActionType, HumanPlugin, PluginContext } from './plugins'
 export { definePlugin } from './plugins'
+export type { TrailOptions, VisibleCursorOptions } from './plugins/overlay'
+export { trail, visibleCursor } from './plugins/overlay'
 export type { Preset, PresetName, Timing } from './presets'
 export { defaultTiming, definePreset, presets } from './presets'
 export type { Random } from './random'

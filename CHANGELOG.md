@@ -4,6 +4,19 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03 · v1.0.0 (not yet on npm)
 
+### Demo videos that show the cursor (PRD 02) · New
+- `createHuman(page, { preset: 'demo' })` draws a cursor, with a ring on every click, into
+  screenshots and `recordVideo` recordings. Headless browsers draw no cursor of their own, so
+  videos made from scripts used to show buttons pressing themselves.
+- The cursor follows the page's real mouse events, Playwright's own clicks included, so it shows
+  exactly what the page received. It keeps going across page loads, iframes and dialogs, works on
+  pages with a strict Content Security Policy, and never gets in the way of a click.
+- The demo preset moves smoothly and types at a steady, readable pace.
+- `visibleCursor()` adds the cursor to any preset, or restyles the demo one, in your colour and
+  size. `trail()` draws the path the mouse took, for seeing exactly how it moved.
+- Try it: "Record a demo video" in the README. Every clip in the README's "See it" section was
+  recorded this way.
+
 ### Rebuilt from scratch for Playwright (PRD 01) · New
 - Wrap any Playwright page with `createHuman(page)` and click, hover, drag, type, press keys and
   scroll like a person. No browser launching, no setup: bring the page you already have.

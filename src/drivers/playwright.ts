@@ -1,5 +1,6 @@
 import { HumanError } from '../errors'
 import type { Box, Point, Size } from '../geometry'
+import { inPage } from '../in-page'
 import { caretToEndInPage, hitTestInPage } from './hit-test'
 import type { Driver, ElementRef, HitTest, MouseButton, ScrollOffset } from './types'
 
@@ -44,6 +45,7 @@ export interface PlaywrightPageLike {
     evaluate(fn: any, arg?: any): Promise<any>
     addInitScript(script: { content: string }): Promise<unknown>
     context(): unknown
+    frames(): Pick<PlaywrightPageLike, 'evaluate'>[]
 }
 
 const isFunction = (value: unknown): boolean => typeof value === 'function'
@@ -104,10 +106,9 @@ function elementRef(
         exists,
         box,
         scrollIntoView: () => target.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {}),
-        hitTest: async (point, box) =>
-            (await target.evaluate(hitTestInPage, { point, box })) as HitTest,
+        hitTest: async (point, box) => (await target.evaluate(hitTest, { point, box })) as HitTest,
         caretToEnd: async () => {
-            await target.evaluate(caretToEndInPage)
+            await target.evaluate(caretToEnd)
         },
     }
 }
@@ -130,6 +131,37 @@ const handleRef = (handle: PlaywrightElementHandleLike): ElementRef =>
         async () => true
     )
 
+// Everything sent into the page goes through inPage, so a build that adds helpers (esbuild's
+// keepNames) can't break it. Wrapped once here, not on every call.
+const hitTest = inPage(hitTestInPage)
+const caretToEnd = inPage(caretToEndInPage)
+const windowSize = inPage(() => ({ width: window.innerWidth, height: window.innerHeight }))
+const scrollOffset = inPage((point: Point | null): ScrollOffset => {
+    const root = document.scrollingElement ?? document.documentElement
+    // An app shell scrolls an inner box, not the page: find the one under the cursor.
+    let el = point ? document.elementFromPoint(point.x, point.y) : null
+    for (; el && el !== root && el !== document.body; el = el.parentElement) {
+        const { overflowY } = getComputedStyle(el)
+        if (/auto|scroll|overlay/.test(overflowY) && el.scrollHeight > el.clientHeight) {
+            return {
+                x: el.scrollLeft,
+                y: el.scrollTop,
+                maxX: el.scrollWidth - el.clientWidth,
+                maxY: el.scrollHeight - el.clientHeight,
+            }
+        }
+    }
+    return {
+        x: window.scrollX,
+        y: window.scrollY,
+        maxX: root.scrollWidth - window.innerWidth,
+        maxY: root.scrollHeight - window.innerHeight,
+    }
+})
+
+/** Scripts already added to each page, so every human on a page doesn't add its own copy. */
+const added = new WeakMap<object, Set<string>>()
+
 /** The built-in driver for Playwright pages. `createHuman` picks it automatically. */
 export function playwrightDriver(page: PlaywrightPageLike): Driver {
     return {
@@ -142,40 +174,10 @@ export function playwrightDriver(page: PlaywrightPageLike): Driver {
         keyUp: (key) => page.keyboard.up(key),
         insertText: (text) => page.keyboard.insertText(text),
         async viewport() {
-            return (
-                page.viewportSize() ??
-                ((await page.evaluate(() => ({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                }))) as Size)
-            )
+            return page.viewportSize() ?? ((await page.evaluate(windowSize)) as Size)
         },
         async scrollOffset(at?: Point) {
-            return (await page.evaluate((point: Point | null) => {
-                const root = document.scrollingElement ?? document.documentElement
-                // An app shell scrolls an inner box, not the page: find the one under the cursor.
-                let el = point ? document.elementFromPoint(point.x, point.y) : null
-                for (; el && el !== root && el !== document.body; el = el.parentElement) {
-                    const { overflowY } = getComputedStyle(el)
-                    if (
-                        /auto|scroll|overlay/.test(overflowY) &&
-                        el.scrollHeight > el.clientHeight
-                    ) {
-                        return {
-                            x: el.scrollLeft,
-                            y: el.scrollTop,
-                            maxX: el.scrollWidth - el.clientWidth,
-                            maxY: el.scrollHeight - el.clientHeight,
-                        }
-                    }
-                }
-                return {
-                    x: window.scrollX,
-                    y: window.scrollY,
-                    maxX: root.scrollWidth - window.innerWidth,
-                    maxY: root.scrollHeight - window.innerHeight,
-                }
-            }, at ?? null)) as ScrollOffset
+            return (await page.evaluate(scrollOffset, at ?? null)) as ScrollOffset
         },
         locate(target) {
             if (typeof target === 'string')
@@ -185,7 +187,20 @@ export function playwrightDriver(page: PlaywrightPageLike): Driver {
             return null
         },
         async addScript(source) {
-            await Promise.all([page.addInitScript({ content: source }), page.evaluate(source)])
+            const scripts = added.get(page) ?? new Set()
+            added.set(page, scripts)
+            if (scripts.has(source)) return
+            scripts.add(source)
+            // The init script covers every frame of every new document. Frames already loaded run
+            // it now; one that navigates meanwhile gets the init script instead, so its error is
+            // safe to drop.
+            await Promise.all([
+                page.addInitScript({ content: source }).catch((error: unknown) => {
+                    scripts.delete(source) // so the plugin's setup can try again
+                    throw error
+                }),
+                ...page.frames().map((frame) => frame.evaluate(source).catch(() => {})),
+            ])
         },
     }
 }

@@ -1,5 +1,6 @@
 import type { BezierMotionOptions, MotionStrategy } from './motion'
 import type { HumanPlugin } from './plugins'
+import { visibleCursor } from './plugins/overlay'
 import type { ScrollStrategy, WheelScrollOptions } from './scroll'
 import type { NaturalTypingOptions, TypingStrategy } from './typing'
 
@@ -17,7 +18,10 @@ export interface Timing {
     doubleClickGap: [min: number, max: number]
 }
 
-/** A named bundle of behaviour. Any option you pass to `createHuman` overrides the preset. */
+/**
+ * A named bundle of behaviour. Any option you pass to `createHuman` overrides the preset. Plugins
+ * add to the preset's, and one with the same name replaces it.
+ */
 export interface Preset {
     motion?: MotionStrategy | BezierMotionOptions
     typing?: TypingStrategy | NaturalTypingOptions
@@ -53,7 +57,21 @@ const fast: Preset = {
     },
 }
 
-export const presets = { average, careful, fast } satisfies Record<string, Preset>
+/** For recordings: smooth, unhurried, readable, with the cursor drawn. */
+const demo: Preset = {
+    motion: { fitts: { a: 110, b: 170 }, curvature: 0.2, overshoot: 0.15, tremor: 0 },
+    typing: { wpm: 50, variance: 0.15 },
+    timing: {
+        hesitation: [220, 380],
+        hoverDwell: [600, 900],
+        think: [700, 1200],
+        clickHold: [110, 160],
+    },
+    // Recordings are usually shown smaller than they're filmed, so a slightly larger arrow.
+    plugins: [visibleCursor({ size: 28 })],
+}
+
+export const presets = { average, careful, fast, demo } satisfies Record<string, Preset>
 
 export type PresetName = keyof typeof presets
 

@@ -39,7 +39,8 @@
         "test:watch": "vitest",
         "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
         "smoke": "node scripts/smoke.mjs",
-        "prepublishOnly": "pnpm check"
+        "prepublishOnly": "pnpm check",
+        "demos": "tsx scripts/demos/record.ts"
     },
     "keywords": [
         "playwright",
@@ -72,6 +73,7 @@
         "@types/node": "^26.6.6",
         "playwright": "^1.64.1",
         "tsup": "^9.0.0",
+        "tsx": "^4.23.15",
         "typescript": "^6.0.3",
         "vitest": "^5.0.5"
     }

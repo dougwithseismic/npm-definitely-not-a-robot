@@ -1,0 +1,418 @@
+import type { Page } from 'playwright'
+import { type Human, type HumanOptions, trail } from '../../src'
+import type { StageOptions } from './stage'
+
+export interface Take {
+    page: Page
+    human: Human<Page>
+    /** Show a line of code in the code bar. */
+    code(text: string): Promise<void>
+}
+
+/** One recording: a page, options for `createHuman` (on top of the demo preset) and a script. */
+export interface Side {
+    stage: StageOptions
+    options?: HumanOptions
+    run(take: Take): Promise<void>
+}
+
+export interface Scene {
+    /** File name in docs/media. */
+    name: string
+    viewport: { width: number; height: number }
+    /** Where the cursor starts. */
+    start: { x: number; y: number }
+    /** One side, or two recorded separately and shown side by side. */
+    sides: Side[]
+}
+
+const wide = { width: 1280, height: 720 }
+const half = { width: 720, height: 540 }
+
+// ---- the hero: Playwright's own input next to a person's ----
+
+const signupCss = `
+main { display: grid; place-items: center; height: calc(100vh - 116px); }
+.card { width: 440px; padding: 32px; }
+h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -.02em; }
+p { margin: 0 0 22px; color: var(--muted); }
+label { display: block; font-size: 15px; font-weight: 600; margin: 14px 0 6px; }
+.btn { width: 100%; margin-top: 22px; padding: 13px; font-size: 18px; }
+.done { display: none; text-align: center; padding: 30px 0; font-size: 22px; font-weight: 650; }
+.welcome .form { display: none; } .welcome .done { display: block; }
+.done span { display: block; font-size: 48px; }`
+
+const signupBody = `<main><div class="card" id="card">
+  <div class="form"><h1>Create your account</h1><p>Start your free trial.</p>
+  <label for="email">Email</label><input id="email" autocomplete="off">
+  <label for="password">Password</label><input id="password" type="password">
+  <button class="btn" id="signup">Sign up</button></div>
+  <div class="done"><span>👋</span>Welcome, Ada</div>
+</div></main>`
+
+const signupScript = `document.getElementById('signup').addEventListener('click', () =>
+    setTimeout(() => document.getElementById('card').classList.add('welcome'), 250))`
+
+const hero: Scene = {
+    name: 'hero',
+    viewport: half,
+    start: { x: 560, y: 470 },
+    sides: [
+        {
+            stage: {
+                label: 'Playwright on its own',
+                plain: true,
+                body: signupBody,
+                css: signupCss,
+                script: signupScript,
+            },
+            async run({ page, code }) {
+                await page.waitForTimeout(500)
+                await code("await page.fill('#email', 'ada@example.com')")
+                await page.fill('#email', 'ada@example.com')
+                await page.waitForTimeout(900)
+                await code("await page.fill('#password', 'hunter22')")
+                await page.fill('#password', 'hunter22')
+                await page.waitForTimeout(900)
+                await code("await page.click('#signup')")
+                await page.click('#signup')
+            },
+        },
+        {
+            stage: {
+                label: 'With definitely-not-a-robot',
+                body: signupBody,
+                css: signupCss,
+                script: signupScript,
+            },
+            options: { speed: 1.4 },
+            async run({ human, code }) {
+                await code("await human.type('#email', 'ada@example.com')")
+                await human.type('#email', 'ada@example.com')
+                await code("await human.type('#password', 'hunter22')")
+                await human.type('#password', 'hunter22')
+                await code("await human.click('#signup')")
+                await human.click('#signup')
+            },
+        },
+    ],
+}
+
+// ---- numbered dots to click, for curved paths and seeds ----
+
+/** Round numbered buttons centred on each target, `size` pixels across. */
+const dotStage = (targets: { id: string; x: number; y: number }[], size: number) => ({
+    css: `.dot { position: absolute; width: ${size}px; height: ${size}px; border-radius: 50%;
+        border: 0; background: var(--accent); color: #fff; font-weight: 700;
+        font-size: ${Math.round(size * 0.32)}px; transition: background .2s, transform .2s; }
+        .dot.hit { background: var(--good); transform: scale(.92); }`,
+    body: targets
+        .map(
+            (d, i) =>
+                `<button class="dot" id="${d.id}" style="left:${d.x - size / 2}px;top:${d.y - size / 2}px">${i + 1}</button>`
+        )
+        .join(''),
+})
+
+// ---- curved paths ----
+
+const dots = [
+    { id: 't1', x: 980, y: 160 },
+    { id: 't2', x: 260, y: 220 },
+    { id: 't3', x: 1080, y: 520 },
+    { id: 't4', x: 520, y: 440 },
+]
+
+const curve: Scene = {
+    name: 'curved-paths',
+    viewport: wide,
+    start: { x: 140, y: 560 },
+    sides: [
+        {
+            stage: {
+                label: 'Clicking',
+                ...dotStage(dots, 64),
+                script: `document.querySelectorAll('.dot').forEach((d) =>
+                    d.addEventListener('click', () => d.classList.add('hit')))`,
+            },
+            options: { seed: 11, motion: { overshoot: 0.6 }, plugins: [trail({ fade: 2200 })] },
+            async run({ human, code }) {
+                for (const d of dots) {
+                    await code(`await human.click('#${d.id}')`)
+                    await human.click(`#${d.id}`)
+                }
+            },
+        },
+    ],
+}
+
+// ---- hover menus ----
+
+const hover: Scene = {
+    name: 'hover-menu',
+    viewport: wide,
+    start: { x: 900, y: 560 },
+    sides: [
+        {
+            stage: {
+                label: 'Hovering',
+                css: `nav { display: flex; gap: 8px; padding: 18px 32px; background: #fff;
+                    border-bottom: 1px solid var(--line); }
+                .item { position: relative; padding: 10px 16px; border-radius: 10px; font-weight: 600; }
+                .item:hover { background: #eef2ff; color: var(--accent); }
+                .menu { display: none; position: absolute; top: 46px; left: 0; width: 260px;
+                    padding: 8px; background: #fff; border: 1px solid var(--line);
+                    border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.12); }
+                .item:hover .menu { display: block; }
+                .menu a { display: block; padding: 10px 12px; border-radius: 8px; color: var(--ink);
+                    text-decoration: none; font-weight: 500; }
+                .menu a:hover { background: var(--bg); }
+                .menu small { display: block; color: var(--muted); font-size: 13px; }
+                .toast { position: fixed; left: 50%; top: 320px; transform: translateX(-50%);
+                    padding: 14px 22px; border-radius: 12px; background: var(--ink); color: #fff;
+                    opacity: 0; transition: opacity .3s; }
+                .toast.on { opacity: 1; }`,
+                body: `<nav>
+                  <div class="item" id="products">Products ▾
+                    <div class="menu">
+                      <a href="#" id="automation">Automation<small>Scripts that click for you</small></a>
+                      <a href="#" id="recording">Recording<small>Demo videos from tests</small></a>
+                      <a href="#" id="testing">Testing<small>E2E that behaves like users</small></a>
+                    </div></div>
+                  <div class="item">Pricing</div><div class="item">Docs</div></nav>
+                  <div class="toast" id="toast">Opened Recording</div>`,
+                script: `document.getElementById('recording').addEventListener('click', (e) => {
+                    e.preventDefault(); document.getElementById('toast').classList.add('on') })`,
+            },
+            options: { seed: 4 },
+            async run({ human, code }) {
+                await code("await human.hover('#products')")
+                await human.hover('#products')
+                await code("await human.click('#recording')")
+                await human.click('#recording')
+            },
+        },
+    ],
+}
+
+// ---- drag and drop ----
+
+const card = (id: string, text: string, tag: string) =>
+    `<div class="task" id="${id}"><b>${tag}</b>${text}</div>`
+
+const drag: Scene = {
+    name: 'drag-and-drop',
+    viewport: wide,
+    start: { x: 640, y: 600 },
+    sides: [
+        {
+            stage: {
+                label: 'Dragging',
+                css: `main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+                    padding: 32px; }
+                .col { background: #f1f5f9; border-radius: 14px; padding: 14px; min-height: 420px; }
+                .col h2 { margin: 4px 6px 14px; font-size: 15px; color: var(--muted);
+                    text-transform: uppercase; letter-spacing: .06em; }
+                .task { background: #fff; border: 1px solid var(--line); border-radius: 12px;
+                    padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(15,23,42,.05);
+                    user-select: none; }
+                .task b { display: inline-block; font-size: 12px; padding: 2px 8px; margin-right: 8px;
+                    border-radius: 99px; background: #eef2ff; color: var(--accent); }
+                .ghost { position: fixed; pointer-events: none; transform: rotate(3deg);
+                    box-shadow: 0 16px 32px rgba(15,23,42,.18); z-index: 4; }
+                .col.over { outline: 2px dashed var(--accent); outline-offset: -4px; }`,
+                body: `<main>
+                  <section class="col" id="todo"><h2>To do</h2>
+                    ${card('c1', 'Record the onboarding demo', 'video')}
+                    ${card('c2', 'Fix flaky checkout test', 'e2e')}</section>
+                  <section class="col" id="doing"><h2>Doing</h2>
+                    ${card('c3', 'Write the launch post', 'docs')}</section>
+                  <section class="col" id="done"><h2>Done</h2></section></main>`,
+                script: `let dragged = null, ghost = null, dx = 0, dy = 0
+                const colAt = (x, y) => document.elementsFromPoint(x, y).find((el) => el.classList.contains('col'))
+                addEventListener('pointerdown', (e) => {
+                    dragged = e.target.closest('.task'); if (!dragged) return
+                    const r = dragged.getBoundingClientRect(); dx = e.clientX - r.left; dy = e.clientY - r.top
+                    ghost = dragged.cloneNode(true); ghost.classList.add('ghost'); ghost.style.width = r.width + 'px'
+                    document.body.append(ghost); dragged.style.opacity = '.35'; move(e) })
+                const move = (e) => { if (!ghost) return
+                    ghost.style.left = e.clientX - dx + 'px'; ghost.style.top = e.clientY - dy + 'px'
+                    const over = colAt(e.clientX, e.clientY); document.querySelectorAll('.col').forEach((c) => c.classList.toggle('over', c === over)) }
+                addEventListener('pointermove', move)
+                addEventListener('pointerup', (e) => { if (!dragged) return
+                    const col = colAt(e.clientX, e.clientY); if (col) col.append(dragged)
+                    dragged.style.opacity = ''; ghost.remove(); ghost = dragged = null
+                    document.querySelectorAll('.col').forEach((c) => c.classList.remove('over')) })`,
+            },
+            options: { seed: 3 },
+            async run({ human, code }) {
+                await code("await human.drag('#c2', '#done')")
+                await human.drag('#c2', '#done')
+            },
+        },
+    ],
+}
+
+// ---- typing ----
+
+const typing: Scene = {
+    name: 'typing',
+    viewport: wide,
+    start: { x: 980, y: 560 },
+    sides: [
+        {
+            stage: {
+                label: 'Typing',
+                keys: true,
+                css: `main { display: grid; place-items: center; height: calc(100vh - 116px); }
+                .card { width: 820px; padding: 30px 34px; font-size: 20px; }
+                .row { display: flex; gap: 14px; align-items: center; padding: 10px 0;
+                    border-bottom: 1px solid var(--line); color: var(--muted); }
+                .row b { color: var(--ink); font-weight: 600; }
+                textarea { margin-top: 18px; height: 150px; resize: none; font-size: 28px; }`,
+                body: `<main><div class="card">
+                  <div class="row">To <b>Ada Lovelace</b></div>
+                  <div class="row">Subject <b>Q3 numbers</b></div>
+                  <textarea id="message" placeholder="Write a reply…"></textarea>
+                </div></main>`,
+            },
+            options: { seed: 7, speed: 1.25, typing: { typos: 0.06 } },
+            async run({ human, code }) {
+                await code("await human.type('#message', 'Hi Ada! Q3 looks great. Ship it?')")
+                await human.type('#message', 'Hi Ada! Q3 looks great. Ship it?')
+            },
+        },
+    ],
+}
+
+// ---- scrolling into view ----
+
+const scroll: Scene = {
+    name: 'scroll-into-view',
+    viewport: wide,
+    start: { x: 640, y: 420 },
+    sides: [
+        {
+            stage: {
+                label: 'Scrolling',
+                keys: true,
+                css: `article { max-width: 760px; margin: 0 auto; padding: 40px 24px 200px; }
+                h1 { font-size: 40px; letter-spacing: -.03em; margin: 0 0 12px; }
+                .lead { font-size: 21px; color: var(--muted); }
+                .block { height: 150px; margin: 26px 0; border-radius: 14px;
+                    background: linear-gradient(135deg, #eef2ff, #f1f5f9); }
+                .line { height: 14px; margin: 12px 0; border-radius: 7px; background: #e2e8f0; }
+                .cta { text-align: center; padding: 40px; margin-top: 40px; }
+                .cta .btn { font-size: 19px; padding: 15px 30px; }`,
+                body: `<article><h1>Ship demos that look human</h1>
+                  <p class="lead">Record product videos straight from your Playwright tests.</p>
+                  ${'<div class="block"></div><div class="line"></div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div>'.repeat(6)}
+                  <div class="card cta"><h2>Ready?</h2><button class="btn" id="trial">Start free trial</button></div>
+                </article>`,
+            },
+            options: { seed: 5 },
+            async run({ page, human, code }) {
+                await page.waitForTimeout(900)
+                await code("await human.click('#trial')  // scrolls there first")
+                await human.click('#trial')
+            },
+        },
+    ],
+}
+
+// ---- refusing to click through a cookie banner ----
+
+const cover: Scene = {
+    name: 'cookie-banner',
+    viewport: wide,
+    start: { x: 300, y: 300 },
+    sides: [
+        {
+            stage: {
+                label: 'Clicking safely',
+                css: `main { display: grid; place-items: center; height: calc(100vh - 116px); }
+                .card { width: 520px; padding: 28px; }
+                .line { display: flex; justify-content: space-between; padding: 10px 0;
+                    border-bottom: 1px solid var(--line); }
+                .total { font-weight: 700; font-size: 20px; border: 0; }
+                .btn { width: 100%; margin-top: 16px; padding: 14px; font-size: 18px; }
+                .banner { position: fixed; left: 0; right: 0; bottom: 64px; padding: 26px 40px 40px;
+                    display: flex; gap: 24px; align-items: center; justify-content: space-between;
+                    background: #fff; border-top: 1px solid var(--line);
+                    box-shadow: 0 -12px 32px rgba(15,23,42,.1); height: 230px; }
+                .banner p { margin: 0; max-width: 700px; }
+                .error { position: fixed; top: 76px; right: 24px; width: 520px; padding: 16px 18px;
+                    border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca;
+                    color: #7f1d1d; font: 15px/1.5 ui-monospace, Menlo, monospace; display: none; }
+                .error b { color: var(--bad); }
+                .paid { color: var(--good); font-weight: 700; text-align: center; margin-top: 14px;
+                    display: none; }`,
+                body: `<main><div class="card">
+                    <div class="line"><span>Robot vacuum</span><span>$249</span></div>
+                    <div class="line"><span>Shipping</span><span>Free</span></div>
+                    <div class="line total"><span>Total</span><span>$249</span></div>
+                    <button class="btn" id="checkout">Checkout</button>
+                    <div class="paid" id="paid">Order placed ✓</div></div></main>
+                  <div class="banner cookie-banner" id="banner"><p>We use cookies to make this
+                    site work. Choose what you're happy with.</p>
+                    <button class="btn" id="accept">Accept all</button></div>
+                  <div class="error" id="error"></div>`,
+                script: `document.getElementById('accept').onclick = () => {
+                    document.getElementById('banner').remove(); document.getElementById('error').style.display = 'none' }
+                document.getElementById('checkout').onclick = () => { document.getElementById('paid').style.display = 'block' }
+                window.showError = (code, message) => { const el = document.getElementById('error')
+                    el.innerHTML = '<b>' + code + '</b><br>' + escape(message)
+                    el.style.display = 'block' }`,
+            },
+            options: { seed: 2 },
+            async run({ page, human, code }) {
+                await code("await human.click('#checkout')")
+                try {
+                    await human.click('#checkout', { timeout: 1500 })
+                } catch (error) {
+                    const { code: name, message } = error as { code: string; message: string }
+                    await page.evaluate(
+                        ([c, m]) => (window as any).showError(c, m),
+                        [name, message]
+                    )
+                }
+                await page.waitForTimeout(1800)
+                await code("await human.click('#accept')")
+                await human.click('#accept')
+                await code("await human.click('#checkout')")
+                await human.click('#checkout')
+            },
+        },
+    ],
+}
+
+// ---- seeds ----
+
+const seedTargets = [
+    { id: 's1', x: 560, y: 130 },
+    { id: 's2', x: 150, y: 260 },
+    { id: 's3', x: 520, y: 380 },
+]
+
+const seedSide = (run: number): Side => ({
+    stage: {
+        label: `seed 42, run ${run}`,
+        ...dotStage(seedTargets, 56),
+    },
+    options: { seed: 42, plugins: [trail({ fade: 6000 })] },
+    async run({ human, code }) {
+        for (const d of seedTargets) {
+            await code(`await human.click('#${d.id}')  // seed: 42`)
+            await human.click(`#${d.id}`)
+        }
+    },
+})
+
+const seed: Scene = {
+    name: 'seed-replay',
+    viewport: half,
+    start: { x: 120, y: 440 },
+    sides: [seedSide(1), seedSide(2)],
+}
+
+export const scenes: Scene[] = [hero, curve, hover, drag, typing, scroll, cover, seed]

@@ -66,7 +66,11 @@ export interface Driver {
     scrollOffset(at?: Point): Promise<ScrollOffset>
     /** Turn a user-supplied target into an element, or return null if this driver can't. */
     locate(target: unknown): ElementRef | null
-    /** Run a script in the page now and after every navigation. Used by plugins. */
+    /**
+     * Run a script in the page now and after every navigation. Used by plugins. Every human on a
+     * page asks for its plugins' scripts, so the same source can arrive more than once; running it
+     * again must be harmless (the built-in driver adds each source once per page).
+     */
     addScript?(source: string): Promise<void>
 }
 

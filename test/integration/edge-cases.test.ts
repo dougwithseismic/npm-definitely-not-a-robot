@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { createHuman, definePlugin, type HumanOptions } from '../../src'
-import { events, FIXTURE_HTML, failure, moveTrace, useFixture } from './fixture'
+import { events, FIXTURE_HTML, failure, fast, moveTrace, useFixture } from './fixture'
 
 // Regressions from reviewing the core: frames, scrolling panels, error mapping, seeds, plugins.
 
 const fx = useFixture()
-
-const fast = { speed: 'instant' as const, seed: 1 }
 
 describe('targets that scroll inside something else', () => {
     it('clicks a button scrolled out of sight inside an iframe, not the page behind it', async () => {
