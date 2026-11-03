@@ -7,13 +7,15 @@ Settled choices. Don't relitigate; add new calls with a date.
 - **Status**: Running
 - **Ship rights**: push, merge to `main` and deploy the docs site without asking each time. Given
   2026-11-03 when the user ran `/autopilot` with "Redesign and rewrite this library from scratch,
-  including a factory pattern for extensibility and playwright support by default". Ship rights do
-  **not** cover `npm publish`: the npm CLI isn't logged in and a first public release is the
-  user's call (see Needs you in the backlog).
+  including a factory pattern for extensibility and playwright support by default". Publishing to
+  npm added 2026-11-03, when the user said "npm logged in now" and "letse publish when ready":
+  1.0.0 from their machine (npm asks them for a one-time code), later versions by pushing a
+  release tag (see Releases below).
 - **Base branch**: `main` (not protected, nothing deploys on push). Claims are pushed straight to
   `main` as `docs: claim PRD <nn>`.
 - **Deploy targets**:
-  - The library ships to npm as `definitely-not-a-robot` once the user publishes it.
+  - The library ships to npm as `definitely-not-a-robot`, published by `.github/workflows/release.yml`
+    when a `v*` tag is pushed.
   - The docs and landing site deploys to Railway (PRD 07). Recipe goes in `docs/DEPLOY.md` when
     that PRD ships.
 - **The real surface**: a stranger installing the packed tarball into an empty folder and running
@@ -21,7 +23,8 @@ Settled choices. Don't relitigate; add new calls with a date.
   site's production URL.
 - **Test account**: none needed (no accounts).
 - **Third-party services**: Railway, for this project's own services only. GitHub: this repo
-  only (settings, Actions, releases). npm: read-only until the user logs in and says publish.
+  only (settings, Actions, releases). npm: publish this package only. Linking npm to the release
+  workflow (trusted publishing) changes the user's npm account, so it waits for their yes.
 
 ## Product
 
@@ -93,6 +96,19 @@ Settled choices. Don't relitigate; add new calls with a date.
 - One feature per commit, plain messages, changelog entry in the same commit.
 - Every user-visible feature ships with a short demo video of it in action, recorded by the
   library itself (`pnpm demos`, from PRD 02 on), shown in the README and on the site.
+
+## Releases
+
+- Semver. Changelog days are marked with the version that shipped them: `## 2026-11-03 · v1.0.0`.
+  A release's notes are its marked day plus any unmarked days below it
+  (`node scripts/release-notes.mjs v1.0.1`). CI fails if `package.json`'s version has no heading.
+- To release: `npm version <patch|minor|major> --no-git-tag-version`, mark the top changelog day
+  with the new version, commit `Release v<version>`, then `git tag v<version>` and push the commit
+  and the tag. The release workflow checks the tag matches `package.json`, runs smoke and
+  `pnpm check`, publishes with provenance and makes the GitHub release from the changelog.
+- Publishing uses npm trusted publishing: npm trusts `release.yml` in this repo, so there's no npm
+  token in GitHub to leak or rotate. npm only allows linking a package that already exists, so
+  1.0.0 (2026-11-03) was published from the user's machine, without provenance.
 
 ## User's calls
 

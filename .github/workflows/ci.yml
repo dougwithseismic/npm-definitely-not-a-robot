@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - name: Changelog has a heading for this version
+        run: node scripts/release-notes.mjs "v$(node -p 'require("./package.json").version')" > /dev/null
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Types, lint, tests, build

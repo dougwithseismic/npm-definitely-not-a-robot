@@ -1,0 +1,53 @@
+name: Release
+
+# Pushing a tag like v1.0.1 publishes that version to npm with provenance, then makes a GitHub
+# release from its CHANGELOG section. npm trusts this workflow by file name (trusted publishing),
+# so there's no npm token to store or rotate. Steps: docs/DECISIONS.md, "Releases".
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write # the GitHub release
+  id-token: write # proves to npm that this workflow, in this repo, is publishing
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+      - uses: actions/setup-node@v7
+        with:
+          # Trusted publishing needs npm 11.5.1 or later, which comes with Node 24.
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - name: Check the tag matches package.json
+        run: test "$GITHUB_REF_NAME" = "v$(node -p 'require("./package.json").version')"
+      - name: Release notes from CHANGELOG.md
+        run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install the packed tarball into an empty project and run the README quickstart
+        run: pnpm smoke
+      # Both steps skip what's already done, so a failed run can be re-run, and a version published
+      # by hand (1.0.0) still gets its GitHub release.
+      - name: Publish (prepublishOnly runs pnpm check first)
+        run: |
+          package="$(node -p 'require("./package.json").name')@${GITHUB_REF_NAME#v}"
+          if npm view "$package" version > /dev/null 2>&1; then
+            echo "$package is already on npm"
+          else
+            npm publish --access public
+          fi
+      - name: GitHub release
+        run: |
+          gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1 ||
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}

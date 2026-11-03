@@ -169,3 +169,19 @@ exact file into an empty folder, so we test what users get, not our source tree.
 
 **Provenance.** A signed statement, shown on npm, that a published version was built from a
 specific commit by a specific CI run. It tells users the package wasn't tampered with.
+
+## Releasing
+
+**Semver (semantic versioning).** `major.minor.patch`. Patch: fixes only. Minor: new features,
+nothing breaks. Major: something you rely on changed, so read the changelog before upgrading.
+
+**Tag (git tag).** A name pinned to one commit, like `v1.0.1`. Pushing a tag that starts with `v`
+is what starts our release workflow.
+
+**Trusted publishing.** npm's way to let a CI workflow publish without a stored password or token.
+GitHub Actions proves to npm which repository and workflow file is running (with a short-lived
+*OIDC token*, an ID card issued for that one run), and npm accepts it because the package owner
+linked that workflow to the package. It also makes provenance automatic.
+
+**One-time password (2FA code).** The six-digit code from an authenticator app that npm asks for
+on publish when two-factor authentication is on. Only the account owner can type it.

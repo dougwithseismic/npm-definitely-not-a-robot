@@ -2,7 +2,12 @@
 
 What's new, newest first. Each entry says what you can do now.
 
-## 2026-11-03 · v1.0.0 (not yet on npm)
+## 2026-11-03 · v1.0.0
+
+### On npm · New
+- `npm install definitely-not-a-robot`. Versions after 1.0.0 are published by this repo's GitHub
+  Actions with npm provenance, so npm shows which commit and build each one came from.
+- Each release gets a GitHub release with its notes from this changelog.
 
 ### A `human` in every Playwright Test (PRD 03) · New
 - `import { test, expect } from 'definitely-not-a-robot/playwright'` and every test gets a `human`
