@@ -73,7 +73,13 @@ const browsers: Record<string, BrowserType> = { chromium, firefox, webkit }
 export async function launch(): Promise<Browser> {
     const type = browsers[BROWSER]
     if (!type) throw new Error(`DNAR_BROWSER is '${BROWSER}': use chromium, firefox or webkit.`)
-    return type.launch({ headless: true })
+    const browser = await type.launch({ headless: true })
+    // A browser that has just started takes its first input slowly (WebKit for seconds), which the
+    // first test would measure instead of the library. Warm it up once here.
+    const page = await openFixture(browser)
+    for (let i = 1; i <= 20; i++) await page.mouse.move(i * 20, i * 20)
+    await page.close()
+    return browser
 }
 
 export const VIEWPORT = { width: 1280, height: 800 }

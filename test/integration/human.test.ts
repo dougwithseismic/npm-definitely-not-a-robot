@@ -49,7 +49,7 @@ describe('clicking', () => {
     // A browser that answers each move slowly (WebKit, or one far away) still gets the path, since
     // moves don't wait for each other's answers. `lag` adds a delay to every answer.
     it.each([0, 40])(
-        'gets at least 80%% of the planned points to the page, with %i ms added',
+        'gets at least 4 in 5 of the planned points to the page, with %i ms added',
         async (lag) => {
             let planned = 0
             const bezier = bezierMotion()
@@ -388,5 +388,7 @@ describe('the factory', () => {
         expect(wrong({}).message).toContain('defineDriver')
         expect(() => createHuman(fx.page, { speed: -1 })).toThrow(/valid speed/)
         expect(() => createHuman(fx.page, { preset: 'turbo' as never })).toThrow(/Unknown preset/)
+        const driver = { ...playwrightDriver(fx.page), maxInFlight: Number.NaN }
+        expect(() => createHuman(fx.page, { driver })).toThrow(/maxInFlight/)
     })
 })

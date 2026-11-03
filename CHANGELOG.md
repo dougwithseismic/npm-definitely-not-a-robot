@@ -4,6 +4,14 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Every point of a mouse path reaches slow and remote browsers (PRD 11) · Improved
+- Mouse paths and scrolls no longer wait for the browser to answer each step before sending the
+  next. A browser that answers slowly, like WebKit or one across a network, now gets the whole
+  path on time, where it used to get a handful of points.
+- WebKit now gets as many points along each path as Chromium and Firefox.
+- Drivers you write yourself keep waiting for each answer unless you opt in with `maxInFlight`.
+  See "Drive something else" in the README.
+
 ### Scroll like a trackpad, now the demo preset's default (PRD 09) · New
 - `scroll: trackpadScroll()` scrolls the way a laptop trackpad does: each flick sends a stream of
   small steps that speed up, then glide to a stop, instead of the mouse wheel's jumps of 100 px.
@@ -15,9 +23,6 @@ What's new, newest first. Each entry says what you can do now.
 ### Tested in Firefox and WebKit, not just Chromium · Improved
 - Every change is now tested in Chromium, Firefox and WebKit (the engine under Safari): clicks,
   drags, typing, scrolling and the visible cursor, above modal dialogs and across iframes.
-- One difference to know: in WebKit the page gets fewer points along each mouse path. WebKit
-  takes longer to accept each move, so a path played in real time keeps its timing and skips
-  points.
 
 ### The cursor stays under the mouse over iframes in web components and scaled iframes · Fixed
 - The visible cursor used to stop at the edge of an iframe inside a web component, and to draw in

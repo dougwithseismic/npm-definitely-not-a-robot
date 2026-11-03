@@ -223,6 +223,12 @@ export function createHuman<P extends PlaywrightPageLike | PuppeteerPageLike>(
 export function createHuman<P>(page: P, options: HumanOptions & { driver: Driver }): Human<P>
 export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     const driver = options.driver ?? detectDriver(page)
+    const maxInFlight = driver.maxInFlight ?? 1
+    requireOption(
+        Number.isInteger(maxInFlight) && maxInFlight >= 1,
+        `driver.maxInFlight must be a whole number of at least 1, got ${maxInFlight}.`,
+        'Leave it out to wait for each answer, or use 8 like the built-in drivers.'
+    )
     const preset: Preset =
         typeof options.preset === 'object' ? options.preset : presets[options.preset ?? 'average']
     requireOption(
@@ -318,7 +324,7 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
      * go one at a time: sent all at once, the browser would merge them into fewer events.
      */
     function sender() {
-        const limit = instant ? 1 : (driver.maxInFlight ?? 1)
+        const limit = instant ? 1 : maxInFlight
         const pending: Promise<void>[] = []
         let failed: { error: unknown } | undefined
         return {

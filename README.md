@@ -375,12 +375,20 @@ createHuman(page, { driver: logged })
 
 For another tool entirely, write every method with `defineDriver()` and pass it the same way.
 
+Mouse moves and wheel steps don't wait for each other's answers: the built-in drivers allow 8 on
+their way at once (`maxInFlight`), because Playwright and Puppeteer deliver input in the order
+it's sent. A wrapper made with `...base` keeps that. A driver of your own waits for each answer
+unless you set `maxInFlight`, and it must then keep calls in order. If your wrapper delays some
+calls more than others, set `maxInFlight: 1`.
+
 ## How it works
 
 Every action is **planned, then played**. Planning is pure maths: a Bezier curve timed by Fitts's
 law and eased the way an arm accelerates, a list of keystrokes with human gaps, a series of wheel
-notches. Playing sends those steps to the browser on a clock. If the browser is slow or remote,
-it drops points rather than running late, so a movement takes as long as a person would take.
+notches. Playing sends those steps to the browser on a clock, each at its time, without waiting
+for the browser to answer the one before. So a slow or remote browser still gets the whole path.
+If it falls further behind than eight steps, points are skipped rather than run late, so a
+movement takes as long as a person would take.
 
 All randomness comes from one seeded generator, which is why a seed replays a run exactly.
 New to the terms? There's a plain-language [glossary](docs/GLOSSARY.md).

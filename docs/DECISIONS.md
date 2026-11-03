@@ -57,7 +57,9 @@ Settled choices. Don't relitigate; add new calls with a date.
   click point is the target (through shadow roots, labels count). If something covers it, wait
   until timeout, then throw `TARGET_COVERED` naming what's on top. `{ force: true }` skips it.
 - **Clock**: the player schedules points against an absolute clock and drops points when behind,
-  so a slow or remote browser keeps human durations instead of running long. `createHuman` detects Playwright or Puppeteer pages by shape.
+  so a slow or remote browser keeps human durations instead of running long. Moves and wheel steps
+  are pipelined, up to the driver's `maxInFlight` (8 built in) unanswered at once, so points drop
+  only when the browser is that far behind (PRD 11, 2026-11-03). `createHuman` detects Playwright or Puppeteer pages by shape.
   Custom drivers via `defineDriver()`.
 - **Plan, then play**: motion, typing and scrolling are planned by pure functions that return
   timed steps (`{ x, y, t }[]`, keystrokes with delays, wheel deltas). A small player sends them

@@ -61,6 +61,13 @@ We do the same on some long moves.
 **Round trip.** One message to the browser and its reply, a few milliseconds each. Every mouse
 step is one, so instant mode sends a few points per move instead of dozens.
 
+**In flight, pipelining.** A message is *in flight* once it's sent and until its answer comes
+back. *Pipelining* means sending the next message without waiting for that answer. Playwright and
+Puppeteer deliver input in the order it's sent, so we keep up to eight mouse moves or wheel steps
+in flight (a driver's `maxInFlight`). A browser that's slow to answer still gets every point on
+time. Instant mode sends one at a time: sent all together, the browser would merge them into
+fewer events.
+
 **Plan, then play.** We first compute the whole movement as a list of timed points (*plan*), then
 send them to the browser on a clock (*play*). Planning is pure maths, so it can be tested without a
 browser and even run on the landing page.

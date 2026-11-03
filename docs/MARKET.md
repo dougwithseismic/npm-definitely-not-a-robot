@@ -68,7 +68,7 @@ Shown in the first session: run the quickstart and watch it.
 - No typing anywhere in the cursor libraries → PRD 01 (shipped in code)
 - No determinism → PRD 01 seeds
 - Clicks hitting adjacent or covered elements → PRD 01 hit test before pressing
-- Slow on remote browsers → PRD 01 player drops points instead of running late
+- Slow on remote browsers → PRD 01 player keeps time; PRD 11 pipelines moves so the whole path arrives
 - CJS/ESM import errors → PRD 01 dual build, checked by `pnpm smoke`
 - Undocumented options and units (ghost-cursor `moveSpeed`) → README tables give units and defaults
 - Demo videos where hover states never fire → PRD 02
