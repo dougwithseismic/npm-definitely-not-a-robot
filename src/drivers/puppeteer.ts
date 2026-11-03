@@ -188,6 +188,8 @@ export function puppeteerDriver(page: PuppeteerPageLike): Driver {
     }
     return {
         name: 'puppeteer',
+        // Puppeteer sends input in the order it's called, so moves needn't wait for each other.
+        maxInFlight: 8,
         moveMouse: (x, y) => page.mouse.move(x, y),
         mouseDown: (button, clickCount) => page.mouse.down({ button, clickCount }),
         mouseUp: (button, clickCount) => page.mouse.up({ button, clickCount }),

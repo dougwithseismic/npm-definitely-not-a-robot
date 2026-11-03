@@ -64,6 +64,13 @@ export interface Driver {
     mouseUp(button: MouseButton, clickCount: number): Promise<void>
     wheel(dx: number, dy: number): Promise<void>
     /**
+     * How many mouse moves and wheel events may be on their way to the browser at once. Default 1:
+     * each waits for the one before to finish. Above 1, the driver must keep them in order when
+     * called again before the last call has finished. The built-in drivers allow 8, so a slow or
+     * remote browser still gets every point of a path on time.
+     */
+    readonly maxInFlight?: number
+    /**
      * Press a key: a single character (`'a'`, `'A'`) or a key name as Playwright names them
      * (`'Enter'`, `'Shift'`). That includes `'ControlOrMeta'`, which the driver resolves to Meta on
      * a Mac and Control elsewhere.

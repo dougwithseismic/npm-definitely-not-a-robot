@@ -311,9 +311,37 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
         return position
     }
 
+    /**
+     * Sends events in order without waiting for each answer, up to the driver's `maxInFlight` at a
+     * time, so a browser that answers slowly still gets them on time. Waits only when that many are
+     * on their way; `drain()` waits for the rest and reports the first failure. In instant mode they
+     * go one at a time: sent all at once, the browser would merge them into fewer events.
+     */
+    function sender() {
+        const limit = instant ? 1 : (driver.maxInFlight ?? 1)
+        const pending: Promise<void>[] = []
+        let failed: { error: unknown } | undefined
+        return {
+            async send(start: () => Promise<void>) {
+                if (pending.length >= limit) await pending.shift()
+                if (failed) throw failed.error
+                pending.push(
+                    start().catch((error: unknown) => {
+                        failed ??= { error }
+                    })
+                )
+            },
+            async drain() {
+                await Promise.all(pending.splice(0))
+                if (failed) throw failed.error
+            },
+        }
+    }
+
     /** Send planned points on an absolute clock, dropping points rather than drifting late. */
     async function playPath(points: TimedPoint[]): Promise<void> {
         const clock = startClock()
+        const moves = sender()
         for (let i = 0; i < points.length; i++) {
             const point = points[i] as TimedPoint
             if (!instant) {
@@ -321,10 +349,11 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
                 if (next && clock.passed(next.t)) continue
                 await clock.until(point.t)
             }
-            await driver.moveMouse(point.x, point.y)
+            await moves.send(() => driver.moveMouse(point.x, point.y))
             position = { x: point.x, y: point.y }
             for (const plugin of plugins) plugin.onMove?.(position, context)
         }
+        await moves.drain()
     }
 
     /** Press and release one key. `autoShift` holds Shift for capitals and symbols. */
@@ -398,13 +427,14 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
 
     async function playWheel(dx: number, dy: number): Promise<void> {
         const steps = scrolling.plan({ dx, dy, random })
+        const wheels = sender()
         if (instant) {
             for (const run of runs(steps, INSTANT_EVENTS)) {
                 const sum = (axis: 'dx' | 'dy') =>
                     run.reduce((total, step) => total + step[axis], 0)
-                await driver.wheel(sum('dx'), sum('dy'))
+                await wheels.send(() => driver.wheel(sum('dx'), sum('dy')))
             }
-            return
+            return wheels.drain()
         }
         // On a clock, like a path. A step that's late joins the next one rather than being dropped,
         // so a slow browser still scrolls the whole distance in the planned time.
@@ -418,9 +448,11 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
             const next = times[i + 1]
             if (next !== undefined && clock.passed(next)) continue
             await clock.until(times[i] as number)
-            await driver.wheel(owedX, owedY)
+            const [x, y] = [owedX, owedY]
+            await wheels.send(() => driver.wheel(x, y))
             ;[owedX, owedY] = [0, 0]
         }
+        await wheels.drain()
     }
 
     /** Scroll with the wheel until the element shows, falling back to an instant scroll. */

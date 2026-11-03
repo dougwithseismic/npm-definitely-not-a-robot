@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+    bezierMotion,
     createHuman,
+    defineMotion,
     definePlugin,
     defineScroll,
     HumanError,
@@ -46,6 +48,39 @@ describe('clicking', () => {
         )
         expect(maxDev).toBeGreaterThan(5)
     })
+
+    // A browser that answers each move slowly (WebKit, or one far away) still gets the path, since
+    // moves don't wait for each other's answers. `lag` adds a delay to every answer.
+    it.each([0, 40])(
+        'gets at least 80%% of the planned points to the page, with %i ms added',
+        async (lag) => {
+            let planned = 0
+            const bezier = bezierMotion()
+            const motion = defineMotion({
+                name: 'counted',
+                plan(request) {
+                    const points = bezier.plan(request)
+                    planned += points.length
+                    return points
+                },
+            })
+            const base = playwrightDriver(fx.page)
+            const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+            const driver = {
+                ...base,
+                moveMouse: (x: number, y: number) => sleep(lag).then(() => base.moveMouse(x, y)),
+            }
+            const human = createHuman(fx.page, {
+                motion,
+                driver,
+                seed: 1,
+                startPosition: { x: 100, y: 700 },
+            })
+            await human.move({ x: 900, y: 150 })
+            const received = (await events(fx.page)).filter((e) => e.type === 'mousemove').length
+            expect(received).toBeGreaterThanOrEqual(planned * 0.8)
+        }
+    )
 
     it('accepts Playwright locators and points', async () => {
         const human = createHuman(fx.page, { speed: 'instant' })
