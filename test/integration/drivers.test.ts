@@ -92,8 +92,10 @@ describe.each(running)('on %s', (name, start) => {
             })
             await human.click('#signup')
             const log = await events(page)
-            // A path, not one jump. The count varies: a busy machine drops points to keep to time.
-            expect(log.filter((e) => e.type === 'mousemove').length).toBeGreaterThan(3)
+            // A path, not one jump. The count varies: a busy machine drops points to keep to time,
+            // and so does WebKit, which answers each move more slowly.
+            const moves = log.filter((e) => e.type === 'mousemove').length
+            expect(moves).toBeGreaterThan(BROWSER === 'webkit' ? 1 : 3)
             expect(
                 isInside(log.find((e) => e.type === 'mousedown')!, await box(page, '#signup'))
             ).toBe(true)

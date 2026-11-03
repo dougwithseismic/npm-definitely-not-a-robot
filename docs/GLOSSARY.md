@@ -195,6 +195,13 @@ exact file into an empty folder, so we test what users get, not our source tree.
 **Provenance.** A signed statement, shown on npm, that a published version was built from a
 specific commit by a specific CI run. It tells users the package wasn't tampered with.
 
+**Browser engines: Chromium, Firefox, WebKit.** The three engines Playwright drives. Chromium is
+under Chrome and Edge, WebKit under Safari. Each handles input a little differently, so the tests
+run in all three.
+
+**CI matrix.** One CI job run several times with a different setting each time, here once per
+browser (`DNAR_BROWSER=firefox`, `webkit`). One failing doesn't stop the others.
+
 ## Releasing
 
 **Semver (semantic versioning).** `major.minor.patch`. Patch: fixes only. Minor: new features,

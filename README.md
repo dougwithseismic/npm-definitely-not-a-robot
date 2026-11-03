@@ -125,7 +125,8 @@ wrong when your automation needs to look or behave like a person:
 - **Built to extend**: presets, swappable motion, typing and scroll strategies, plugins, and
   custom drivers.
 - **No dependencies.** TypeScript types included, ESM and CommonJS, Node 18+. Works with
-  `playwright`, `playwright-core`, `@playwright/test` and `puppeteer`.
+  `playwright`, `playwright-core`, `@playwright/test` and `puppeteer`, and is tested in
+  Chromium, Firefox and WebKit.
 
 ### See it
 

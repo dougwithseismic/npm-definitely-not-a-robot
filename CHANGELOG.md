@@ -4,6 +4,13 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Tested in Firefox and WebKit, not just Chromium · Improved
+- Every change is now tested in Chromium, Firefox and WebKit (the engine under Safari): clicks,
+  drags, typing, scrolling and the visible cursor, above modal dialogs and across iframes.
+- One difference to know: in WebKit the page gets fewer points along each mouse path. WebKit
+  takes longer to accept each move, so a path played in real time keeps its timing and skips
+  points.
+
 ### The cursor stays under the mouse over iframes in web components and scaled iframes · Fixed
 - The visible cursor used to stop at the edge of an iframe inside a web component, and to draw in
   the wrong place over an iframe shrunk or enlarged with CSS, such as a thumbnail preview of

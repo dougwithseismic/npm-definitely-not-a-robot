@@ -128,7 +128,9 @@ Bundle: ESM 47.94 KB, CJS 48.32 KB. 72 tests (12 for the overlay). CI green on m
 
 - Not checked in Firefox or WebKit: their browsers aren't installed at Playwright 1.64's builds
   here. Re-raising above a modal relies on `<dialog>` toggle events. Belongs with cross-browser
-  CI (UX row).
+  CI (UX row). (Checked 2026-11-03: CI runs the integration tests in Firefox and WebKit, the
+  cursor's included, and the modal and iframe tests pass there. The video-ring test stays
+  Chromium-only: it slows animations through DevTools.)
 - An iframe inside a shadow root isn't found by the parent, so the cursor stops at its edge; a
   CSS-transformed iframe draws the cursor offset. (Fixed 2026-11-03: the parent walks open
   shadow roots when the plain search misses, and scales the child's point by the frame's drawn
