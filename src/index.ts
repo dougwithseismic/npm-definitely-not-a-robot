@@ -1,5 +1,7 @@
 export type { PlaywrightPageLike } from './drivers/playwright'
 export { playwrightDriver } from './drivers/playwright'
+export type { PuppeteerPageLike } from './drivers/puppeteer'
+export { puppeteerDriver } from './drivers/puppeteer'
 export type { Driver, ElementRef, HitTest, MouseButton, ScrollOffset } from './drivers/types'
 export { defineDriver } from './drivers/types'
 export type { HumanErrorCode } from './errors'

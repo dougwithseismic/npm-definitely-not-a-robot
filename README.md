@@ -2,7 +2,8 @@
 
 **Your Playwright scripts click like robots. Make them move like people.**
 
-One line wraps any Playwright page. Clicks travel curved paths and land where a hand would.
+One line wraps any Playwright page (or Puppeteer page). Clicks travel curved paths and land where
+a hand would.
 Typing has a real rhythm. Scrolling turns the wheel. And the same seed replays the same run,
 every time.
 
@@ -63,6 +64,29 @@ with `use: { humanOptions: { … } }` in `playwright.config.ts` (in TypeScript, 
 Combine the two with Playwright's `mergeTests(yourTest, test)`. Everything in the main package is
 exported here too, so one import covers it. Needs `@playwright/test` 1.40 or later.
 
+### With Puppeteer
+
+Pass a Puppeteer page instead. Nothing else changes:
+
+```js
+import puppeteer from 'puppeteer'
+import { createHuman } from 'definitely-not-a-robot'
+
+const browser = await puppeteer.launch({ headless: false })
+const page = await browser.newPage()
+await page.goto('https://demo.playwright.dev/todomvc')
+
+const human = createHuman(page)
+await human.type('.new-todo', 'Buy milk')
+await human.press('Enter')
+await human.click('.toggle')
+
+await browser.close()
+```
+
+Targets are CSS selectors (Puppeteer's own `::-p-text(Sign up)` works too), element handles from
+`page.$()`, or points. Same seed, same path, whichever tool drives the browser.
+
 ## Why
 
 Playwright is built for speed. `click()` teleports the mouse to the exact centre of an element and
@@ -109,6 +133,7 @@ Every clip below was recorded by the library itself, with `preset: 'demo'` and P
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hover-menu.gif" alt="Hover opens menus on the way, then clicks inside them"><br>Hover opens menus on the way, then clicks inside them</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/drag-and-drop.gif" alt="Drag and drop, holding the button the whole way"><br>Drag and drop, holding the button the whole way</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-into-view.gif" alt="Off-screen targets are scrolled into view with the wheel, in bursts"><br>Off-screen targets are scrolled into view with the wheel, in bursts</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/cookie-banner.gif" alt="Won’t click through a cookie banner, and says what’s in the way"><br>Won’t click through a cookie banner, and says what’s in the way</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/playwright-test.gif" alt="In Playwright Test: one import, and every test gets a human"><br>In Playwright Test: one import, and every test gets a human</td></tr>
+<tr><td colspan="2" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/puppeteer.gif" alt="The same calls on a page from Playwright and a page from Puppeteer"><br>The same calls on a page from Playwright and a page from Puppeteer</td></tr>
 </table>
 
 ## Use cases
@@ -285,7 +310,8 @@ createHuman(page, { plugins: [log] })
 
 Everything that talks to the browser goes through a small `Driver` interface: mouse move, down
 and up, wheel, key down and up, insert text, viewport, scroll offset, and finding an element.
-Implement it with `defineDriver()` and pass it as `{ driver }`.
+Playwright and Puppeteer have one built in, picked from the page you pass. For anything else,
+implement it with `defineDriver()` and pass it as `{ driver }`.
 
 ## How it works
 
@@ -312,7 +338,9 @@ more than mouse movement.
 `definitely-not-a-robot/playwright` and every test gets a `human`, or pass the test's `page` to
 `createHuman` yourself.
 
-**Does it work with Puppeteer?** Not yet. Playwright only for now.
+**Does it work with Puppeteer?** Yes. Pass a Puppeteer page to `createHuman` and every action
+works as it does on Playwright. Use selectors or element handles as targets; Puppeteer's
+`page.locator()` locators aren't supported yet.
 
 **Why are my tests slower?** Human timing takes human time. Use `DNAR_SPEED=instant` in CI, or
 `speed: 2` to halve it.

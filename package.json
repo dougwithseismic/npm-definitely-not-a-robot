@@ -106,6 +106,7 @@
         "marked": "^18.1.2",
         "playwright": "^1.64.1",
         "publint": "^0.3.25",
+        "puppeteer-core": "^25.16.0",
         "shiki": "^4.6.0",
         "tsdown": "^0.23.4",
         "tsx": "^4.23.15",

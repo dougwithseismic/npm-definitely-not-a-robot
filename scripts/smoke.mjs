@@ -1,6 +1,7 @@
 // The stranger test: pack the library exactly as npm would publish it, install the tarball into
-// an empty folder next to Playwright, then run the README quickstart, the demo recording and the
-// synthetic-sessions recipe, a CommonJS require and a type check against Playwright's real types.
+// an empty folder next to Playwright, then run the README quickstart, the demo recording, the
+// synthetic-sessions recipe and the Puppeteer example, a CommonJS require and a type check against
+// Playwright's and Puppeteer's real types.
 // Then add @playwright/test and run the README's test file and the real-input recipe through the
 // fixture.
 import { execSync } from 'node:child_process'
@@ -32,6 +33,7 @@ const example = (name) => {
 const quickstart = example('quickstart.mjs')
 const recordDemo = example('record-demo.mjs')
 const todoSpec = example('todo.spec.ts')
+const puppeteerExample = example('puppeteer.mjs')
 // The use-case recipes are too long for the README, which links to them; the site shows them in full.
 const realInputSpec = recipe('real-input.spec.ts')
 const syntheticSessions = recipe('synthetic-sessions.mjs')
@@ -49,7 +51,13 @@ try {
 
     step(`install ${tarball} into an empty project`)
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'stranger', type: 'module' }))
-    run(`npm install --no-audit --no-fund ./${tarball} playwright@${version('playwright')}`, dir)
+    // puppeteer shares puppeteer-core's version numbers. Its own Chrome download is skipped: the
+    // Puppeteer example runs on the Chromium Playwright already has.
+    run(
+        `npm install --no-audit --no-fund ./${tarball} playwright@${version('playwright')} puppeteer@${version('puppeteer-core')}`,
+        dir,
+        { ...process.env, PUPPETEER_SKIP_DOWNLOAD: '1' }
+    )
 
     step('run the README quickstart (headless)')
     writeFileSync(
@@ -76,6 +84,17 @@ try {
         throw new Error('the synthetic sessions did not each record pointer moves')
     }
 
+    step("run the README Puppeteer example (headless, on Playwright's Chromium)")
+    writeFileSync(
+        join(dir, 'puppeteer.mjs'),
+        puppeteerExample.replace('headless: false', 'headless: true')
+    )
+    const chromiumPath = run(
+        `node --input-type=module -e "import { chromium } from 'playwright'; console.log(chromium.executablePath())"`,
+        dir
+    ).trim()
+    run('node puppeteer.mjs', dir, { ...process.env, PUPPETEER_EXECUTABLE_PATH: chromiumPath })
+
     step('require() from CommonJS')
     run(
         `node -e "const m = require('definitely-not-a-robot'); if (typeof m.createHuman !== 'function') process.exit(1)"`,
@@ -93,7 +112,7 @@ try {
         dir
     )
 
-    step("type-check the core and the fixture against Playwright's real types")
+    step("type-check the core and the fixture against Playwright's and Puppeteer's real types")
     writeFileSync(
         join(dir, 'check.ts'),
         [
@@ -102,6 +121,9 @@ try {
             'declare const page: Page',
             'const human: Human<Page> = createHuman(page, { preset: "fast", seed: 1 })',
             "void human.click(page.getByRole('button'))",
+            "import type { Page as PuppeteerPage } from 'puppeteer'",
+            'declare const puppeteerPage: PuppeteerPage',
+            "void createHuman(puppeteerPage, { seed: 1 }).click('#email')",
             '',
             "import { defineConfig, type Page as TestPage } from '@playwright/test'",
             "import { expect, test, type HumanFixtures } from 'definitely-not-a-robot/playwright'",

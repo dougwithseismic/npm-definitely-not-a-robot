@@ -53,7 +53,11 @@ export interface Driver {
     mouseDown(button: MouseButton, clickCount: number): Promise<void>
     mouseUp(button: MouseButton, clickCount: number): Promise<void>
     wheel(dx: number, dy: number): Promise<void>
-    /** Press a key: a single character (`'a'`, `'A'`) or a key name (`'Enter'`, `'Shift'`). */
+    /**
+     * Press a key: a single character (`'a'`, `'A'`) or a key name as Playwright names them
+     * (`'Enter'`, `'Shift'`). That includes `'ControlOrMeta'`, which the driver resolves to Meta on
+     * a Mac and Control elsewhere.
+     */
     keyDown(key: string): Promise<void>
     keyUp(key: string): Promise<void>
     /** Insert text that has no key on a US keyboard (emoji, accents) as an input event. */

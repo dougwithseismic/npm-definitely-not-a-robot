@@ -4,6 +4,14 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Works with Puppeteer (PRD 06) · New
+- Pass a Puppeteer page to `createHuman` and every action works as it does on Playwright:
+  clicks, drags, typing, key presses, scrolling and the visible cursor. There's nothing to set up;
+  the library sees which tool you're using.
+- Targets are CSS selectors, Puppeteer's own selectors such as `::-p-text(Sign up)`, element
+  handles from `page.$()`, or points. The same seed draws the same path in either tool.
+- Try it: the "With Puppeteer" section of the README, or the Puppeteer tab on the website.
+
 ### Recipes and pages for three use cases (PRD 08) · New
 - Demo videos, tests that need real input, and checking your own analytics: each now has a page
   on the website with a video, what plain Playwright misses, and a recipe you can copy.

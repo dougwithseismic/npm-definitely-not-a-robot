@@ -7,9 +7,11 @@
  */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, statSync } from 'node:fs'
+import { type AddressInfo, createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { type Browser, chromium } from 'playwright'
+import { type Browser, chromium, type Page } from 'playwright'
+import puppeteer from 'puppeteer-core'
 import { createHuman } from '../../src'
 import { type Scene, type Side, scenes } from './scenes'
 import { stage } from './stage'
@@ -17,6 +19,13 @@ import { stage } from './stage'
 const OUT = join(import.meta.dirname, '../../docs/media')
 const GIF_MAX_BYTES = 2_000_000
 const GIF_MAX_SECONDS = 12
+/** A free port where Puppeteer reaches the browser, for sides it drives. */
+const debugPort = await new Promise<number>((resolve) => {
+    const server = createServer().listen(0, () => {
+        const { port } = server.address() as AddressInfo
+        server.close(() => resolve(port))
+    })
+})
 
 interface Clip {
     file: string
@@ -33,7 +42,8 @@ async function film(browser: Browser, scene: Scene, side: Side, dir: string): Pr
     const page = await context.newPage()
     const opened = Date.now()
     await page.setContent(stage(side.stage))
-    const human = createHuman(page, {
+    const driven = side.driver === 'puppeteer' ? await asPuppeteer(page) : undefined
+    const human = createHuman((driven?.page ?? page) as Page, {
         preset: 'demo',
         seed: 7,
         startPosition: scene.start,
@@ -49,8 +59,26 @@ async function film(browser: Browser, scene: Scene, side: Side, dir: string): Pr
     })
     await page.waitForTimeout(1500)
     const duration = (Date.now() - started) / 1000
+    await driven?.browser.disconnect()
     await context.close()
     return { file: await page.video()!.path(), start: (started - opened) / 1000, duration }
+}
+
+/** The same tab as a Puppeteer page, so Playwright films what Puppeteer drives. */
+async function asPuppeteer(page: Page) {
+    const marker = `take-${Date.now()}`
+    await page.evaluate((name) => {
+        window.name = name
+    }, marker)
+    const browser = await puppeteer.connect({
+        browserURL: `http://127.0.0.1:${debugPort}`,
+        defaultViewport: null,
+    })
+    for (const tab of await browser.pages()) {
+        if ((await tab.evaluate(() => window.name)) === marker) return { page: tab, browser }
+    }
+    await browser.disconnect()
+    throw new Error("Puppeteer couldn't find the tab to drive")
 }
 
 const ffmpeg = (args: string[]) =>
@@ -134,7 +162,7 @@ if (unknown.length) {
 
 mkdirSync(OUT, { recursive: true })
 const work = mkdtempSync(join(tmpdir(), 'dnar-demos-'))
-const browser = await chromium.launch()
+const browser = await chromium.launch({ args: [`--remote-debugging-port=${debugPort}`] })
 try {
     for (const scene of scenes.filter((s) => !wanted.length || wanted.includes(s.name))) {
         const clips: Clip[] = []

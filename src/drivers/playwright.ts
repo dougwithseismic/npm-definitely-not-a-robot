@@ -1,7 +1,14 @@
 import { HumanError } from '../errors'
 import type { Box, Point, Size } from '../geometry'
-import { inPage } from '../in-page'
-import { caretToEndInPage, hitTestInPage } from './hit-test'
+import {
+    addScriptOnce,
+    caretToEnd,
+    hitTest,
+    isFunction,
+    isTimeout,
+    scrollOffset,
+    windowSize,
+} from './common'
 import type { Driver, ElementRef, HitTest, MouseButton, ScrollOffset } from './types'
 
 // The parts of Playwright we use, described by shape so the library needs no Playwright import
@@ -48,8 +55,6 @@ export interface PlaywrightPageLike {
     frames(): Pick<PlaywrightPageLike, 'evaluate'>[]
 }
 
-const isFunction = (value: unknown): boolean => typeof value === 'function'
-
 export function isPlaywrightPage(value: unknown): value is PlaywrightPageLike {
     const page = value as Partial<PlaywrightPageLike> | null
     return (
@@ -80,7 +85,7 @@ function visibleWithin(wait: Promise<void>, description: string): Promise<boolea
     return wait.then(
         () => true,
         (error: unknown) => {
-            if ((error as Error)?.name === 'TimeoutError') return false
+            if (isTimeout(error)) return false
             const message = String((error as Error)?.message)
             if (!message.includes('strict mode violation')) throw error
             const count = /resolved to (\d+) elements/.exec(message)?.[1] ?? 'several'
@@ -131,37 +136,6 @@ const handleRef = (handle: PlaywrightElementHandleLike): ElementRef =>
         async () => true
     )
 
-// Everything sent into the page goes through inPage, so a build that adds helpers (esbuild's
-// keepNames) can't break it. Wrapped once here, not on every call.
-const hitTest = inPage(hitTestInPage)
-const caretToEnd = inPage(caretToEndInPage)
-const windowSize = inPage(() => ({ width: window.innerWidth, height: window.innerHeight }))
-const scrollOffset = inPage((point: Point | null): ScrollOffset => {
-    const root = document.scrollingElement ?? document.documentElement
-    // An app shell scrolls an inner box, not the page: find the one under the cursor.
-    let el = point ? document.elementFromPoint(point.x, point.y) : null
-    for (; el && el !== root && el !== document.body; el = el.parentElement) {
-        const { overflowY } = getComputedStyle(el)
-        if (/auto|scroll|overlay/.test(overflowY) && el.scrollHeight > el.clientHeight) {
-            return {
-                x: el.scrollLeft,
-                y: el.scrollTop,
-                maxX: el.scrollWidth - el.clientWidth,
-                maxY: el.scrollHeight - el.clientHeight,
-            }
-        }
-    }
-    return {
-        x: window.scrollX,
-        y: window.scrollY,
-        maxX: root.scrollWidth - window.innerWidth,
-        maxY: root.scrollHeight - window.innerHeight,
-    }
-})
-
-/** Scripts already added to each page, so every human on a page doesn't add its own copy. */
-const added = new WeakMap<object, Set<string>>()
-
 /** The built-in driver for Playwright pages. `createHuman` picks it automatically. */
 export function playwrightDriver(page: PlaywrightPageLike): Driver {
     return {
@@ -186,21 +160,7 @@ export function playwrightDriver(page: PlaywrightPageLike): Driver {
             if (isElementHandle(target)) return handleRef(target)
             return null
         },
-        async addScript(source) {
-            const scripts = added.get(page) ?? new Set()
-            added.set(page, scripts)
-            if (scripts.has(source)) return
-            scripts.add(source)
-            // The init script covers every frame of every new document. Frames already loaded run
-            // it now; one that navigates meanwhile gets the init script instead, so its error is
-            // safe to drop.
-            await Promise.all([
-                page.addInitScript({ content: source }).catch((error: unknown) => {
-                    scripts.delete(source) // so the plugin's setup can try again
-                    throw error
-                }),
-                ...page.frames().map((frame) => frame.evaluate(source).catch(() => {})),
-            ])
-        },
+        addScript: (source) =>
+            addScriptOnce(page, source, () => page.addInitScript({ content: source })),
     }
 }

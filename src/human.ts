@@ -1,4 +1,5 @@
 import { isPlaywrightPage, type PlaywrightPageLike, playwrightDriver } from './drivers/playwright'
+import { isPuppeteerPage, type PuppeteerPageLike, puppeteerDriver } from './drivers/puppeteer'
 import type { Driver, ElementRef, HitTest, MouseButton } from './drivers/types'
 import { describeValue, HumanError, requireOption } from './errors'
 import {
@@ -18,7 +19,7 @@ import { createRandom, randomSeed, streamSeed } from './random'
 import { type ScrollStrategy, type WheelScrollOptions, wheelScroll } from './scroll'
 import { type NaturalTypingOptions, naturalTyping, needsShift, type TypingStrategy } from './typing'
 
-/** An element: a selector string, or a Playwright locator or element handle. */
+/** An element: a selector string, a Playwright locator, or an element handle. */
 export type ElementTarget = string | { boundingBox(): Promise<unknown> }
 
 /** Something to aim at: an element, or a point in viewport pixels. */
@@ -41,7 +42,7 @@ export interface HumanOptions extends Preset {
     timeout?: number
     /** Where the cursor starts. Default: a random spot in the lower middle of the viewport. */
     startPosition?: Point
-    /** Use your own driver instead of detecting Playwright. */
+    /** Use your own driver instead of detecting Playwright or Puppeteer. */
     driver?: Driver
 }
 
@@ -185,6 +186,7 @@ function readSpeed(option: number | 'instant' | undefined): number {
 
 function detectDriver(page: unknown): Driver {
     if (isPlaywrightPage(page)) return playwrightDriver(page)
+    if (isPuppeteerPage(page)) return puppeteerDriver(page)
     const looksLike = page as { newPage?: unknown; then?: unknown } | null
     let got = describeValue(page)
     let hint =
@@ -198,7 +200,7 @@ function detectDriver(page: unknown): Driver {
     }
     throw new HumanError(
         'UNSUPPORTED_PAGE',
-        `createHuman() needs a Playwright page, but got ${got}.`,
+        `createHuman() needs a Playwright or Puppeteer page, but got ${got}.`,
         hint
     )
 }
@@ -210,10 +212,13 @@ type Runner = <T>(action: Action, body: () => Promise<T>) => Promise<T>
  *
  * @example
  * const human = createHuman(page)
- * await human.click('text=Sign up')
+ * await human.click('#signup')
  * await human.type('#email', 'ada@example.com')
  */
-export function createHuman<P extends PlaywrightPageLike>(page: P, options?: HumanOptions): Human<P>
+export function createHuman<P extends PlaywrightPageLike | PuppeteerPageLike>(
+    page: P,
+    options?: HumanOptions
+): Human<P>
 /** Wrap anything your own driver can drive. */
 export function createHuman<P>(page: P, options: HumanOptions & { driver: Driver }): Human<P>
 export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
@@ -446,7 +451,7 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
             target,
             verb,
             timeout,
-            "A target is a selector ('#email'), a locator (page.getByRole('button')), an element handle, or a point ({ x: 100, y: 200 })."
+            "A target is a selector ('#email'), a Playwright locator (page.getByRole('button')), an element handle, or a point ({ x: 100, y: 200 })."
         )
         const viewport = await driver.viewport()
         let box = await bringIntoView(ref, viewport)
@@ -601,7 +606,7 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
             opts.to,
             'scroll to',
             readTimeout(opts.timeout, defaultTimeout),
-            "Scroll to a selector ('#pricing'), a locator, an element handle, 'top' or 'bottom'."
+            "Scroll to a selector ('#pricing'), a Playwright locator, an element handle, 'top' or 'bottom'."
         )
         await bringIntoView(ref, await driver.viewport())
     }

@@ -65,8 +65,10 @@ export async function launch(): Promise<Browser> {
     return chromium.launch({ headless: true })
 }
 
+export const VIEWPORT = { width: 1280, height: 800 }
+
 export async function openFixture(browser: Browser): Promise<Page> {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
+    const page = await browser.newPage({ viewport: VIEWPORT })
     await page.setContent(FIXTURE_HTML)
     return page
 }

@@ -13,6 +13,8 @@ export interface Take {
 export interface Side {
     stage: StageOptions
     options?: HumanOptions
+    /** Drive this side through Puppeteer instead of Playwright (which still films it). */
+    driver?: 'puppeteer'
     run(take: Take): Promise<void>
 }
 
@@ -91,6 +93,34 @@ const hero: Scene = {
             stage: { label: 'With definitely-not-a-robot', ...signupStage },
             options: { speed: 1.4 },
             run: signUp,
+        },
+    ],
+}
+
+// ---- the same human on Puppeteer ----
+
+/** Says which tool made the page, then signs Ada up with the same calls. */
+const signUpOn = (made: string) => async (take: Take) => {
+    await take.code(`const human = createHuman(page) // ${made}`)
+    await take.page.waitForTimeout(900)
+    await signUp(take)
+}
+
+const puppeteerScene: Scene = {
+    name: 'puppeteer',
+    viewport: half,
+    start: { x: 560, y: 470 },
+    sides: [
+        {
+            stage: { label: 'Playwright', ...signupStage },
+            options: { speed: 1.4 },
+            run: signUpOn('page from Playwright'),
+        },
+        {
+            stage: { label: 'Puppeteer', ...signupStage },
+            options: { speed: 1.4 },
+            driver: 'puppeteer',
+            run: signUpOn('page from Puppeteer'),
         },
     ],
 }
@@ -571,4 +601,5 @@ export const scenes: Scene[] = [
     fixture,
     realInput,
     analytics,
+    puppeteerScene,
 ]
