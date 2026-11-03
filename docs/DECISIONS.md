@@ -78,9 +78,12 @@ Settled choices. Don't relitigate; add new calls with a date.
 
 ## Stack and conventions
 
-- TypeScript (strict), ESM and CommonJS builds with type declarations via tsup, Node 18+.
-- TypeScript is held on 6.x (2026-11-03): TypeScript 7 ships no compiler API, and tsup's
-  declaration bundling needs one. Revisit when tsup or tsdown supports TS 7.
+- TypeScript 7 (strict), ESM and CommonJS builds with type declarations via tsdown, Node 18+.
+- Build moved from tsup to tsdown (2026-11-03, when the user asked for every dependency on its
+  latest release): tsup 9 calls TypeScript's JS compiler API for declarations, which TypeScript 7
+  no longer ships; tsdown supports 7. The build runs publint and arethetypeswrong, so a wrong
+  `exports` path fails `pnpm build` instead of reaching users.
+- Dependencies stay on their latest releases. CI's GitHub Actions too.
 - pnpm. Add packages with `pnpm add <pkg>@latest`, never by hand-editing versions.
 - Vitest for unit tests; integration tests drive real headless Chromium through Playwright.
 - Biome for lint and format: 4 spaces, single quotes, no semicolons, 100 columns (the repo's old

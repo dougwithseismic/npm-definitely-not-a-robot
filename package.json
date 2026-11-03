@@ -30,8 +30,8 @@
         "node": ">=18"
     },
     "scripts": {
-        "build": "tsup",
-        "dev": "tsup --watch",
+        "build": "tsdown",
+        "dev": "tsdown --watch",
         "typecheck": "tsc --noEmit",
         "lint": "biome check .",
         "format": "biome check --write .",
@@ -68,13 +68,15 @@
     "author": "Doug Silkstone <doug@withseismic.com> (https://withseismic.com)",
     "license": "MIT",
     "devDependencies": {
+        "@arethetypeswrong/core": "^0.18.5",
         "@biomejs/biome": "^2.6.4",
         "@playwright/test": "^1.64.1",
         "@types/node": "^26.6.6",
         "playwright": "^1.64.1",
-        "tsup": "^9.0.0",
+        "publint": "^0.3.25",
+        "tsdown": "^0.23.4",
         "tsx": "^4.23.15",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "vitest": "^5.0.5"
     }
 }

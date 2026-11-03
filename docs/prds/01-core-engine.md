@@ -115,7 +115,8 @@ Shipped 2026-11-03.
   empty folder, README quickstart against demo.playwright.dev, CJS require, type check against
   Playwright 1.64.1's real `Page`.
 - **Tooling note**: TypeScript held on 6.x because tsup's declaration bundling needs the compiler
-  API that TS 7 dropped.
+  API that TS 7 dropped. Superseded 2026-11-03: the build moved to tsdown, on TS 7 (see
+  DECISIONS).
 - **Review fixes** (a review agent ran experiments in Chromium and confirmed 15 defects; all
   fixed, each with a regression test in `test/integration/edge-cases.test.ts`):
   - Hit test works inside iframes: the top-level point is shifted into frame pixels by the
