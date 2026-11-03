@@ -33,6 +33,10 @@ jobs:
         run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      # Ubuntu blocks the user namespaces Chrome's sandbox needs. Playwright turns the sandbox off;
+      # Puppeteer, as the README runs it, keeps it on.
+      - name: Let Chrome's sandbox run
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Install the packed tarball into an empty project and run the README quickstart
         run: pnpm smoke
       # Both steps skip what's already done, so a failed run can be re-run, and a version published
