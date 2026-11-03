@@ -88,9 +88,13 @@ Settled choices. Don't relitigate; add new calls with a date.
 - Gates before merging: `pnpm check` (types, lint, unit + integration tests, build) and
   `pnpm smoke` (pack, install into an empty folder, run the quickstart).
 - One feature per commit, plain messages, changelog entry in the same commit.
+- Every user-visible feature ships with a short demo video of it in action, recorded by the
+  library itself (`pnpm demos`, from PRD 02 on), shown in the README and on the site.
 
 ## User's calls
 
 - 2026-11-03: rewrite from scratch, factory pattern for extensibility, Playwright by default.
   Teach the terminology as we go (reports carry a short "Terms" section; `docs/GLOSSARY.md`
   collects them). Focus on user experience and think commercially: messaging and pain points.
+- 2026-11-03: "It's important to create demo videos of each feature in action too." Every feature
+  gets a video (convention above); PRD 02 records them for everything shipped so far.

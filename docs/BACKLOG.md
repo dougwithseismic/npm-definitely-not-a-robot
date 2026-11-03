@@ -10,7 +10,7 @@ merges, 02 + 03 (lane A: `src/plugins/`, `src/presets.ts`, `src/playwright/`), 0
 describes everything else.
 
 - [x] 01 Core engine and factory: `createHuman`, Playwright driver, motion, typing, scroll, presets, seeds (`docs/prds/01-core-engine.md`) (shipped 2026-11-03)
-- [ ] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, video recipe (`docs/prds/02-demo-output.md`)
+- [~] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, a video of every feature (`docs/prds/02-demo-output.md`) (building since 2026-11-03, autopilot session)
 - [ ] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`)
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks and smoke test shipped 2026-11-03; tagged releases and provenance open)
@@ -29,7 +29,7 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] Errors say what happened and what to do (target not found, not visible, wrong page type)
 - [ ] README first screen says who it's for, the outcome and why this over the alternatives, with
       one call to action (install)
-- [ ] A real demo, made with the library itself (video or GIF of a recorded run)
+- [ ] A demo video of every feature in action, made with the library itself
 - [x] Typed, ESM and CommonJS, Node 18+, works with `playwright` and `@playwright/test`
 - [ ] Tests and CI green, with a badge
 - [ ] Versioned changelog and GitHub releases
