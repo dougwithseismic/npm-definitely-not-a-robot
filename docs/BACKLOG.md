@@ -13,9 +13,9 @@ describes everything else.
 - [x] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, a video of every feature (`docs/prds/02-demo-output.md`) (shipped 2026-11-03)
 - [~] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`) (shipped 2026-11-03)
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
-- [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks and smoke test shipped 2026-11-03; release workflow building since 2026-11-03, autopilot session)
+- [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
-- [ ] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`)
+- [ ] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (building since 2026-11-03, autopilot session)
 - [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`)
 
 ## Launch bar
