@@ -2,6 +2,16 @@
 
 What's new, newest first. Each entry says what you can do now.
 
+## 2026-11-03
+
+### A website with a live demo (PRD 07) · New
+- See Playwright's click next to a human one: click anywhere on the demo and both cursors go
+  there, one in a single jump, the other along a curved path. The second cursor is the library
+  itself running in your browser, with the `demo` preset. Replay the seed to watch the identical
+  path again.
+- Every feature video, the quickstart, the FAQ and this changelog, on one page.
+- Try it: https://site-production-4098.up.railway.app
+
 ## 2026-11-03 · v1.0.0
 
 ### On npm · New

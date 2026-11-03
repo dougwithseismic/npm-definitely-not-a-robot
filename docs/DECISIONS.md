@@ -16,11 +16,11 @@ Settled choices. Don't relitigate; add new calls with a date.
 - **Deploy targets**:
   - The library ships to npm as `definitely-not-a-robot`, published by `.github/workflows/release.yml`
     when a `v*` tag is pushed.
-  - The docs and landing site deploys to Railway (PRD 07). Recipe goes in `docs/DEPLOY.md` when
-    that PRD ships.
+  - The website (`site/`) deploys to Railway with `railway up` from a clean export of `main`.
+    Recipe and ids: `docs/DEPLOY.md`.
 - **The real surface**: a stranger installing the packed tarball into an empty folder and running
-  the README quickstart against a real page in Chromium (`pnpm smoke`). After PRD 07, the landing
-  site's production URL.
+  the README quickstart against a real page in Chromium (`pnpm smoke`). Also the website at
+  https://site-production-4098.up.railway.app.
 - **Test account**: none needed (no accounts).
 - **Third-party services**: Railway, for this project's own services only. GitHub: this repo
   only (settings, Actions, releases). npm: publish this package only. Linking npm to the release
@@ -91,7 +91,7 @@ Settled choices. Don't relitigate; add new calls with a date.
 - Vitest for unit tests; integration tests drive real headless Chromium through Playwright.
 - Biome for lint and format: 4 spaces, single quotes, no semicolons, 100 columns (the repo's old
   Prettier style).
-- Gates before merging: `pnpm check` (types, lint, unit + integration tests, build) and
+- Gates before merging: `pnpm check` (types, lint, unit + integration tests, build, website build) and
   `pnpm smoke` (pack, install into an empty folder, run the quickstart).
 - One feature per commit, plain messages, changelog entry in the same commit.
 - Every user-visible feature ships with a short demo video of it in action, recorded by the
@@ -105,7 +105,7 @@ Settled choices. Don't relitigate; add new calls with a date.
 - To release: `npm version <patch|minor|major> --no-git-tag-version`, mark the top changelog day
   with the new version, commit `Release v<version>`, then `git tag v<version>` and push the commit
   and the tag. The release workflow checks the tag matches `package.json`, runs smoke and
-  `pnpm check`, publishes with provenance and makes the GitHub release from the changelog.
+  `pnpm check:lib` (`check` without the website, so a site problem can't hold up a release), publishes with provenance and makes the GitHub release from the changelog.
 - Publishing uses npm trusted publishing: npm trusts `release.yml` in this repo, so there's no npm
   token in GitHub to leak or rotate. npm only allows linking a package that already exists, so
   1.0.0 (2026-11-03) was published from the user's machine, without provenance.

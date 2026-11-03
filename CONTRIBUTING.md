@@ -12,7 +12,7 @@ pnpm exec playwright install chromium
 ## Before you open a pull request
 
 ```bash
-pnpm check   # types, lint, unit and browser tests, build
+pnpm check   # types, lint, unit and browser tests, build, website build
 pnpm smoke   # packs the library, installs it into an empty folder, runs the README quickstart
 ```
 

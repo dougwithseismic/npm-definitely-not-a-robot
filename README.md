@@ -18,6 +18,9 @@ every time.
 npm install definitely-not-a-robot
 ```
 
+**[Try the live demo](https://site-production-4098.up.railway.app)**: click anywhere and watch
+Playwright's click next to a human one, planned by this library in your browser.
+
 ## Quickstart
 
 ```js

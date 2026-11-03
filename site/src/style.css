@@ -1,0 +1,858 @@
+/* The same palette and shapes as the demo videos, so the site and the clips read as one thing. */
+:root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --robot: #94a3b8;
+    --code-bg: #0d1117;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+}
+
+body {
+    margin: 0;
+    font:
+        17px / 1.6 -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Inter,
+        Roboto,
+        sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+a {
+    color: var(--accent);
+    text-underline-offset: 3px;
+}
+
+code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--accent-soft);
+    color: #3730a3;
+    padding: 0.1em 0.35em;
+    border-radius: 5px;
+    overflow-wrap: anywhere;
+}
+
+/* Code in a box of its own drops the inline pill. */
+.install code,
+.stage-code code,
+.code pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+h1,
+h2,
+h3 {
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+h2 {
+    font-size: clamp(26px, 4vw, 36px);
+    margin-bottom: 14px;
+}
+
+h3 {
+    font-size: 19px;
+}
+
+.wrap {
+    width: min(1120px, 100% - 40px);
+    margin-inline: auto;
+}
+
+main > section {
+    padding-block: clamp(48px, 8vw, 88px);
+}
+
+.skip {
+    position: absolute;
+    left: -999px;
+}
+
+.skip:focus {
+    left: 12px;
+    top: 12px;
+    z-index: 20;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+:focus-visible {
+    outline: 3px solid #a5b4fc;
+    outline-offset: 2px;
+}
+
+/* Header */
+.bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 max(20px, calc((100% - 1120px) / 2));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+}
+
+.brand {
+    display: inline-flex;
+    gap: 9px;
+    align-items: center;
+    font-weight: 650;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.brand i {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    background: var(--accent);
+    flex: none;
+}
+
+.bar nav {
+    display: flex;
+    gap: 22px;
+    font-size: 15px;
+}
+
+.bar nav a {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.bar nav a:hover,
+.bar nav a[aria-current] {
+    color: var(--ink);
+}
+
+.bar nav .star {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+@media (max-width: 720px) {
+    .bar nav a:not(.star) {
+        display: none;
+    }
+}
+
+/* Hero */
+.hero {
+    padding-block: clamp(40px, 6vw, 72px) 32px;
+    text-align: center;
+}
+
+.eyebrow {
+    display: inline-block;
+    margin: 0 0 18px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hero h1 {
+    font-size: clamp(34px, 6.2vw, 64px);
+    letter-spacing: -0.035em;
+    max-width: 17ch;
+    margin-inline: auto;
+}
+
+.hero h1 span {
+    color: var(--accent);
+}
+
+.lead {
+    font-size: clamp(17px, 2.1vw, 20px);
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 22px auto 30px;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.install {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 6px 6px 6px 18px;
+    gap: 14px;
+}
+
+.install code {
+    color: #e2e8f0;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.install .gt {
+    color: #64748b;
+    margin-right: 6px;
+    user-select: none;
+}
+
+.install button {
+    flex: none;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: #1e293b;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 72px;
+}
+
+.install button:hover {
+    background: #334155;
+}
+
+/* On phones the command gets its own line, so it's never cut short. */
+@media (max-width: 480px) {
+    .install {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        padding: 14px;
+        gap: 10px;
+    }
+    .install code {
+        font-size: 13px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: center;
+    }
+    .install button {
+        padding: 10px;
+    }
+    .actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    height: 50px;
+    padding: 0 22px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+}
+
+.button:hover {
+    border-color: #cbd5e1;
+}
+
+/* Demo */
+.demo {
+    padding-top: 12px;
+}
+
+/* The white surface every card sits on. */
+.stage-card,
+.mini,
+.card,
+.use,
+.clip {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.stage-card {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.stage-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+}
+
+.legend {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+.key::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.key-robot {
+    background: #f1f5f9;
+    color: var(--muted);
+}
+
+.key-human {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.stage {
+    position: relative;
+    height: clamp(340px, 46vw, 440px);
+    background:
+        radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0) 0 0 / 22px 22px,
+        var(--bg);
+    cursor: crosshair;
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.stage canvas {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.mini {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(320px, 100% - 48px);
+    display: grid;
+    gap: 12px;
+    padding: 22px;
+    cursor: default;
+}
+
+.mini-title {
+    margin: 0 0 2px;
+    font-weight: 650;
+    font-size: 17px;
+}
+
+.mini .field {
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 15px;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.mini .check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.mini .box {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1.5px solid #94a3b8;
+    border-radius: 5px;
+    background: #fff;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.mini .cta {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 20px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    /* The press snaps, so the button is back in place for the next move to measure. */
+    transition: background 0.15s;
+}
+
+.mini .field.pressed {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #e0e7ff;
+}
+
+.mini .box.pressed {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.mini .cta.pressed {
+    transform: scale(0.97);
+    background: #4338ca;
+}
+
+.cursor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 4;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.cursor svg {
+    display: block;
+    overflow: visible;
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.35));
+}
+
+.cursor path {
+    stroke: #fff;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.cursor-robot path {
+    fill: var(--robot);
+}
+
+.cursor-human {
+    z-index: 5;
+}
+
+.cursor-human path {
+    fill: var(--accent);
+}
+
+.ripple {
+    position: absolute;
+    z-index: 3;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border-radius: 50%;
+    border: 2px solid;
+    pointer-events: none;
+    animation: ripple 0.55s ease-out forwards;
+}
+
+.ripple-robot {
+    border-color: var(--robot);
+}
+
+.ripple-human {
+    border-color: var(--accent);
+}
+
+@keyframes ripple {
+    from {
+        transform: scale(0.3);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+
+.hint {
+    position: absolute;
+    right: 14px;
+    bottom: 10px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.stage-code {
+    background: var(--ink);
+    color: #e2e8f0;
+    padding: 14px 18px;
+    font: 14px / 1.5 var(--mono);
+    display: grid;
+    gap: 6px;
+}
+
+.stage-code .line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 16px;
+    min-width: 0;
+}
+
+.stage-code .line > span {
+    color: #94a3b8;
+}
+
+.line-robot code {
+    color: #cbd5e1;
+}
+
+.line-robot code::before {
+    content: "●  ";
+    color: var(--robot);
+}
+
+.line-human code::before {
+    content: "●  ";
+    color: #818cf8;
+}
+
+.line-meta {
+    border-top: 1px solid #1e293b;
+    padding-top: 8px;
+    margin-top: 2px;
+    align-items: center;
+}
+
+.line-meta button {
+    border: 1px solid #334155;
+    background: none;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font: 600 13px / 1.5 var(--mono);
+}
+
+.line-meta button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.caption {
+    color: var(--muted);
+    font-size: 15px;
+    text-align: center;
+    max-width: 70ch;
+    margin: 16px auto 0;
+}
+
+/* Sections */
+.section-lead {
+    color: var(--muted);
+    max-width: 66ch;
+    margin: 0 0 28px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.card {
+    padding: 24px;
+}
+
+.card p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.card .pain {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #b91c1c;
+    text-decoration: line-through;
+    text-decoration-color: rgba(185, 28, 28, 0.4);
+}
+
+.uses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+}
+
+.use,
+.clip {
+    margin: 0;
+    overflow: hidden;
+}
+
+.use video,
+.clip video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+}
+
+.use figcaption {
+    padding: 18px 20px 20px;
+}
+
+.use p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: -1px;
+    overflow-x: auto;
+}
+
+.tabs [role="tab"] {
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    padding: 9px 16px;
+    background: none;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabs [aria-selected="true"] {
+    background: var(--code-bg);
+    color: #fff;
+}
+
+.code {
+    margin-bottom: 22px;
+}
+
+.code pre {
+    margin: 0;
+    padding: 22px;
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+    overflow-x: auto;
+    font: 14px / 1.65 var(--mono);
+}
+
+.code pre code {
+    overflow-wrap: normal;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+    gap: 18px;
+}
+
+.clip figcaption {
+    padding: 12px 16px 14px;
+    font-size: 15px;
+    color: var(--muted);
+}
+
+/* Prose from the README and changelog */
+.prose {
+    max-width: 760px;
+}
+
+.prose p,
+.prose li {
+    color: #334155;
+}
+
+.prose strong {
+    color: var(--ink);
+}
+
+.changes h2:not(#changes-title) {
+    font-size: 22px;
+    margin: 36px 0 6px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+}
+
+.changes h3 {
+    font-size: 18px;
+    margin: 22px 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.changes ul {
+    padding-left: 20px;
+    margin: 6px 0;
+}
+
+.kind {
+    flex: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 6px;
+    position: relative;
+    top: -2px;
+}
+
+.kind-new {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.kind-improved {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.kind-fixed {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.page {
+    padding-block: 56px 88px;
+}
+
+.page h1,
+.lost h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    margin-bottom: 8px;
+}
+
+.lost {
+    padding-block: 96px;
+    min-height: 60vh;
+}
+
+.lost .actions {
+    justify-content: flex-start;
+}
+
+/* Closing call to action */
+.cta-band {
+    background: var(--ink);
+    color: #fff;
+    text-align: center;
+}
+
+.cta-band h2 {
+    margin-bottom: 26px;
+}
+
+.cta-band .install {
+    background: #1e293b;
+}
+
+.cta-band .install button {
+    background: #334155;
+}
+
+.button.light {
+    border-color: #fff;
+}
+
+.foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 28px 40px;
+    font-size: 15px;
+}
+
+.foot nav {
+    display: flex;
+    gap: 20px;
+}
+
+.foot nav a {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.muted {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .ripple {
+        animation: none;
+        opacity: 0;
+    }
+}

@@ -185,3 +185,32 @@ linked that workflow to the package. It also makes provenance automatic.
 
 **One-time password (2FA code).** The six-digit code from an authenticator app that npm asks for
 on publish when two-factor authentication is on. Only the account owner can type it.
+
+## The website
+
+**Static site.** A website made of plain files (HTML, CSS, JavaScript, videos) built ahead of
+time, with no server code running per visit. Ours is built by Vite from `site/` and fills itself in
+from the README, the examples and `CHANGELOG.md`, so the FAQ, video captions, code samples and
+changelog on it always match the repo. The landing copy around them is written for the site.
+
+**Partial.** A piece of HTML shared by every page, such as the header and footer in
+`site/partials/`, put in place of a `<!--@header-->` marker when the site is built.
+
+**Stage driver.** The small driver in `site/src/demo.ts` that lets `createHuman` run inside the
+website's demo box: its mouse events move a drawn cursor instead of a real one. It shows the
+driver interface at its smallest.
+
+**Build-time content.** Text pulled in while the site is built rather than when someone visits.
+The `<!--@faq-->` style markers in `site/*.html` are replaced with the README's FAQ, the
+changelog and highlighted code at build time.
+
+**Open Graph image.** The picture social apps and chat tools show when someone shares a link.
+`site/public/og.png`, rendered by `pnpm site:og` from the library's own motion planner.
+
+**Container (Docker image).** A packaged, self-contained copy of an app and everything it needs to
+run. `site/Dockerfile` builds the site in one stage, then copies the finished files into a small
+web server image (Caddy) that Railway runs.
+
+**Reduced motion.** A system setting people use when animation makes them unwell. With it on, the
+site's demo doesn't play by itself and videos don't autoplay.
+

@@ -37,7 +37,7 @@ jobs:
         run: pnpm smoke
       # Both steps skip what's already done, so a failed run can be re-run, and a version published
       # by hand (1.0.0) still gets its GitHub release.
-      - name: Publish (prepublishOnly runs pnpm check first)
+      - name: Publish (prepublishOnly runs pnpm check:lib first)
         run: |
           package="$(node -p 'require("./package.json").name')@${GITHUB_REF_NAME#v}"
           if npm view "$package" version > /dev/null 2>&1; then

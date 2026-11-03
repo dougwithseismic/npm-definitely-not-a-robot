@@ -15,5 +15,5 @@
         "declaration": true,
         "noEmit": true
     },
-    "include": ["src", "test", "scripts", "*.config.ts"]
+    "include": ["src", "test", "scripts", "site", "*.config.ts"]
 }

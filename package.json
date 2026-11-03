@@ -55,10 +55,15 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:fixture": "playwright test -c test/playwright",
-        "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:fixture && pnpm build",
+        "check": "pnpm check:lib && pnpm site:build",
+        "check:lib": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:fixture && pnpm build",
         "smoke": "node scripts/smoke.mjs",
-        "prepublishOnly": "pnpm check",
-        "demos": "tsx scripts/demos/record.ts"
+        "prepublishOnly": "pnpm check:lib",
+        "demos": "tsx scripts/demos/record.ts",
+        "site:dev": "vite --config site/vite.config.ts",
+        "site:build": "vite build --config site/vite.config.ts",
+        "site:preview": "vite preview --config site/vite.config.ts",
+        "site:og": "tsx scripts/site-og.ts"
     },
     "keywords": [
         "playwright",
@@ -79,7 +84,7 @@
         "type": "git",
         "url": "git+https://github.com/dougwithseismic/npm-definitely-not-a-robot.git"
     },
-    "homepage": "https://github.com/dougwithseismic/npm-definitely-not-a-robot#readme",
+    "homepage": "https://site-production-4098.up.railway.app",
     "bugs": {
         "url": "https://github.com/dougwithseismic/npm-definitely-not-a-robot/issues"
     },
@@ -98,11 +103,14 @@
         "@biomejs/biome": "^2.6.4",
         "@playwright/test": "^1.64.1",
         "@types/node": "^26.6.6",
+        "marked": "^18.1.2",
         "playwright": "^1.64.1",
         "publint": "^0.3.25",
+        "shiki": "^4.6.0",
         "tsdown": "^0.23.4",
         "tsx": "^4.23.15",
         "typescript": "^7.0.2",
+        "vite": "^8.3.5",
         "vitest": "^5.0.5"
     }
 }

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>definitely-not-a-robot: human mouse, keyboard and scroll for Playwright</title>
+<meta name="description" content="Your Playwright scripts click like robots. One line makes them move like people: curved mouse paths, typing with a rhythm, wheel scrolling, and seeds that replay a run exactly. MIT, no dependencies.">
+<link rel="canonical" href="%SITE_URL%/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Your Playwright scripts click like robots. Make them move like people.">
+<meta property="og:description" content="Curved mouse paths, typing with a rhythm, wheel scrolling and replayable seeds, for Playwright. One line, no dependencies.">
+<meta property="og:url" content="%SITE_URL%/">
+<meta property="og:image" content="%SITE_URL%/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/src/style.css">
+<script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+<!--@header-->
+
+<main id="main">
+  <section class="hero wrap">
+    <p class="eyebrow">For Playwright · MIT · zero dependencies</p>
+    <h1>Your Playwright scripts click like robots. <span>Make them move like people.</span></h1>
+    <p class="lead">One line wraps any Playwright page. Clicks travel curved paths and land where a hand would. Typing has a real rhythm. Scrolling turns the wheel. And the same seed replays the same run, every time.</p>
+    <div class="actions">
+      <div class="install">
+        <code><span class="gt">$</span> npm install definitely-not-a-robot</code>
+        <button type="button" data-copy="npm install definitely-not-a-robot">Copy</button>
+      </div>
+      <a class="button" href="%REPO%">Star on GitHub</a>
+    </div>
+  </section>
+
+  <section class="wrap demo" data-demo aria-labelledby="demo-title">
+    <div class="stage-card">
+      <div class="stage-head">
+        <span class="brand"><i></i><span id="demo-title">Spot the robot</span></span>
+        <span class="legend">
+          <span class="key key-robot">Playwright</span>
+          <span class="key key-human">definitely-not-a-robot</span>
+        </span>
+      </div>
+      <div class="stage" data-stage>
+        <canvas aria-hidden="true"></canvas>
+        <div class="mini">
+          <p class="mini-title">Create your account</p>
+          <button type="button" class="field" id="email" data-target>you@example.com</button>
+          <button type="button" class="field" id="password" data-target>••••••••</button>
+          <span class="check"><button type="button" class="box" id="terms" data-target aria-label="Accept the terms"></button> I accept the terms</span>
+          <button type="button" class="cta" id="signup" data-target>Sign up</button>
+        </div>
+        <span class="cursor cursor-robot" data-cursor="robot" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 2.5v17.2l4.3-4.1 2.9 6.6 2.9-1.3-2.9-6.5h6.1z"/></svg></span>
+        <span class="cursor cursor-human" data-cursor="human" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 2.5v17.2l4.3-4.1 2.9 6.6 2.9-1.3-2.9-6.5h6.1z"/></svg></span>
+        <p class="hint">Click anywhere</p>
+      </div>
+      <div class="stage-code" aria-live="off">
+        <div class="line line-robot">
+          <code data-out="robot-code">await page.click('#signup')</code>
+          <span>1 mouse move · 0 ms</span>
+        </div>
+        <div class="line line-human">
+          <code data-out="human-code">await human.click('#signup')</code>
+          <span data-out="human-stats">a curved path, timed like a hand</span>
+        </div>
+        <div class="line line-meta">
+          <span data-out="seed">same seed, same path</span>
+          <button type="button" data-replay disabled>Replay this seed</button>
+        </div>
+      </div>
+    </div>
+    <p class="caption">This is the library itself, running in your browser: <code>createHuman</code> with the <code>demo</code> preset, driving this box instead of a browser tab. The grey cursor is what <code>page.click()</code> does: one jump to the dead centre. The indigo one is <code>human.click()</code>.</p>
+  </section>
+
+  <section class="wrap" id="how" aria-labelledby="pain-title">
+    <h2 id="pain-title">Playwright is built for speed. Sometimes you need a person.</h2>
+    <p class="section-lead"><code>click()</code> teleports to the exact centre and <code>fill()</code> pastes text in one go. Perfect when a test only checks the result. Wrong when your automation has to look or behave like someone using the page.</p>
+    <div class="cards">
+      <article class="card">
+        <p class="pain">The cursor teleports</p>
+        <h3>Paths that arc, timed by distance</h3>
+        <p>Far, small targets take longer than near, big ones. Long moves overshoot and correct. Clicks land near the centre, never the edge, and won't go through a cookie banner.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Text appears all at once</p>
+        <h3>Typing with a rhythm</h3>
+        <p>Uneven gaps between keys, faster common letter pairs, pauses between words, Shift for capitals, and typos that get noticed and fixed if you want them.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Every run is different</p>
+        <h3>Seeds replay a run exactly</h3>
+        <p><code>createHuman(page, { seed: 42 })</code> gives the same paths and timings every time, so a flaky run can be reproduced and a demo re-recorded frame for frame.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="uses-title">
+    <h2 id="uses-title">What people use it for</h2>
+    <div class="uses">
+      <figure class="use">
+        <video src="/media/hero.mp4#t=0.1" muted loop playsinline preload="none" aria-label="Playwright on its own fills a sign-up form instantly. With definitely-not-a-robot the cursor travels to each field and the text is typed key by key."></video>
+        <figcaption><h3>Product demos that look real</h3><p>Record a walkthrough with Playwright's <code>recordVideo</code>. The <code>demo</code> preset draws a cursor and a ring on every click.</p></figcaption>
+      </figure>
+      <figure class="use">
+        <video src="/media/hover-menu.mp4#t=0.1" muted loop playsinline preload="none" aria-label="Hover opens menus on the way, then clicks inside them."></video>
+        <figcaption><h3>Tests that need real input</h3><p>Hover menus, debounced search, drag and drop and per-keystroke validation only fire on the events a person makes.</p></figcaption>
+      </figure>
+      <figure class="use">
+        <video src="/media/seed-replay.mp4#t=0.1" muted loop playsinline preload="none" aria-label="The same seed replays the same run, path for path."></video>
+        <figcaption><h3>Checking your own analytics</h3><p>Heatmaps, session replay and your own bot rules need sessions that move like users. Seeds make each one repeatable.</p></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="wrap" id="code" aria-labelledby="code-title">
+    <h2 id="code-title">One line, then use it like <code>page</code></h2>
+    <div class="tabs" role="tablist" aria-label="Examples">
+      <button type="button" role="tab" id="tab-script" aria-controls="panel-script" aria-selected="true">Playwright script</button>
+      <button type="button" role="tab" id="tab-test" aria-controls="panel-test" aria-selected="false" tabindex="-1">Playwright Test</button>
+    </div>
+    <div class="code" id="panel-script" role="tabpanel" aria-labelledby="tab-script"><!--@quickstart--></div>
+    <div class="code" id="panel-test" role="tabpanel" aria-labelledby="tab-test" hidden><!--@test-example--></div>
+    <p class="section-lead">Running in CI? Set <code>DNAR_SPEED=instant</code> and the same script runs at full speed, sending the same kinds of events. <a href="%REPO%#api">Read the API</a>.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="gallery-title">
+    <h2 id="gallery-title">See every feature</h2>
+    <p class="section-lead">Each clip was recorded by the library itself, with <code>preset: 'demo'</code> and Playwright's <code>recordVideo</code>.</p>
+    <div class="gallery"><!--@gallery--></div>
+  </section>
+
+  <section class="wrap prose" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">FAQ</h2>
+    <!--@faq-->
+  </section>
+
+  <section class="wrap prose" aria-labelledby="responsible-title">
+    <h2 id="responsible-title">Responsible use</h2>
+    <!--@responsible-use-->
+  </section>
+
+  <section class="wrap prose changes" aria-labelledby="changes-title">
+    <h2 id="changes-title">What's new</h2>
+    <!--@changelog-latest-->
+    <p><a href="/changelog/">The full changelog</a></p>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <h2>Make your next script move like a person.</h2>
+      <div class="actions">
+        <div class="install">
+          <code><span class="gt">$</span> npm install definitely-not-a-robot</code>
+          <button type="button" data-copy="npm install definitely-not-a-robot">Copy</button>
+        </div>
+        <a class="button light" href="%REPO%">Star on GitHub</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!--@footer-->
+</body>
+</html>

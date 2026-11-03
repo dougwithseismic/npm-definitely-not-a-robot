@@ -5,6 +5,8 @@
             "src/**",
             "test/**",
             "scripts/**",
+            "site/**",
+            "!site/dist",
             "*.ts",
             "*.json",
             "!package.json",
