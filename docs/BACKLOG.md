@@ -41,7 +41,7 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] Landing site live with the live demo, Open Graph image, sitemap, 404
 - [x] Use-case pages from `docs/MARKET.md`
 - [x] Public changelog page fed from `CHANGELOG.md`
-- [ ] Measurement: npm weekly downloads and GitHub stars recorded in `docs/LAUNCH.md` each wave
+- [x] Measurement: npm weekly downloads and GitHub stars recorded in `docs/LAUNCH.md` each wave
 
 ## Needs you
 
