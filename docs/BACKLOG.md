@@ -25,7 +25,8 @@ here adds something none of them do, and most show up in the demo videos buyers 
 Lanes: 09 (lane A: `src/scroll/`, `src/presets.ts`) and 12 (lane C: `examples/`, `site/`) can run
 beside anything. 10 and 11 both change `src/human.ts` playback, so they run one after the other.
 
-- [ ] 09 Trackpad scrolling: smooth, momentum scrolling as a strategy, used by the `demo` preset (`docs/prds/09-trackpad-scroll.md`)
+- [~] 09 Trackpad scrolling: smooth, momentum scrolling as a strategy, used by the `demo` preset (`docs/prds/09-trackpad-scroll.md`)
+      (building since 2026-11-03, autopilot session)
 - [ ] 11 Every point reaches slow browsers: send moves without waiting for each, so WebKit and remote browsers get the whole path (`docs/prds/11-pipelined-moves.md`)
 - [ ] 10 Touch input: `human.tap()` and `human.swipe()` for mobile emulation, with a touch marker in videos (`docs/prds/10-touch.md`)
 - [ ] 12 Human-looking AI agent recordings: drive Playwright MCP and agent frameworks through `createHuman` (`docs/prds/12-agent-recordings.md`)
