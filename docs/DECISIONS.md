@@ -4,7 +4,7 @@ Settled choices. Don't relitigate; add new calls with a date.
 
 ## How autopilot runs here
 
-- **Status**: Running
+- **Status**: Paused (2026-11-03, the user said "Stop here" after PRD 11)
 - **Ship rights**: push, merge to `main` and deploy the docs site without asking each time. Given
   2026-11-03 when the user ran `/autopilot` with "Redesign and rewrite this library from scratch,
   including a factory pattern for extensibility and playwright support by default". Publishing to
