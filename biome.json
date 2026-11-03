@@ -7,6 +7,7 @@
             "scripts/**",
             "site/**",
             "!site/dist",
+            "examples/**",
             "*.ts",
             "*.json",
             "!package.json",
@@ -30,5 +31,11 @@
             "suspicious": { "noExplicitAny": "off" },
             "style": { "noNonNullAssertion": "off" }
         }
-    }
+    },
+    "overrides": [
+        {
+            "includes": ["examples/**"],
+            "assist": { "actions": { "source": { "organizeImports": "off" } } }
+        }
+    ]
 }

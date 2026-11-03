@@ -98,22 +98,9 @@
     </div>
   </section>
 
-  <section class="wrap" aria-labelledby="uses-title">
+  <section class="wrap" id="uses" aria-labelledby="uses-title">
     <h2 id="uses-title">What people use it for</h2>
-    <div class="uses">
-      <figure class="use">
-        <video src="/media/hero.mp4#t=0.1" muted loop playsinline preload="none" aria-label="Playwright on its own fills a sign-up form instantly. With definitely-not-a-robot the cursor travels to each field and the text is typed key by key."></video>
-        <figcaption><h3>Product demos that look real</h3><p>Record a walkthrough with Playwright's <code>recordVideo</code>. The <code>demo</code> preset draws a cursor and a ring on every click.</p></figcaption>
-      </figure>
-      <figure class="use">
-        <video src="/media/hover-menu.mp4#t=0.1" muted loop playsinline preload="none" aria-label="Hover opens menus on the way, then clicks inside them."></video>
-        <figcaption><h3>Tests that need real input</h3><p>Hover menus, debounced search, drag and drop and per-keystroke validation only fire on the events a person makes.</p></figcaption>
-      </figure>
-      <figure class="use">
-        <video src="/media/seed-replay.mp4#t=0.1" muted loop playsinline preload="none" aria-label="The same seed replays the same run, path for path."></video>
-        <figcaption><h3>Checking your own analytics</h3><p>Heatmaps, session replay and your own bot rules need sessions that move like users. Seeds make each one repeatable.</p></figcaption>
-      </figure>
-    </div>
+    <!--@use-cases-->
   </section>
 
   <section class="wrap" id="code" aria-labelledby="code-title">
@@ -122,8 +109,8 @@
       <button type="button" role="tab" id="tab-script" aria-controls="panel-script" aria-selected="true">Playwright script</button>
       <button type="button" role="tab" id="tab-test" aria-controls="panel-test" aria-selected="false" tabindex="-1">Playwright Test</button>
     </div>
-    <div class="code" id="panel-script" role="tabpanel" aria-labelledby="tab-script"><!--@quickstart--></div>
-    <div class="code" id="panel-test" role="tabpanel" aria-labelledby="tab-test" hidden><!--@test-example--></div>
+    <div class="code" id="panel-script" role="tabpanel" aria-labelledby="tab-script"><!--@example:quickstart.mjs--></div>
+    <div class="code" id="panel-test" role="tabpanel" aria-labelledby="tab-test" hidden><!--@example:todo.spec.ts--></div>
     <p class="section-lead">Running in CI? Set <code>DNAR_SPEED=instant</code> and the same script runs at full speed, sending the same kinds of events. <a href="%REPO%#api">Read the API</a>.</p>
   </section>
 
@@ -149,18 +136,7 @@
     <p><a href="/changelog/">The full changelog</a></p>
   </section>
 
-  <section class="cta-band">
-    <div class="wrap">
-      <h2>Make your next script move like a person.</h2>
-      <div class="actions">
-        <div class="install">
-          <code><span class="gt">$</span> npm install definitely-not-a-robot</code>
-          <button type="button" data-copy="npm install definitely-not-a-robot">Copy</button>
-        </div>
-        <a class="button light" href="%REPO%">Star on GitHub</a>
-      </div>
-    </div>
-  </section>
+  <!--@cta-->
 </main>
 
 <!--@footer-->

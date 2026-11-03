@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record product demo videos with Playwright · definitely-not-a-robot</title>
+<meta name="description" content="Record your product demo from a Playwright script. The demo preset draws a cursor that travels to every click and types at a pace viewers can read. The same seed gives the same take.">
+<link rel="canonical" href="%SITE_URL%/use-cases/demo-videos/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Record your product demo from a script. It still looks like a person made it.">
+<meta property="og:description" content="Record your product demo from a Playwright script. The demo preset draws a cursor that travels to every click and types at a pace viewers can read. The same seed gives the same take.">
+<meta property="og:url" content="%SITE_URL%/use-cases/demo-videos/">
+<meta property="og:image" content="%SITE_URL%/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/src/style.css">
+<script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+<!--@header-->
+
+<main id="main">
+  <section class="hero wrap">
+    <p class="eyebrow">Use case · Demo videos</p>
+    <h1>Record your product demo from a script. <span>It still looks like a person made it.</span></h1>
+    <p class="lead">Hand-made screen recordings go stale with every release. A Playwright script can re-record them in seconds, but its video has no cursor, text that appears in one frame and clicks out of nowhere. Add one line and the same script looks like someone using your product.</p>
+    <figure class="clip feature">
+      <video src="/media/hero.mp4#t=0.1" muted loop playsinline preload="none" aria-label="Playwright on its own fills a sign-up form instantly. With definitely-not-a-robot the cursor travels to each field and the text is typed key by key."></video>
+      <figcaption>Left: Playwright on its own. Right: the same sign-up with <code>createHuman(page, { preset: 'demo' })</code>.</figcaption>
+    </figure>
+  </section>
+
+  <section class="wrap" aria-labelledby="short-title">
+    <h2 id="short-title">Where a plain recording falls short</h2>
+    <div class="cards">
+      <article class="card">
+        <p class="pain">No cursor in the video</p>
+        <h3>A cursor viewers can follow</h3>
+        <p>The <code>demo</code> preset draws an arrow, and a ring on every click, inside the page, so both end up in the recording. It follows the page's real mouse events, so it shows exactly what happened.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Forms fill in one frame</p>
+        <h3>Typing people can read</h3>
+        <p>Text goes in key by key at a steady 50 words a minute, with Shift for capitals, and short pauses between steps so each one lands before the next.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Every take is a reshoot</p>
+        <h3>Same seed, same take</h3>
+        <p>Pass a <code>seed</code> and every run takes the same paths with the same pauses, so a take can be re-recorded frame for frame.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="recipe-title">
+    <h2 id="recipe-title">The recipe</h2>
+    <p class="section-lead">Install it next to Playwright with <code>npm install definitely-not-a-robot playwright</code>, save this as <code>record-demo.mjs</code> and run <code>node record-demo.mjs</code>.</p>
+    <p class="file">examples/record-demo.mjs</p>
+    <div class="code"><!--@example:record-demo.mjs--></div>
+    <p class="section-lead">Playwright saves WebM; <code>ffmpeg -i videos/&lt;file&gt;.webm demo.mp4</code> makes an MP4. In Playwright Test, set <code>use: { video: 'on', humanOptions: { preset: 'demo' } }</code> and every test records with a cursor.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="more-title">
+    <h2 id="more-title">More use cases</h2>
+    <!--@use-cases-->
+  </section>
+
+  <!--@cta-->
+</main>
+
+<!--@footer-->
+</body>
+</html>

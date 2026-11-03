@@ -4,6 +4,14 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Recipes and pages for three use cases (PRD 08) · New
+- Demo videos, tests that need real input, and checking your own analytics: each now has a page
+  on the website with a video, what plain Playwright misses, and a recipe you can copy.
+- New recipes: `examples/real-input.spec.ts` tests a search box that suggests on each key and a
+  signature pad that wants a real stroke, and `examples/synthetic-sessions.mjs` runs seeded
+  sessions and prints what each one sent. Both run in CI against the package as npm installs it.
+- Try it: https://site-production-4098.up.railway.app/#uses
+
 ### A website with a live demo (PRD 07) · New
 - See Playwright's click next to a human one: click anywhere on the demo and both cursors go
   there, one in a single jump, the other along a curved path. The second cursor is the library

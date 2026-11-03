@@ -1,7 +1,8 @@
 // The stranger test: pack the library exactly as npm would publish it, install the tarball into
-// an empty folder next to Playwright, then run the README quickstart and demo recording, a CommonJS
-// require and a type check against Playwright's real types. Then add @playwright/test and run the
-// README's test file through the fixture.
+// an empty folder next to Playwright, then run the README quickstart, the demo recording and the
+// synthetic-sessions recipe, a CommonJS require and a type check against Playwright's real types.
+// Then add @playwright/test and run the README's test file and the real-input recipe through the
+// fixture.
 import { execSync } from 'node:child_process'
 import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -19,8 +20,10 @@ const run = (cmd, cwd = root, env = process.env) => {
 const step = (label) => console.log(`smoke: ${label}`)
 
 const readme = readFileSync(join(root, 'README.md'), 'utf8')
+const recipe = (name) => readFileSync(join(root, 'examples', name), 'utf8')
+/** An example the README shows in full, so the two can't drift apart. */
 const example = (name) => {
-    const source = readFileSync(join(root, 'examples', name), 'utf8')
+    const source = recipe(name)
     if (!readme.includes(source.trim())) {
         throw new Error(`README is out of sync with examples/${name}`)
     }
@@ -29,6 +32,9 @@ const example = (name) => {
 const quickstart = example('quickstart.mjs')
 const recordDemo = example('record-demo.mjs')
 const todoSpec = example('todo.spec.ts')
+// The use-case recipes are too long for the README, which links to them; the site shows them in full.
+const realInputSpec = recipe('real-input.spec.ts')
+const syntheticSessions = recipe('synthetic-sessions.mjs')
 
 const dir = mkdtempSync(join(tmpdir(), 'dnar-smoke-'))
 try {
@@ -60,6 +66,16 @@ try {
         throw new Error('the demo recording wrote no video')
     }
 
+    step('run the synthetic-sessions recipe')
+    writeFileSync(join(dir, 'synthetic-sessions.mjs'), syntheticSessions)
+    const instant = { ...process.env, DNAR_SPEED: 'instant' }
+    const sessions = [
+        ...run('node synthetic-sessions.mjs', dir, instant).matchAll(/pointermove: (\d+)/g),
+    ]
+    if (sessions.length !== 3 || sessions.some(([, moves]) => Number(moves) === 0)) {
+        throw new Error('the synthetic sessions did not each record pointer moves')
+    }
+
     step('require() from CommonJS')
     run(
         `node -e "const m = require('definitely-not-a-robot'); if (typeof m.createHuman !== 'function') process.exit(1)"`,
@@ -67,10 +83,11 @@ try {
     )
 
     // Everything above ran without @playwright/test installed: the core entry never imports it.
-    step('add @playwright/test and run the README test file through the fixture')
+    step('add @playwright/test and run the README test file and the real-input recipe')
     run(`npm install --no-audit --no-fund @playwright/test@${version('@playwright/test')}`, dir)
     writeFileSync(join(dir, 'todo.spec.ts'), todoSpec)
-    run('npx playwright test --reporter=line', dir, { ...process.env, DNAR_SPEED: 'instant' })
+    writeFileSync(join(dir, 'real-input.spec.ts'), realInputSpec)
+    run('npx playwright test --reporter=line', dir, instant)
     run(
         `node -e "const m = require('definitely-not-a-robot/playwright'); if (typeof m.test.use !== 'function' || typeof m.createHuman !== 'function') process.exit(1)"`,
         dir
@@ -111,7 +128,7 @@ try {
                 skipLibCheck: true,
                 types: [],
             },
-            files: ['check.ts', 'todo.spec.ts'],
+            include: ['*.ts'],
         })
     )
     run(`${join(root, 'node_modules/.bin/tsc')} -p ${dir}`)

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test search-as-you-type, signature pads and drag and drop with Playwright · definitely-not-a-robot</title>
+<meta name="description" content="Some widgets only react to the events a person makes. page.fill() sends no key events and drags arrive in one jump. human.type() and human.drag() send them, and DNAR_SPEED=instant keeps CI fast.">
+<link rel="canonical" href="%SITE_URL%/use-cases/real-input-tests/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Some widgets only work with real input. Test them with it.">
+<meta property="og:description" content="Some widgets only react to the events a person makes. page.fill() sends no key events and drags arrive in one jump. human.type() and human.drag() send them, and DNAR_SPEED=instant keeps CI fast.">
+<meta property="og:url" content="%SITE_URL%/use-cases/real-input-tests/">
+<meta property="og:image" content="%SITE_URL%/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/src/style.css">
+<script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+<!--@header-->
+
+<main id="main">
+  <section class="hero wrap">
+    <p class="eyebrow">Use case · End-to-end tests</p>
+    <h1>Some widgets only work with real input. <span>Test them with it.</span></h1>
+    <p class="lead">Search-as-you-type, signature pads, drag-and-drop boards and per-keystroke validation wait for the events a person makes. Playwright's quickest calls skip those events, so the test fails on a widget that works, or you write a workaround for each one.</p>
+    <figure class="clip feature">
+      <video src="/media/real-input.mp4#t=0.1" muted loop playsinline preload="none" aria-label="With page.fill the search box shows no suggestions and a dragged signature is one straight jump, too short to count. With definitely-not-a-robot the suggestions appear as each key is typed and the signature is drawn and accepted."></video>
+      <figcaption>Left: <code>page.fill()</code> sends no key events, so no suggestions, and <code>page.dragAndDrop()</code> arrives in one jump, too short to count as a signature. Right: the same steps with <code>human</code>.</figcaption>
+    </figure>
+  </section>
+
+  <section class="wrap" aria-labelledby="short-title">
+    <h2 id="short-title">Where plain Playwright falls short</h2>
+    <div class="cards">
+      <article class="card">
+        <p class="pain">fill() sends no key events</p>
+        <h3>Every key, pressed</h3>
+        <p><code>human.type()</code> presses and releases a key for each character, with Shift for capitals, so keyup handlers, input masks and per-keystroke validation all run.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Drags arrive in one jump</p>
+        <h3>Moves the whole way</h3>
+        <p><code>mouse.move()</code> and <code>dragTo()</code> send a single move by default. <code>human.drag()</code> holds the button along a curved path, so signature pads and drag libraries get the stream of moves they wait for.</p>
+      </article>
+      <article class="card">
+        <p class="pain">Scrolling skips the wheel</p>
+        <h3>The wheel turns</h3>
+        <p>Playwright scrolls a target into view without a single wheel event. <code>human</code> turns the wheel in bursts, so wheel handlers see a scroll, step by step.</p>
+      </article>
+    </div>
+    <p class="section-lead">Only need keys pressed? Playwright's <code>pressSequentially()</code> does that, at one fixed delay. Reach for <code>human</code> when you want one call per step that gets keys, paths and the wheel right.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="recipe-title">
+    <h2 id="recipe-title">The recipe</h2>
+    <p class="section-lead">Save it next to your tests and run <code>npx playwright test</code>. Swap <code>setContent</code> for your own page.</p>
+    <p class="file">examples/real-input.spec.ts</p>
+    <div class="code"><!--@example:real-input.spec.ts--></div>
+    <p class="section-lead">In CI, set <code>DNAR_SPEED=instant</code>: the same kinds of events, without the waits, so the suite stays fast.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="more-title">
+    <h2 id="more-title">More use cases</h2>
+    <!--@use-cases-->
+  </section>
+
+  <!--@cta-->
+</main>
+
+<!--@footer-->
+</body>
+</html>

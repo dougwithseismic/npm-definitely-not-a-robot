@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test your analytics, heatmaps and session replay with synthetic sessions · definitely-not-a-robot</title>
+<meta name="description" content="Point seeded, human-like Playwright sessions at your staging site and check that your heatmaps, session replay, funnels and bot rules recorded them right. Run any session again with its seed.">
+<link rel="canonical" href="%SITE_URL%/use-cases/analytics-testing/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Does your analytics record what visitors do? Check before they arrive.">
+<meta property="og:description" content="Point seeded, human-like Playwright sessions at your staging site and check that your heatmaps, session replay, funnels and bot rules recorded them right. Run any session again with its seed.">
+<meta property="og:url" content="%SITE_URL%/use-cases/analytics-testing/">
+<meta property="og:image" content="%SITE_URL%/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="/src/style.css">
+<script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+<!--@header-->
+
+<main id="main">
+  <section class="hero wrap">
+    <p class="eyebrow">Use case · Analytics and QA</p>
+    <h1>Does your analytics record what visitors do? <span>Check before they arrive.</span></h1>
+    <p class="lead">Heatmaps, session replay, funnels and your own bot rules all read mouse, keyboard and scroll events. A plain Playwright script sends almost none of them, so it can't tell you whether they work. Seeded sessions that move like visitors can, and one that comes out wrong can be run again with its seed.</p>
+    <figure class="clip feature">
+      <video src="/media/analytics.mp4#t=0.1" muted loop playsinline preload="none" aria-label="An analytics panel counts what each sign-up sent. Playwright on its own: one pointer move, no key presses. With definitely-not-a-robot: dozens of pointer moves and a key press for every character."></video>
+      <figcaption>The same sign-up, counted by a small analytics script. Playwright on its own: one pointer move and no key presses. With <code>human</code>: a trail, every key, and a click into each field.</figcaption>
+    </figure>
+  </section>
+
+  <section class="wrap" aria-labelledby="short-title">
+    <h2 id="short-title">Where a plain script falls short</h2>
+    <div class="cards">
+      <article class="card">
+        <p class="pain">One pointer move per click</p>
+        <h3>Trails, not dots</h3>
+        <p>Each click travels a curved path made of dozens of pointer moves, so heatmaps and session replays have something to draw.</p>
+      </article>
+      <article class="card">
+        <p class="pain">No keystrokes at all</p>
+        <h3>Every key counted</h3>
+        <p><code>page.fill()</code> sends no key events, so keystroke counts and typing time come out as zero. <code>human.type()</code> presses each key, with a rhythm.</p>
+      </article>
+      <article class="card">
+        <p class="pain">A bad session can't be repeated</p>
+        <h3>Seeds replay a session</h3>
+        <p>Give each session a seed. When one is recorded wrong, run that seed again and get the same paths and pauses while you fix it.</p>
+      </article>
+    </div>
+    <p class="section-lead">Run it on sites you own or are allowed to test. The library makes input look human; it doesn't hide automation, and it isn't for getting around anyone's bot protection. <a href="/#responsible-title">Responsible use</a>.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="recipe-title">
+    <h2 id="recipe-title">The recipe</h2>
+    <p class="section-lead">Run <code>node synthetic-sessions.mjs</code>. Each line is what one session sent: point it at your staging site and compare with what your analytics recorded.</p>
+    <p class="file">examples/synthetic-sessions.mjs</p>
+    <div class="code"><!--@example:synthetic-sessions.mjs--></div>
+    <p class="file">Output</p>
+    <div class="code"><pre class="output">seed 1 { pointermove: 46, click: 2, keydown: 19 }
+seed 2 { pointermove: 60, click: 2, keydown: 19 }
+seed 3 { pointermove: 57, click: 2, keydown: 19 }</pre></div>
+  </section>
+
+  <section class="wrap" aria-labelledby="more-title">
+    <h2 id="more-title">More use cases</h2>
+    <!--@use-cases-->
+  </section>
+
+  <!--@cta-->
+</main>
+
+<!--@footer-->
+</body>
+</html>

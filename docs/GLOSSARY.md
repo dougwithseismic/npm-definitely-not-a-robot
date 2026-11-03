@@ -193,8 +193,20 @@ time, with no server code running per visit. Ours is built by Vite from `site/` 
 from the README, the examples and `CHANGELOG.md`, so the FAQ, video captions, code samples and
 changelog on it always match the repo. The landing copy around them is written for the site.
 
-**Partial.** A piece of HTML shared by every page, such as the header and footer in
-`site/partials/`, put in place of a `<!--@header-->` marker when the site is built.
+**Partial.** A piece of HTML shared between pages, such as the header, footer and closing call to
+action in `site/partials/`, put in place of a marker like `<!--@header-->` when the site is built.
+
+**Use-case page.** A page on the website for one job people hire the library for (demo videos,
+tests that need real input, checking your own analytics). It leads with the pain, shows a video,
+says plainly where Playwright alone falls short, and ends with a recipe.
+
+**Recipe.** A complete, runnable example in `examples/` for one use case. The website shows each
+recipe straight from its file, and the smoke test runs it against the packed package, so the code
+people copy is code that works.
+
+**Synthetic session.** A scripted visit that moves, types and scrolls like a person, used to check
+your own analytics, heatmaps, session replay or bot rules on a site you own. Give each one a seed
+and it can be run again when its recording looks wrong.
 
 **Stage driver.** The small driver in `site/src/demo.ts` that lets `createHuman` run inside the
 website's demo box: its mouse events move a drawn cursor instead of a real one. It shows the

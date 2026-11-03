@@ -111,6 +111,27 @@ Every clip below was recorded by the library itself, with `preset: 'demo'` and P
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/playwright-test.gif" alt="In Playwright Test: one import, and every test gets a human"><br>In Playwright Test: one import, and every test gets a human</td></tr>
 </table>
 
+## Use cases
+
+Three jobs people bring it to. Each has a recipe in [`examples/`](examples) that runs in CI, and a
+page on the website with a video of it.
+
+- **[Product demos that look real](https://site-production-4098.up.railway.app/use-cases/demo-videos/).** Re-record a walkthrough from
+  a script. The `demo` preset draws a cursor viewers can follow and types at a pace they can read.
+  Recipe: [Record a demo video](#record-a-demo-video).
+- **[Tests that need real input](https://site-production-4098.up.railway.app/use-cases/real-input-tests/).** Search-as-you-type,
+  signature pads, drag and drop and per-keystroke checks wait for the events a person makes.
+  `page.fill()` sends no key events and drags arrive in one jump; `human` sends them all. Recipe:
+  [`examples/real-input.spec.ts`](examples/real-input.spec.ts).
+- **[Checking your own analytics](https://site-production-4098.up.railway.app/use-cases/analytics-testing/).** Heatmaps, session replay
+  and your own bot rules need sessions that move like visitors. Point seeded sessions at your
+  staging site and run any one again with its seed. Recipe:
+  [`examples/synthetic-sessions.mjs`](examples/synthetic-sessions.mjs).
+
+<table>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/real-input.gif" alt="page.fill() shows no suggestions and a dragged signature is too short; human.type() and human.drag() get both"><br><code>page.fill()</code> shows no suggestions and a dragged signature is too short; <code>human</code> gets both</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/analytics.gif" alt="What an analytics script records from each sign-up: one pointer move and no keys, against a trail and every key"><br>What an analytics script records from each sign-up: one pointer move and no keys, against a trail and every key</td></tr>
+</table>
+
 ## API
 
 ```ts

@@ -65,6 +65,19 @@ async function signUp({ human, code }: Take) {
     await human.click('#signup')
 }
 
+/** Signs Ada up with plain Playwright calls, paced so viewers can read the code bar. */
+async function fillSignUp({ page, code }: Take) {
+    await page.waitForTimeout(500)
+    await code("await page.fill('#email', 'ada@example.com')")
+    await page.fill('#email', 'ada@example.com')
+    await page.waitForTimeout(900)
+    await code("await page.fill('#password', 'hunter22')")
+    await page.fill('#password', 'hunter22')
+    await page.waitForTimeout(900)
+    await code("await page.click('#signup')")
+    await page.click('#signup')
+}
+
 const hero: Scene = {
     name: 'hero',
     viewport: half,
@@ -72,17 +85,7 @@ const hero: Scene = {
     sides: [
         {
             stage: { label: 'Playwright on its own', plain: true, ...signupStage },
-            async run({ page, code }) {
-                await page.waitForTimeout(500)
-                await code("await page.fill('#email', 'ada@example.com')")
-                await page.fill('#email', 'ada@example.com')
-                await page.waitForTimeout(900)
-                await code("await page.fill('#password', 'hunter22')")
-                await page.fill('#password', 'hunter22')
-                await page.waitForTimeout(900)
-                await code("await page.click('#signup')")
-                await page.click('#signup')
-            },
+            run: fillSignUp,
         },
         {
             stage: { label: 'With definitely-not-a-robot', ...signupStage },
@@ -430,4 +433,142 @@ const seed: Scene = {
     sides: [seedSide(1), seedSide(2)],
 }
 
-export const scenes: Scene[] = [hero, curve, hover, drag, typing, scroll, cover, seed, fixture]
+// ---- what an analytics script sees from each sign-up ----
+
+const analyticsStage = {
+    css: `${signupCss}
+    main { grid-template-columns: 360px 210px; gap: 18px; place-content: center; }
+    #card { width: 100%; padding: 24px; }
+    .panel { width: auto; padding: 18px; }
+    .panel h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+        color: var(--muted); }
+    dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0 0 14px; font-size: 15px; }
+    dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+    canvas { display: block; border-radius: 8px; background: var(--bg);
+        border: 1px solid var(--line); }`,
+    body: signupBody.replace(
+        '</main>',
+        `<aside class="card panel"><h2>What analytics saw</h2>
+        <dl><dt>Pointer moves</dt><dd id="n-pointermove">0</dd><dt>Key presses</dt><dd id="n-keydown">0</dd>
+        <dt>Clicks</dt><dd id="n-click">0</dd></dl><canvas id="heat" width="172" height="129"></canvas></aside></main>`
+    ),
+    script: `${signupScript}
+    const counts = { pointermove: 0, keydown: 0, click: 0 }
+    const heat = document.getElementById('heat').getContext('2d')
+    const { width, height } = heat.canvas
+    window.resetCounts = () => { heat.clearRect(0, 0, width, height)
+        for (const type in counts) document.getElementById('n-' + type).textContent = counts[type] = 0 }
+    for (const type in counts) addEventListener(type, (e) => {
+        document.getElementById('n-' + type).textContent = ++counts[type]
+        if (type !== 'pointermove') return
+        heat.fillStyle = 'rgba(79, 70, 229, .45)'; heat.beginPath()
+        heat.arc(e.clientX * width / innerWidth, e.clientY * height / innerHeight, 2.5, 0, 7); heat.fill()
+    }, true)`,
+}
+
+/** Zeroes the panel first, so it counts only what the sign-up sends. */
+const counted = (run: Side['run']) => async (take: Take) => {
+    await take.page.evaluate(() => (window as any).resetCounts())
+    await run(take)
+}
+
+const analytics: Scene = {
+    name: 'analytics',
+    viewport: half,
+    start: { x: 560, y: 470 },
+    sides: [
+        {
+            stage: { label: 'Playwright on its own', plain: true, ...analyticsStage },
+            run: counted(fillSignUp),
+        },
+        {
+            stage: { label: 'With definitely-not-a-robot', ...analyticsStage },
+            options: { speed: 1.4 },
+            run: counted(signUp),
+        },
+    ],
+}
+
+// ---- widgets that need real input: search on keyup and a signature pad ----
+
+const widgetStage = {
+    css: `main { display: grid; place-items: center; height: calc(100vh - 116px); }
+    .card { width: 460px; padding: 22px 28px; }
+    label { display: block; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+    ul { list-style: none; margin: 6px 0 12px; padding: 0; height: 70px; }
+    li { padding: 5px 12px; margin-bottom: 4px; border-radius: 8px; background: #eef2ff;
+        color: var(--accent); font-weight: 500; }
+    canvas { display: block; background: var(--bg); border: 1px dashed #94a3b8; border-radius: 10px; }
+    #signed { margin: 8px 0 0; font-weight: 600; color: var(--muted); }
+    #signed.good { color: var(--good); } #signed.bad { color: var(--bad); }`,
+    body: `<main><div class="card">
+      <label for="search">Search fruit</label><input id="search" autocomplete="off">
+      <ul id="suggestions"></ul>
+      <label>Sign here</label><canvas id="pad" width="402" height="120"></canvas>
+      <p id="signed">Waiting for a signature</p>
+    </div></main>`,
+    script: `const search = document.getElementById('search')
+    search.addEventListener('keyup', () => {
+        document.getElementById('suggestions').innerHTML = ['apple', 'apricot', 'banana', 'blueberry']
+            .filter((f) => f.startsWith(search.value)).map((f) => '<li>' + f + '</li>').join('') })
+    const pad = document.getElementById('pad'), ink = pad.getContext('2d'), signed = document.getElementById('signed')
+    ink.lineWidth = 3; ink.lineCap = ink.lineJoin = 'round'; ink.strokeStyle = '#4f46e5'
+    let points = 0
+    pad.addEventListener('pointerdown', (e) => { pad.setPointerCapture(e.pointerId); points = 1; ink.beginPath(); ink.moveTo(e.offsetX, e.offsetY) })
+    pad.addEventListener('pointermove', (e) => { if (!e.buttons) return
+        points++; ink.lineTo(e.offsetX, e.offsetY); ink.stroke() })
+    pad.addEventListener('pointerup', () => { const ok = points > 10
+        signed.textContent = ok ? 'Signed ✓' : 'Too short, sign again'; signed.className = ok ? 'good' : 'bad' })`,
+}
+
+/** Where the signature starts and ends, inside the pad. */
+const stroke = { from: { x: 50, y: 85 }, to: { x: 350, y: 40 } }
+
+const realInput: Scene = {
+    name: 'real-input',
+    viewport: half,
+    start: { x: 560, y: 470 },
+    sides: [
+        {
+            stage: { label: 'Playwright on its own', plain: true, ...widgetStage },
+            async run({ page, code }) {
+                await page.waitForTimeout(500)
+                await code("await page.fill('#search', 'apr')")
+                await page.fill('#search', 'apr')
+                await page.waitForTimeout(1200)
+                await code("await page.dragAndDrop('#pad', '#pad', { … })")
+                await page.dragAndDrop('#pad', '#pad', {
+                    sourcePosition: stroke.from,
+                    targetPosition: stroke.to,
+                })
+            },
+        },
+        {
+            stage: { label: 'With definitely-not-a-robot', ...widgetStage },
+            options: { seed: 5 },
+            async run({ page, human, code }) {
+                await code("await human.type('#search', 'apr')")
+                await human.type('#search', 'apr')
+                await page.waitForTimeout(500)
+                const pad = (await page.locator('#pad').boundingBox())!
+                const at = (p: { x: number; y: number }) => ({ x: pad.x + p.x, y: pad.y + p.y })
+                await code('await human.drag(from, to)')
+                await human.drag(at(stroke.from), at(stroke.to))
+            },
+        },
+    ],
+}
+
+export const scenes: Scene[] = [
+    hero,
+    curve,
+    hover,
+    drag,
+    typing,
+    scroll,
+    cover,
+    seed,
+    fixture,
+    realInput,
+    analytics,
+]

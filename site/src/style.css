@@ -658,7 +658,39 @@ main > section {
 }
 
 .use figcaption {
+    position: relative;
     padding: 18px 20px 20px;
+}
+
+/* The heading's link covers the caption, so the whole text is a target. */
+.use h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.use h3 a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.use .go {
+    display: inline-block;
+    color: var(--accent);
+    transition: transform 0.15s;
+}
+
+.use h3 a:hover {
+    color: var(--accent);
+}
+
+.use h3 a:hover .go {
+    transform: translateX(3px);
+}
+
+/* Under "More use cases", the page you're on is left out. */
+.use:has([aria-current]) {
+    display: none;
 }
 
 .use p {
@@ -686,7 +718,8 @@ main > section {
     white-space: nowrap;
 }
 
-.tabs [aria-selected="true"] {
+.tabs [aria-selected="true"],
+.file {
     background: var(--code-bg);
     color: #fff;
 }
@@ -798,6 +831,36 @@ main > section {
 
 .lost .actions {
     justify-content: flex-start;
+}
+
+/* Use-case pages: the clip card, wider, with the video at its own shape. */
+.feature {
+    max-width: 1000px;
+    margin: 8px auto 0;
+    text-align: left;
+}
+
+.feature video {
+    aspect-ratio: auto 1446 / 540;
+}
+
+/* The file a recipe comes from, as a tab on its code block. */
+.file {
+    display: table;
+    margin: 0;
+    padding: 9px 16px;
+    border-radius: 10px 10px 0 0;
+    font: 600 14px var(--mono);
+}
+
+/* A lead that follows content rather than a heading closes the section instead. */
+:not(h1, h2) + .section-lead {
+    margin-top: 24px;
+}
+
+.code .output {
+    background: var(--code-bg);
+    color: #e6edf3;
 }
 
 /* Closing call to action */
