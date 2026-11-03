@@ -99,15 +99,29 @@ describe('hovering and dragging', () => {
         ).toBe(true)
     })
 
-    // Instant mode thins mouse paths, but not while a button is held.
-    it.each([4, 'instant'] as const)('drags along the whole path at speed %s', async (speed) => {
-        const human = createHuman(fx.page, { speed })
+    it('drags and drops at human speed', async () => {
+        const human = createHuman(fx.page, { speed: 4 })
         await human.drag('#source', '#dropzone')
         expect(
             await fx.page.evaluate(() => (window as unknown as { dropped?: boolean }).dropped)
         ).toBe(true)
-        const moves = (await events(fx.page)).filter((e) => e.type === 'mousemove')
-        expect(moves.length).toBeGreaterThan(15)
+    })
+
+    // Real-time playback skips points that are already late, so how many arrive at human speed
+    // depends on how busy the machine is. Instant mode thins paths, but not while a button is
+    // held, so there every point of the drag arrives.
+    it('sends every point of a drag in instant mode', async () => {
+        const human = createHuman(fx.page, { speed: 'instant' })
+        await human.drag('#source', '#dropzone')
+        expect(
+            await fx.page.evaluate(() => (window as unknown as { dropped?: boolean }).dropped)
+        ).toBe(true)
+        const log = await events(fx.page)
+        const held = log.slice(
+            log.findIndex((e) => e.type === 'mousedown'),
+            log.findIndex((e) => e.type === 'mouseup')
+        )
+        expect(held.filter((e) => e.type === 'mousemove').length).toBeGreaterThan(15)
     })
 })
 
