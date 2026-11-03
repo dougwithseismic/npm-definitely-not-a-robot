@@ -9,7 +9,7 @@ import {
     playwrightDriver,
     trackpadScroll,
 } from '../../src'
-import { BROWSER, events, failure, moveTrace, useFixture } from './fixture'
+import { events, failure, moveTrace, useFixture } from './fixture'
 
 const fx = useFixture()
 
@@ -28,16 +28,13 @@ describe('clicking', () => {
         const down = log.find((e) => e.type === 'mousedown')!
         const click = log.find((e) => e.type === 'click')!
 
-        // WebKit answers each move more slowly, so playing the path on time drops more points.
-        expect(moves.length).toBeGreaterThan(BROWSER === 'webkit' ? 1 : 10)
+        expect(moves.length).toBeGreaterThan(10)
         expect(inside(down, await box('#signup'))).toBe(true)
         expect(click.target).toBe('signup')
         expect(point).toEqual({ x: down.x, y: down.y })
         expect(human.position).toEqual(point)
 
-        // Not a straight line: some point strays well off the chord. WebKit can get as few as two
-        // points, which leaves no curve to see (PRD 11 sends it the whole path).
-        if (BROWSER === 'webkit') return
+        // Not a straight line: some point strays well off the chord.
         const a = moves[0]!
         const b = moves.at(-1)!
         const len = Math.hypot(b.x - a.x, b.y - a.y)
@@ -249,19 +246,15 @@ describe('scrolling', () => {
         expect(await scrollY()).toBe(0)
     })
 
-    // WebKit takes so long to answer each wheel event that most steps go together (PRD 11).
-    it.skipIf(BROWSER === 'webkit')(
-        'glides in many small steps with trackpad scrolling, the demo preset’s',
-        async () => {
-            const human = createHuman(fx.page, { preset: 'demo', seed: 2 })
-            await human.scroll({ by: 600 })
-            await expect.poll(scrollY).toBeGreaterThan(500)
-            // The wheel would send 6. Steps that fall behind the clock go together, so allow for a
-            // busy machine.
-            const wheels = (await events(fx.page)).filter((e) => e.type === 'wheel')
-            expect(wheels.length).toBeGreaterThan(8)
-        }
-    )
+    it('glides in many small steps with trackpad scrolling, the demo preset’s', async () => {
+        const human = createHuman(fx.page, { preset: 'demo', seed: 2 })
+        await human.scroll({ by: 600 })
+        await expect.poll(scrollY).toBeGreaterThan(500)
+        // The wheel would send 6. Steps that fall behind the clock go together, so allow for a
+        // busy machine.
+        const wheels = (await events(fx.page)).filter((e) => e.type === 'wheel')
+        expect(wheels.length).toBeGreaterThan(8)
+    })
 
     it('still covers the whole distance, on time, when the browser answers slowly', async () => {
         const base = playwrightDriver(fx.page)
