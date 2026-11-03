@@ -11,9 +11,9 @@ describes everything else.
 
 - [x] 01 Core engine and factory: `createHuman`, Playwright driver, motion, typing, scroll, presets, seeds (`docs/prds/01-core-engine.md`) (shipped 2026-11-03)
 - [x] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, a video of every feature (`docs/prds/02-demo-output.md`) (shipped 2026-11-03)
-- [~] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`) (building since 2026-11-03, autopilot session)
+- [~] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`) (shipped 2026-11-03)
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
-- [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks and smoke test shipped 2026-11-03; tagged releases and provenance open)
+- [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks and smoke test shipped 2026-11-03; release workflow building since 2026-11-03, autopilot session)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
 - [ ] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`)
 - [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`)
@@ -35,7 +35,7 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [ ] Versioned changelog and GitHub releases
 - [x] LICENSE, SECURITY.md, CONTRIBUTING.md, issue templates
 - [x] Responsible-use statement: what it is for and what it doesn't do
-- [ ] Published to npm with provenance **(you: npm login, then say publish)**
+- [ ] Published to npm with provenance **(you: type npm's one-time code for the first publish)**
 - [ ] Sponsorship link that works **(you: enable GitHub Sponsors, or name another link)**
 - [ ] Landing site live with the live demo, Open Graph image, sitemap, 404
 - [ ] Use-case pages from `docs/MARKET.md`
@@ -44,8 +44,10 @@ database backups (no server-side product). "Can pay" means sponsorship.
 
 ## Needs you
 
-- **npm login and first publish.** Run `npm login` in a terminal, then tell me "publish". Unblocks
-  the launch bar's npm item and the install instructions everyone else will copy.
+- **The first publish.** Logged in and approved ("letse publish when ready"). npm asks for your
+  one-time code, so `npm publish` runs in a terminal where you can type it. npm only lets a
+  workflow publish (with provenance) once the package exists, so 1.0.0 goes from your machine and
+  later versions from the release workflow.
 - **OK to name competitors?** The migration guide (PRD 06) and any comparison page name
   ghost-cursor and Playwright's screencast cursor. Say which names are fine to use in public copy.
 
