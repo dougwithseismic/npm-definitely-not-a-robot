@@ -1,0 +1,25 @@
+name: Bug report
+description: Something doesn't work the way the docs say
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest script that shows it
+      description: Include the seed (`human.seed`) if the bug depends on movement.
+      render: ts
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: definitely-not-a-robot 1.0.0, playwright 1.64.1, Node 22, macOS
+    validations:
+      required: true

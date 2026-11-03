@@ -1,0 +1,15 @@
+name: Feature request
+description: Something you'd like it to do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: What are you trying to get done?
+      description: The job, not the solution. "Record a demo where the menu opens on hover" beats "add hoverMenu()".
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: What do you do today instead?
