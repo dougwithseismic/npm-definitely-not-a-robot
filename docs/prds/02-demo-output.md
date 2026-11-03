@@ -65,3 +65,71 @@ for every feature shipped so far. From here on every user-visible feature ships 
 7. README: hero GIF and per-feature GIFs.
 
 ## Implementation Notes
+
+Shipped 2026-11-03.
+
+**What was built**
+
+- One overlay serves both plugins: `src/plugins/overlay-page.ts` runs in the page and draws the
+  cursor, the press ring and the trail. `visibleCursor()` and `trail()` in
+  `src/plugins/overlay.ts` validate options and install it through `driver.addScript`. Tasks 1
+  and 2 asked for two files; one runtime with two option sets was simpler, and the second plugin
+  on a page only updates options.
+- The overlay is a `dnar-overlay` element on `<html>` with a closed shadow root, inline
+  `!important` styles set through CSSOM, shown as a manual popover so it sits in the top layer, and
+  raised again when a dialog or popover opens (`toggle` events). It re-mounts after
+  `document.open()` (Playwright's `setContent`) through a MutationObserver, and saves its
+  position to `sessionStorage` on `pagehide`.
+- Iframes don't draw, and don't build the overlay either. Each frame opens a `MessageChannel` to its parent on its first pointer event
+  and sends its moves down that, and the parent adds the frame's offset. The page's own `message`
+  handlers see one hello per frame document at most, never the moves. Chromium runs `window`
+  listeners in the order they were added whatever the capture flag, so `stopImmediatePropagation`
+  alone couldn't hide a relay from a handler added before the overlay.
+- Playwright driver: `addScript` adds an init script plus an immediate `evaluate` in every frame
+  (errors dropped, since a frame that navigates meanwhile gets the init script), once per page per
+  script source (a WeakMap), so a human per step doesn't pile up init scripts.
+- `inPage(fn)` (`src/in-page.ts`): esbuild's `keepNames` (used by tsx) wraps inner functions in
+  `__name(...)`, which doesn't exist in the page. Every function the driver sends into the page is
+  wrapped once at module level. The published build doesn't use keepNames and tsx doesn't
+  transform node_modules, so this protects contributors and anyone who bundles the library.
+- The trail is drawn in 16 shades of fade, one stroke each, and faded points are dropped from the
+  front of the list; at most 5000 points are kept.
+- `demo` preset: Fitts a 110 / b 170, curvature 0.2, overshoot 0.15, no tremor, 50 wpm with 0.15
+  variance, longer hover and think pauses, and `visibleCursor({ size: 28 })`. A plugin the user
+  passes with the same name replaces the preset's (in `createHuman`), so
+  `{ preset: 'demo', plugins: [visibleCursor({ color })] }` restyles the cursor instead of adding
+  a second one.
+- `pnpm demos` (`scripts/demos/`): a shared stage (header label, a code bar showing the running
+  line, an optional keycast), eight scenes, recorded with `recordVideo` in Chromium, trimmed by
+  timestamps and encoded to MP4 (x264, CRF 23) and a palette GIF that steps down fps and scale
+  until it's under 2 MB. Two-sided scenes are joined with `hstack`.
+- `examples/record-demo.mjs` with the README recipe; `pnpm smoke` runs it from the packed tarball
+  and checks a video over 10 KB was written.
+
+**Numbers**
+
+| Scene | Length | GIF |
+| --- | --- | --- |
+| hero | 8.6 s | 410 KB |
+| curved-paths | 7.0 s | 813 KB |
+| hover-menu | 4.1 s | 265 KB |
+| drag-and-drop | 3.4 s | 404 KB |
+| typing | 10.7 s | 1026 KB |
+| scroll-into-view | 5.2 s | 1011 KB |
+| cookie-banner | 7.3 s | 455 KB |
+| seed-replay | 5.4 s | 594 KB |
+
+All eight are under the 12 s and 2 MB budget; `docs/media` is about 6 MB and not in the package.
+Clips run in real time, so a busy machine stretches them: the final take ran at a load average
+over 100 and typing first came out at 12.7 s (10.7 s re-taken alone). Record on a quiet machine.
+Bundle: ESM 47.94 KB, CJS 48.32 KB. 72 tests (12 for the overlay). CI green on main.
+
+**Open**
+
+- Not checked in Firefox or WebKit: their browsers aren't installed at Playwright 1.64's builds
+  here. Re-raising above a modal relies on `<dialog>` toggle events. Belongs with cross-browser
+  CI (UX row).
+- An iframe inside a shadow root isn't found by the parent, so the cursor stops at its edge; a
+  CSS-transformed iframe draws the cursor offset.
+- Colours are checked only for being non-empty strings; an invalid one fails silently in the page.
+- The restored `sessionStorage` position can be stale until the first move on the new page.
