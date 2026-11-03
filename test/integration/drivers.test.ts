@@ -9,6 +9,7 @@ import {
 } from '../../src'
 import { isInside } from '../../src/geometry'
 import {
+    BROWSER,
     FIXTURE_HTML,
     failure,
     fast,
@@ -19,7 +20,7 @@ import {
 } from './fixture'
 
 // The same checks on every built-in driver. Puppeteer drives Playwright's Chromium, so no second
-// browser download is needed.
+// browser download is needed, and runs only when the tests do (not with DNAR_BROWSER=firefox).
 
 /** What these tests use from a page, which Playwright and Puppeteer pages share. */
 type AnyPage = (Omit<PlaywrightPageLike, 'evaluate'> | Omit<PuppeteerPageLike, 'evaluate'>) & {
@@ -53,7 +54,11 @@ const backends = {
     },
 }
 
-describe.each(Object.entries(backends))('on %s', (name, start) => {
+const running = Object.entries(backends).filter(
+    ([name]) => name === 'playwright' || BROWSER === 'chromium'
+)
+
+describe.each(running)('on %s', (name, start) => {
     let backend: Awaited<ReturnType<typeof start>>
     beforeAll(async () => {
         backend = await start()

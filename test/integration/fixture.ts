@@ -1,4 +1,4 @@
-import { type Browser, chromium, type Page } from 'playwright'
+import { type Browser, type BrowserType, chromium, firefox, type Page, webkit } from 'playwright'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
 import type { HumanError } from '../../src'
 
@@ -66,8 +66,14 @@ export const FIXTURE_HTML = /* html */ `<!doctype html>
 </body>
 </html>`
 
+/** The browser the integration tests run in: Chromium, or `DNAR_BROWSER=firefox` or `webkit`. */
+export const BROWSER = process.env.DNAR_BROWSER || 'chromium'
+const browsers: Record<string, BrowserType> = { chromium, firefox, webkit }
+
 export async function launch(): Promise<Browser> {
-    return chromium.launch({ headless: true })
+    const type = browsers[BROWSER]
+    if (!type) throw new Error(`DNAR_BROWSER is '${BROWSER}': use chromium, firefox or webkit.`)
+    return type.launch({ headless: true })
 }
 
 export const VIEWPORT = { width: 1280, height: 800 }
