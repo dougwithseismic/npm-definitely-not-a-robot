@@ -1,9 +1,11 @@
 /**
- * Records a short video of every feature with the library itself, into docs/media as an MP4 (for
- * the site) and a GIF (for the README). Needs ffmpeg on the PATH.
+ * Records a short video of every feature with the library itself, into docs/media as an MP4 and a
+ * poster frame (for the site) and a GIF (for the README). Needs ffmpeg and cwebp on the PATH
+ * (`brew install ffmpeg webp`).
  *
  *   pnpm demos              all of them
  *   pnpm demos hero typing  just these
+ *   pnpm demos --posters    only the poster frames, from the MP4s already there
  */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, statSync } from 'node:fs'
@@ -143,15 +145,30 @@ function encode(scene: Scene, clips: Clip[]): string {
         size = statSync(gif).size
         if (size <= GIF_MAX_BYTES) break
     }
+    const still = poster(mp4)
     const notes = [
         size > GIF_MAX_BYTES && 'GIF over 2 MB',
         duration > GIF_MAX_SECONDS && `over ${GIF_MAX_SECONDS}s`,
     ].filter(Boolean)
-    const kb = (file: string) => `${Math.round(statSync(file).size / 1024)} KB`
-    return `${scene.name}: ${duration.toFixed(1)}s, mp4 ${kb(mp4)}, gif ${kb(gif)}${notes.length ? `  (${notes.join(', ')})` : ''}`
+    return `${scene.name}: ${duration.toFixed(1)}s, mp4 ${kb(mp4)}, poster ${kb(still)}, gif ${kb(gif)}${notes.length ? `  (${notes.join(', ')})` : ''}`
 }
 
-const wanted = process.argv.slice(2)
+/**
+ * The still a video shows before it plays (the site loads videos only when they scroll near):
+ * the frame at 0.1s, where the site starts playing, so nothing jumps when it does.
+ */
+function poster(mp4: string): string {
+    const png = join(work, 'poster.png')
+    const webp = mp4.replace(/\.mp4$/, '.webp')
+    ffmpeg(['-ss', '0.1', '-i', mp4, '-frames:v', '1', png])
+    execFileSync('cwebp', ['-quiet', '-q', '80', png, '-o', webp])
+    return webp
+}
+
+const kb = (file: string) => `${Math.round(statSync(file).size / 1024)} KB`
+
+const postersOnly = process.argv.includes('--posters')
+const wanted = process.argv.slice(2).filter((arg) => arg !== '--posters')
 const unknown = wanted.filter((name) => !scenes.some((s) => s.name === name))
 if (unknown.length) {
     console.error(
@@ -162,14 +179,24 @@ if (unknown.length) {
 
 mkdirSync(OUT, { recursive: true })
 const work = mkdtempSync(join(tmpdir(), 'dnar-demos-'))
-const browser = await chromium.launch({ args: [`--remote-debugging-port=${debugPort}`] })
+const chosen = scenes.filter((s) => !wanted.length || wanted.includes(s.name))
 try {
-    for (const scene of scenes.filter((s) => !wanted.length || wanted.includes(s.name))) {
-        const clips: Clip[] = []
-        for (const side of scene.sides) clips.push(await film(browser, scene, side, work))
-        console.log(encode(scene, clips))
+    if (postersOnly) {
+        for (const scene of chosen) {
+            console.log(`${scene.name}: poster ${kb(poster(join(OUT, `${scene.name}.mp4`)))}`)
+        }
+    } else {
+        const browser = await chromium.launch({ args: [`--remote-debugging-port=${debugPort}`] })
+        try {
+            for (const scene of chosen) {
+                const clips: Clip[] = []
+                for (const side of scene.sides) clips.push(await film(browser, scene, side, work))
+                console.log(encode(scene, clips))
+            }
+        } finally {
+            await browser.close()
+        }
     }
 } finally {
-    await browser.close()
     rmSync(work, { recursive: true, force: true })
 }

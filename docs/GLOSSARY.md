@@ -237,3 +237,10 @@ web server image (Caddy) that Railway runs.
 **Reduced motion.** A system setting people use when animation makes them unwell. With it on, the
 site's demo doesn't play by itself and videos don't autoplay.
 
+**Poster frame.** The still image a `<video>` shows until it plays (its `poster` attribute). The
+site loads videos only as they scroll near, so without one each card is blank until then. `pnpm
+demos` saves the frame each clip starts on as a WebP next to the MP4.
+
+**WebP.** An image format every current browser shows, usually less than half the size of a JPEG
+of the same screen. Made with `cwebp`, from Google's `webp` tools.
+

@@ -26,7 +26,7 @@
     <h1>Some widgets only work with real input. <span>Test them with it.</span></h1>
     <p class="lead">Search-as-you-type, signature pads, drag-and-drop boards and per-keystroke validation wait for the events a person makes. Playwright's quickest calls skip those events, so the test fails on a widget that works, or you write a workaround for each one.</p>
     <figure class="clip feature">
-      <video src="/media/real-input.mp4#t=0.1" muted loop playsinline preload="none" aria-label="With page.fill the search box shows no suggestions and a dragged signature is one straight jump, too short to count. With definitely-not-a-robot the suggestions appear as each key is typed and the signature is drawn and accepted."></video>
+      <video src="/media/real-input.mp4#t=0.1" poster="/media/real-input.webp" muted loop playsinline preload="none" aria-label="With page.fill the search box shows no suggestions and a dragged signature is one straight jump, too short to count. With definitely-not-a-robot the suggestions appear as each key is typed and the signature is drawn and accepted."></video>
       <figcaption>Left: <code>page.fill()</code> sends no key events, so no suggestions, and <code>page.dragAndDrop()</code> arrives in one jump, too short to count as a signature. Right: the same steps with <code>human</code>.</figcaption>
     </figure>
   </section>

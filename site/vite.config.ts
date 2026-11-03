@@ -126,7 +126,7 @@ async function fill(name: string, { readme, days }: Sources, page: string): Prom
             return videos(readme)
                 .map(
                     ({ name, caption }) => `<figure class="clip">
-  <video src="/media/${name}.mp4#t=0.1" muted loop playsinline preload="none" aria-label="${caption}"></video>
+  <video src="/media/${name}.mp4#t=0.1" poster="/media/${name}.webp" muted loop playsinline preload="none" aria-label="${caption}"></video>
   <figcaption>${caption}</figcaption>
 </figure>`
                 )
@@ -165,7 +165,8 @@ const content = (): Plugin => ({
                 .replaceAll('%VERSION%', pkg.version)
         },
     },
-    // The demo videos live in docs/media; serve them in dev and copy them into the build.
+    // The demo videos and their posters live in docs/media; serve them in dev and copy them into the
+    // build.
     configureServer(server) {
         server.middlewares.use('/media', (req, res, next) => {
             const file = join(media, (req.url ?? '').split('?')[0] ?? '')
@@ -176,7 +177,7 @@ const content = (): Plugin => ({
             const start = range ? Number(range[1]) : 0
             const end = range?.[2] ? Math.min(Number(range[2]), size - 1) : size - 1
             res.writeHead(range ? 206 : 200, {
-                'Content-Type': 'video/mp4',
+                'Content-Type': file.endsWith('.webp') ? 'image/webp' : 'video/mp4',
                 'Content-Length': end - start + 1,
                 'Accept-Ranges': 'bytes',
                 ...(range && { 'Content-Range': `bytes ${start}-${end}/${size}` }),
@@ -203,7 +204,7 @@ ${pages.map((p) => `  <url><loc>${site.url}${p}</loc></url>`).join('\n')}
     writeBundle(options) {
         const out = join(options.dir ?? '', 'media')
         mkdirSync(out, { recursive: true })
-        for (const file of readdirSync(media).filter((f) => f.endsWith('.mp4'))) {
+        for (const file of readdirSync(media).filter((f) => /\.(mp4|webp)$/.test(f))) {
             cpSync(join(media, file), join(out, file))
         }
     },

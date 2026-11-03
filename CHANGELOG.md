@@ -4,6 +4,12 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Videos on the website show a picture before they play · Improved
+- Every video on the website now shows its first frame straight away, on slow connections, with
+  reduced motion on, and in full-page screenshots. Before, each card was a blank box until its
+  video loaded.
+- Try it: "See every feature" and the three use-case pages on the website.
+
 ### Typing adds to the end of email and number fields · Fixed
 - `human.type('#email', '.org')` on an email or number field that already has text now adds it at
   the end. Those fields don't let scripts move the caret, so the text used to land wherever the
