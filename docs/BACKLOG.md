@@ -12,7 +12,7 @@ describes everything else.
 - [x] 01 Core engine and factory: `createHuman`, Playwright driver, motion, typing, scroll, presets, seeds (`docs/prds/01-core-engine.md`) (shipped 2026-11-03)
 - [x] 02 Demo-ready output: visible cursor, click ripples, `demo` preset, a video of every feature (`docs/prds/02-demo-output.md`) (shipped 2026-11-03)
 - [~] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`) (shipped 2026-11-03)
-- [~] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`) (building since 2026-11-03, autopilot session)
+- [x] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`) (shipped 2026-11-03, PR 12; `funding` moves to the sponsorship item below)
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
 - [~] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`) (driver shipped 2026-11-03: `createHuman` works on Puppeteer pages, PR 10; the migration guide waits on naming competitors)
 - [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
@@ -27,7 +27,7 @@ database backups (no server-side product). "Can pay" means sponsorship.
       README quickstart runs first time against a real page (`pnpm smoke`)
 - [x] First value in under two minutes: install plus a quickstart of ten lines or fewer
 - [x] Errors say what happened and what to do (target not found, not visible, wrong page type)
-- [ ] README first screen says who it's for, the outcome and why this over the alternatives, with
+- [x] README first screen says who it's for, the outcome and why this over the alternatives, with
       one call to action (install)
 - [x] A demo video of every feature in action, made with the library itself
 - [x] Typed, ESM and CommonJS, Node 18+, works with `playwright` and `@playwright/test`
@@ -36,7 +36,8 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [x] LICENSE, SECURITY.md, CONTRIBUTING.md, issue templates
 - [x] Responsible-use statement: what it is for and what it doesn't do
 - [ ] Published to npm with provenance **(you: type npm's one-time code for the first publish)**
-- [ ] Sponsorship link that works **(you: enable GitHub Sponsors, or name another link)**
+- [ ] Sponsorship link that works, also as `funding` in package.json **(you: enable GitHub
+      Sponsors, or name another link)**
 - [x] Landing site live with the live demo, Open Graph image, sitemap, 404
 - [x] Use-case pages from `docs/MARKET.md`
 - [x] Public changelog page fed from `CHANGELOG.md`
