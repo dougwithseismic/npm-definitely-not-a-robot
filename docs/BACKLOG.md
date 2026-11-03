@@ -16,7 +16,7 @@ describes everything else.
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
 - [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
 - [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
-- [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`)
+- [ ] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`) (building since 2026-11-03, autopilot session)
 
 ## Launch bar
 
