@@ -58,6 +58,9 @@ We do the same on some long moves.
 
 **Tremor.** Tiny involuntary wobble in a hand. A few pixels of noise along the path.
 
+**Round trip.** One message to the browser and its reply, a few milliseconds each. Every mouse
+step is one, so instant mode sends a few points per move instead of dozens.
+
 **Plan, then play.** We first compute the whole movement as a list of timed points (*plan*), then
 send them to the browser on a clock (*play*). Planning is pure maths, so it can be tested without a
 browser and even run on the landing page.
@@ -119,6 +122,19 @@ pages block inline `<style>` and `<script>` tags; the overlay uses neither, so i
 around other functions to preserve their names. It only exists in Node, so a function serialised
 into the page would fail. We give the page a stand-in.
 
+## Playwright Test
+
+**Fixture.** A value Playwright Test sets up for each test and hands over by name: `page`,
+`context`, and our `human`. A test asks for what it needs in its arguments
+(`async ({ page, human }) => …`); Playwright builds it before the test and cleans up after, and
+only builds the ones a test asks for. `test.extend()` adds new fixtures.
+
+**Option fixture.** A fixture that is a setting rather than an object, changed with `test.use()`
+in a file or `use` in `playwright.config.ts`. `humanOptions` is one.
+
+**`mergeTests`.** Playwright's way to combine two `test` objects that each add fixtures, so our
+`human` can sit next to your own.
+
 ## Packaging
 
 **ESM and CommonJS.** Two module systems in JavaScript: `import`/`export` (ESM, the standard) and
@@ -129,7 +145,18 @@ project.
 autocomplete, without the code.
 
 **Peer dependency.** A package we work *with* but expect you to install yourself, at the version
-you choose (Playwright). Bundling our own copy would clash with yours.
+you choose (Playwright). Bundling our own copy would clash with yours. An *optional* peer
+(`@playwright/test` for us) only matters if you use the part that needs it: nothing installs or
+loads it for you, and the core never imports it.
+
+**Entry point (subpath export).** A separate front door into the package.
+`definitely-not-a-robot/playwright` is a second entry point, its own file in `dist/`, so importing
+the core never loads the test runner.
+
+**Bundler (tsdown).** The tool that turns `src/` into the files in `dist/`: ESM and CommonJS
+builds plus type declarations. Ours also runs *publint* and *arethetypeswrong*, two checkers that
+fail the build if any way of importing the package (ESM, CommonJS, TypeScript's resolvers) would
+find the wrong file.
 
 **`exports` map.** The part of `package.json` that says which files `import 'definitely-not-a-robot'`
 and `import 'definitely-not-a-robot/playwright'` resolve to.

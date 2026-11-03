@@ -39,6 +39,27 @@ await browser.close()
 Run it and watch: the cursor arcs over to the field, the text goes in key by key, and the
 checkbox gets clicked a little off-centre, the way you'd click it.
 
+### In Playwright Test
+
+Change one import and every test gets a `human` next to `page`:
+
+```ts
+import { expect, test } from 'definitely-not-a-robot/playwright'
+
+test('adds a todo', async ({ page, human }) => {
+    await page.goto('https://demo.playwright.dev/todomvc')
+    await human.type('.new-todo', 'Buy milk')
+    await human.press('Enter')
+    await expect(page.getByTestId('todo-title')).toHaveText('Buy milk')
+})
+```
+
+Set options for a file with `test.use({ humanOptions: { preset: 'demo' } })`, or for every test
+with `use: { humanOptions: { … } }` in `playwright.config.ts` (in TypeScript, write
+`defineConfig<HumanFixtures>({ … })`, importing the type from here). Already have your own `test`?
+Combine the two with Playwright's `mergeTests(yourTest, test)`. Everything in the main package is
+exported here too, so one import covers it. Needs `@playwright/test` 1.40 or later.
+
 ## Why
 
 Playwright is built for speed. `click()` teleports the mouse to the exact centre of an element and
@@ -62,6 +83,8 @@ wrong when your automation needs to look or behave like a person:
 - **Wheel scrolling** in notches and bursts. Targets off-screen are scrolled into view before
   the cursor heads for them.
 - **Hover, drag and drop, double-click, right-click and key combinations.**
+- **A Playwright Test fixture**: import `test` from `definitely-not-a-robot/playwright` and every
+  test gets a `human`.
 - **A visible cursor for demo videos**: `preset: 'demo'` draws a cursor, with a ring on every
   press, into screenshots and `recordVideo` recordings. Headless browsers draw none of their own.
 - **Seeds**: `createHuman(page, { seed: 42 })` replays identical paths and timings, so a flaky
@@ -82,7 +105,7 @@ Every clip below was recorded by the library itself, with `preset: 'demo'` and P
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/curved-paths.gif" alt="Curved paths, timed by distance and size, with an overshoot on long moves"><br>Curved paths, timed by distance and size, with an overshoot on long moves</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/typing.gif" alt="Typing with a rhythm, Shift for capitals, and a typo fixed on the spot"><br>Typing with a rhythm, Shift for capitals, and a typo fixed on the spot</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/hover-menu.gif" alt="Hover opens menus on the way, then clicks inside them"><br>Hover opens menus on the way, then clicks inside them</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/drag-and-drop.gif" alt="Drag and drop, holding the button the whole way"><br>Drag and drop, holding the button the whole way</td></tr>
 <tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/scroll-into-view.gif" alt="Off-screen targets are scrolled into view with the wheel, in bursts"><br>Off-screen targets are scrolled into view with the wheel, in bursts</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/cookie-banner.gif" alt="Won’t click through a cookie banner, and says what’s in the way"><br>Won’t click through a cookie banner, and says what’s in the way</td></tr>
-<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td></td></tr>
+<tr><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/seed-replay.gif" alt="The same seed replays the same run, path for path"><br>The same seed replays the same run, path for path</td><td width="50%" valign="top"><img src="https://raw.githubusercontent.com/dougwithseismic/npm-definitely-not-a-robot/main/docs/media/playwright-test.gif" alt="In Playwright Test: one import, and every test gets a human"><br>In Playwright Test: one import, and every test gets a human</td></tr>
 </table>
 
 ## API
@@ -157,7 +180,7 @@ await browser.close()
 `preset: 'demo'` moves smoothly, types at a steady 50 words a minute and draws the cursor. The
 cursor follows the page's real mouse events, so it shows exactly what the page received.
 Playwright saves WebM; `ffmpeg -i videos/<file>.webm demo.mp4` makes an MP4. In Playwright Test,
-set `use: { video: 'on' }` and create the human with `preset: 'demo'` in your test.
+set `use: { video: 'on', humanOptions: { preset: 'demo' } }` and use the `human` fixture.
 
 To add the cursor to any other preset, restyle the demo one, or see the path the mouse took (your
 `visibleCursor()` replaces the preset's):
@@ -178,8 +201,9 @@ DNAR_SPEED=instant npx playwright test
 ```
 
 The environment variable overrides `speed` in code, so the same script is human when you watch it
-and fast when CI runs it. Instant mode skips `human.pause()` too, so wait for the page with
-Playwright's `expect` or `waitFor`, not with a pause.
+and fast when CI runs it. Nothing switches on its own: without it, CI runs at human speed, so
+videos recorded there still look like a person. Instant mode skips `human.pause()` too, so wait
+for the page with Playwright's `expect` or `waitFor`, not with a pause.
 
 ### Replay a run exactly
 
@@ -260,7 +284,9 @@ on sites you own or have permission to automate: demos, tests and research.
 **Will this get me past bot detection?** No, and it isn't built to. Modern detection looks at much
 more than mouse movement.
 
-**Does it work with `@playwright/test`?** Yes. Pass the test's `page` to `createHuman`.
+**Does it work with `@playwright/test`?** Yes. Import `test` from
+`definitely-not-a-robot/playwright` and every test gets a `human`, or pass the test's `page` to
+`createHuman` yourself.
 
 **Does it work with Puppeteer?** Not yet. Playwright only for now.
 

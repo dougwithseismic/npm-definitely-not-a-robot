@@ -103,6 +103,19 @@ export interface Human<P = unknown> {
 const DEFAULT_TIMEOUT = 10_000
 /** Pixels kept clear of the viewport edges when aiming. */
 const EDGE = 4
+/**
+ * Events sent per movement or scroll in instant mode. Each event is a round trip to the browser, so
+ * sending every planned one takes about as long as a person would.
+ */
+const INSTANT_EVENTS = 8
+
+/** `items` cut into at most `count` runs of about equal length, in order. */
+const runs = <T>(items: T[], count: number): T[][] => {
+    const n = Math.min(count, items.length)
+    return Array.from({ length: n }, (_, i) =>
+        items.slice(Math.floor((i * items.length) / n), Math.floor(((i + 1) * items.length) / n))
+    )
+}
 
 const isPoint = (value: unknown): value is Point =>
     !!value &&
@@ -347,7 +360,13 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     }
 
     async function playWheel(dx: number, dy: number): Promise<void> {
-        for (const step of scrolling.plan({ dx, dy, random })) {
+        const steps = scrolling.plan({ dx, dy, random })
+        const merged = runs(steps, INSTANT_EVENTS).map((run) => ({
+            dx: run.reduce((sum, step) => sum + step.dx, 0),
+            dy: run.reduce((sum, step) => sum + step.dy, 0),
+            delay: 0,
+        }))
+        for (const step of instant ? merged : steps) {
             await wait(step.delay)
             await driver.wheel(step.dx, step.dy)
         }
@@ -477,9 +496,14 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
         )
     }
 
-    /** Travel along a planned path to an aimed point. */
-    const travel = (from: Point, to: Aim) =>
-        playPath(motion.plan({ from, to: to.point, targetSize: to.size, random }))
+    const pathTo = (from: Point, to: Aim) =>
+        motion.plan({ from, to: to.point, targetSize: to.size, random })
+
+    /** Travel along a planned path to an aimed point. Instant mode sends a few points along it. */
+    const travel = (from: Point, to: Aim) => {
+        const path = pathTo(from, to)
+        return playPath(instant ? runs(path, INSTANT_EVENTS).map((run) => run.at(-1)!) : path)
+    }
 
     async function moveTo(target: Target, opts: MoveOptions = {}, verb?: string): Promise<Aim> {
         const from = await ensurePosition()
@@ -634,8 +658,11 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
                 await wait(between(timing.hesitation))
                 await driver.mouseDown('left', 1)
                 await wait(random.range(80, 200))
-                // What's being dragged may cover the drop target, so skip the cover check.
-                await travel(start.point, await aim(to, { ...opts, force: true }, 'drop on'))
+                // What's being dragged may cover the drop target, so skip the cover check. Pages read
+                // every move while a button is down (drawing, reordering a list), so even in instant
+                // mode a drag sends the whole path.
+                const drop = await aim(to, { ...opts, force: true }, 'drop on')
+                await playPath(pathTo(start.point, drop))
                 await wait(random.range(60, 150))
                 await driver.mouseUp('left', 1)
             }),

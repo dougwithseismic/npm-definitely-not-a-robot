@@ -53,19 +53,25 @@ const signupBody = `<main><div class="card" id="card">
 const signupScript = `document.getElementById('signup').addEventListener('click', () =>
     setTimeout(() => document.getElementById('card').classList.add('welcome'), 250))`
 
+const signupStage = { body: signupBody, css: signupCss, script: signupScript }
+
+/** Signs Ada up with the human, showing each line in the code bar. */
+async function signUp({ human, code }: Take) {
+    await code("await human.type('#email', 'ada@example.com')")
+    await human.type('#email', 'ada@example.com')
+    await code("await human.type('#password', 'hunter22')")
+    await human.type('#password', 'hunter22')
+    await code("await human.click('#signup')")
+    await human.click('#signup')
+}
+
 const hero: Scene = {
     name: 'hero',
     viewport: half,
     start: { x: 560, y: 470 },
     sides: [
         {
-            stage: {
-                label: 'Playwright on its own',
-                plain: true,
-                body: signupBody,
-                css: signupCss,
-                script: signupScript,
-            },
+            stage: { label: 'Playwright on its own', plain: true, ...signupStage },
             async run({ page, code }) {
                 await page.waitForTimeout(500)
                 await code("await page.fill('#email', 'ada@example.com')")
@@ -79,20 +85,29 @@ const hero: Scene = {
             },
         },
         {
-            stage: {
-                label: 'With definitely-not-a-robot',
-                body: signupBody,
-                css: signupCss,
-                script: signupScript,
-            },
+            stage: { label: 'With definitely-not-a-robot', ...signupStage },
             options: { speed: 1.4 },
-            async run({ human, code }) {
-                await code("await human.type('#email', 'ada@example.com')")
-                await human.type('#email', 'ada@example.com')
-                await code("await human.type('#password', 'hunter22')")
-                await human.type('#password', 'hunter22')
-                await code("await human.click('#signup')")
-                await human.click('#signup')
+            run: signUp,
+        },
+    ],
+}
+
+// ---- the Playwright Test fixture ----
+
+const fixture: Scene = {
+    name: 'playwright-test',
+    viewport: wide,
+    start: { x: 900, y: 620 },
+    sides: [
+        {
+            stage: { label: 'In Playwright Test', ...signupStage },
+            options: { speed: 1.4 },
+            async run(take) {
+                await take.code("import { test } from 'definitely-not-a-robot/playwright'")
+                await take.page.waitForTimeout(1200)
+                await take.code("test('sign up', async ({ page, human }) => {")
+                await take.page.waitForTimeout(900)
+                await signUp(take)
             },
         },
     ],
@@ -415,4 +430,4 @@ const seed: Scene = {
     sides: [seedSide(1), seedSide(2)],
 }
 
-export const scenes: Scene[] = [hero, curve, hover, drag, typing, scroll, cover, seed]
+export const scenes: Scene[] = [hero, curve, hover, drag, typing, scroll, cover, seed, fixture]

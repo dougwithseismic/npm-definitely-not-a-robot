@@ -6,6 +6,13 @@
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "playwright": [
+                "./dist/playwright.d.cts"
+            ]
+        }
+    },
     "exports": {
         ".": {
             "import": {
@@ -15,6 +22,16 @@
             "require": {
                 "types": "./dist/index.d.cts",
                 "default": "./dist/index.cjs"
+            }
+        },
+        "./playwright": {
+            "import": {
+                "types": "./dist/playwright.d.ts",
+                "default": "./dist/playwright.js"
+            },
+            "require": {
+                "types": "./dist/playwright.d.cts",
+                "default": "./dist/playwright.cjs"
             }
         },
         "./package.json": "./package.json"
@@ -37,7 +54,8 @@
         "format": "biome check --write .",
         "test": "vitest run",
         "test:watch": "vitest",
-        "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+        "test:fixture": "playwright test -c test/playwright",
+        "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:fixture && pnpm build",
         "smoke": "node scripts/smoke.mjs",
         "prepublishOnly": "pnpm check",
         "demos": "tsx scripts/demos/record.ts"
@@ -67,6 +85,14 @@
     },
     "author": "Doug Silkstone <doug@withseismic.com> (https://withseismic.com)",
     "license": "MIT",
+    "peerDependencies": {
+        "@playwright/test": ">=1.40.0"
+    },
+    "peerDependenciesMeta": {
+        "@playwright/test": {
+            "optional": true
+        }
+    },
     "devDependencies": {
         "@arethetypeswrong/core": "^0.18.5",
         "@biomejs/biome": "^2.6.4",

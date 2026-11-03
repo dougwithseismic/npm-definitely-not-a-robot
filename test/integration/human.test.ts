@@ -99,8 +99,9 @@ describe('hovering and dragging', () => {
         ).toBe(true)
     })
 
-    it('drags one element onto another', async () => {
-        const human = createHuman(fx.page, { speed: 4 })
+    // Instant mode thins mouse paths, but not while a button is held.
+    it.each([4, 'instant'] as const)('drags along the whole path at speed %s', async (speed) => {
+        const human = createHuman(fx.page, { speed })
         await human.drag('#source', '#dropzone')
         expect(
             await fx.page.evaluate(() => (window as unknown as { dropped?: boolean }).dropped)
@@ -171,6 +172,16 @@ describe('scrolling', () => {
         expect((await events(fx.page)).filter((e) => e.type === 'wheel').length).toBeGreaterThan(5)
     })
 
+    it('merges wheel notches into a few events in instant mode', async () => {
+        const human = createHuman(fx.page, { speed: 'instant' })
+        await human.scroll({ by: 2000 })
+        await fx.page.waitForTimeout(300)
+        expect(await scrollY()).toBeGreaterThan(1800)
+        expect(
+            (await events(fx.page)).filter((e) => e.type === 'wheel').length
+        ).toBeLessThanOrEqual(8)
+    })
+
     it('scrolls to the bottom and back to the top', async () => {
         const human = createHuman(fx.page, { speed: 'instant' })
         await human.scroll({ to: 'bottom' })
@@ -236,6 +247,14 @@ describe('the factory', () => {
         } finally {
             delete process.env.DNAR_SPEED
         }
+    })
+
+    it('sends a few points per movement in instant mode, not one round trip per point', async () => {
+        const human = createHuman(fx.page, { speed: 'instant', startPosition: { x: 20, y: 20 } })
+        const landed = await human.move({ x: 1100, y: 600 })
+        const moves = (await events(fx.page)).filter((e) => e.type === 'mousemove')
+        expect(moves.length).toBeLessThanOrEqual(9) // the start, then 8 along the way
+        expect(moves.at(-1)).toMatchObject(landed)
     })
 
     it('calls plugin hooks', async () => {

@@ -4,6 +4,18 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03 · v1.0.0 (not yet on npm)
 
+### A `human` in every Playwright Test (PRD 03) · New
+- `import { test, expect } from 'definitely-not-a-robot/playwright'` and every test gets a `human`
+  next to `page`, driving that test's page. Nothing else in your tests changes.
+- `test.use({ humanOptions: { preset: 'demo' } })` sets options for a file, and
+  `use: { humanOptions }` in `playwright.config.ts` sets them for every test. Add `video: 'on'`
+  and every test records a demo video with the cursor in it.
+- Already have your own `test`? Playwright's `mergeTests(yourTest, test)` combines them.
+- CI keeps human timing until you set `DNAR_SPEED=instant`, so videos recorded there still look
+  like a person.
+- `@playwright/test` stays optional: the main package never loads it.
+- Try it: "In Playwright Test" in the README.
+
 ### Demo videos that show the cursor (PRD 02) · New
 - `createHuman(page, { preset: 'demo' })` draws a cursor, with a ring on every click, into
   screenshots and `recordVideo` recordings. Headless browsers draw no cursor of their own, so
@@ -38,6 +50,9 @@ What's new, newest first. Each entry says what you can do now.
 - Try it: the Quickstart in the README.
 
 ### Fixed
+- `speed: 'instant'` is now fast for mouse moves and scrolling too. A long move used to take as long
+  as a person would; now it takes about a tenth of a second. Drags still send every point of the
+  path, because pages read each move while the button is held.
 - Importing the package no longer opens a browser.
 - Two humans on the same page no longer share one cursor.
 - The package installs and runs without pulling in Puppeteer.
