@@ -14,7 +14,7 @@ describes everything else.
 - [~] 03 Playwright Test fixture: `human` fixture from `definitely-not-a-robot/playwright` (`docs/prds/03-test-fixture.md`) (shipped 2026-11-03)
 - [ ] 04 A README that sells: hero, demo video, 60-second quickstart, recipes, glossary (`docs/prds/04-readme.md`)
 - [~] 05 CI and release: GitHub Actions checks, pack smoke test, tagged releases with npm provenance (`docs/prds/05-ci-release.md`) (CI checks, smoke test and tag-based release workflow shipped 2026-11-03; provenance starts once npm trusts the workflow)
-- [ ] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`)
+- [~] 06 Puppeteer adapter and ghost-cursor migration guide (`docs/prds/06-puppeteer-switching.md`) (building since 2026-11-03, autopilot session: the driver first; the guide waits on naming competitors)
 - [x] 07 Landing site with a live "spot the robot" demo, on Railway (`docs/prds/07-landing-site.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app)
 - [x] 08 Use-case recipes: demo videos, realistic E2E, testing your own bot defences (`docs/prds/08-use-cases.md`) (shipped 2026-11-03: https://site-production-4098.up.railway.app/#uses)
 
@@ -56,6 +56,8 @@ database backups (no server-side product). "Can pay" means sponsorship.
 - [ ] Targets inside scrolling panels and iframes are brought into view with an instant
       `scrollIntoViewIfNeeded`. A person would move over the panel and turn the wheel; do that
       (needs the clipping box from the driver, see PRD 01 notes).
+- [ ] Use-case and gallery cards are blank until their video loads (`preload="none"`), which shows
+      on slow connections and in full-page screenshots. Give each video a poster frame.
 - [ ] Typing into an email or number field that already has text lands where the click did,
       because those inputs don't allow moving the caret. Press End (or Cmd+Right on macOS) instead.
 - [ ] Check the visible cursor in Firefox and WebKit (raising above a modal relies on `<dialog>`
