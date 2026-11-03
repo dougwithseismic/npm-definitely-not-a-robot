@@ -368,6 +368,85 @@ const scroll: Scene = {
     ],
 }
 
+// ---- scrolling a panel inside the page ----
+
+const senders = [
+    ['Linear', 'Weekly digest: 12 issues closed'],
+    ['Figma', 'Ada shared “Checkout v3” with you'],
+    ['GitHub', '[api] Release 4.2.0 is out'],
+    ['Stripe', 'Your payout of $3,410 is on its way'],
+    ['Notion', 'Q4 planning: comments on your page'],
+    ['Vercel', 'Deployment ready: marketing-site'],
+    ['Slack', '3 new messages in #launch'],
+    ['Calendly', 'New meeting: Product demo, Thu 2pm'],
+    ['Loom', 'Grace watched “Onboarding walkthrough”'],
+    ['Intercom', '2 conversations waiting for a reply'],
+    ['Sentry', 'Resolved: TypeError in checkout.ts'],
+    ['Mailchimp', 'Your November campaign report'],
+    ['HubSpot', 'Deal moved to “Contract sent”'],
+    ['Zoom', 'Cloud recording is now available'],
+]
+const inboxRows = senders
+    .map(([from, subject]) => `<div class="row"><b>${from}</b><span>${subject}</span></div>`)
+    .join('')
+const inboxStage = {
+    label: 'Scrolling panels',
+    css: `.app { position: fixed; top: 52px; bottom: 64px; left: 0; right: 0; display: flex;
+        background: #fff; }
+    nav { width: 130px; padding: 18px 14px; border-right: 1px solid var(--line); font-size: 15px;
+        color: var(--muted); display: grid; align-content: start; gap: 6px; }
+    nav .on { color: var(--ink); font-weight: 650; background: #eef2ff; border-radius: 8px;
+        padding: 4px 10px; margin: 0 -10px; }
+    #list { width: 280px; overflow: auto; border-right: 1px solid var(--line); }
+    .row { padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 14px;
+        line-height: 1.35; display: grid; cursor: default; }
+    .row span { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row.picked { background: #eef2ff; box-shadow: inset 3px 0 var(--accent); }
+    #invoice b { color: var(--accent); }
+    #read { flex: 1; padding: 26px 24px; color: var(--muted); font-size: 15px; }
+    #read h2 { color: var(--ink); font-size: 21px; margin: 0 0 6px; letter-spacing: -.02em; }
+    #read .due { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #f0fdf4;
+        color: var(--good); font-weight: 600; }`,
+    body: `<div class="app">
+      <nav><span class="on">Inbox</span><span>Starred</span><span>Sent</span><span>Archive</span></nav>
+      <div id="list">${inboxRows}<div class="row" id="invoice"><b>Northwind</b><span>Invoice #1042 for October</span></div>
+        <div class="row"><b>Figma</b><span>New comment on “Pricing page”</span></div></div>
+      <div id="read">Pick a message to read it.</div>
+    </div>`,
+    script: `document.getElementById('invoice').addEventListener('click', (e) => {
+        e.currentTarget.classList.add('picked')
+        document.getElementById('read').innerHTML =
+            '<h2>Invoice #1042</h2>Northwind Traders · October<div class="due">$1,280 due Friday</div>'
+    })`,
+}
+
+const panel: Scene = {
+    name: 'scroll-panel',
+    viewport: half,
+    start: { x: 560, y: 330 },
+    sides: [
+        {
+            stage: { ...inboxStage, label: 'Playwright on its own', plain: true },
+            async run({ page, code }) {
+                await page.waitForTimeout(700)
+                await code("await page.click('#invoice')")
+                await page.click('#invoice')
+                await page.waitForTimeout(1200)
+            },
+        },
+        {
+            stage: { ...inboxStage, label: 'With definitely-not-a-robot' },
+            options: { seed: 3 },
+            async run({ page, human, code }) {
+                await page.waitForTimeout(700)
+                await code("await human.click('#invoice')  // wheels the list")
+                await human.click('#invoice')
+                await page.waitForTimeout(1200)
+            },
+        },
+    ],
+}
+
 // ---- refusing to click through a cookie banner ----
 
 const cover: Scene = {
@@ -596,6 +675,7 @@ export const scenes: Scene[] = [
     drag,
     typing,
     scroll,
+    panel,
     cover,
     seed,
     fixture,

@@ -107,6 +107,11 @@ it isn't the target, the click would land on something else.
 *Clipped*: the target is scrolled out of sight inside a scrolling panel or an iframe, so the point
 shows something else. Covered waits or throws `TARGET_COVERED`; clipped scrolls the panel first.
 
+**Scrolling panel.** A part of a page that scrolls on its own, like an inbox list, a chat or an
+app's main area (CSS `overflow: auto`). The wheel scrolls whatever is under the mouse, so to reach
+something hidden in one, the cursor first moves over the panel, as a hand would. The hit test
+reports the part of the page the panel shows (the *clip*) so we know where to go.
+
 **Strict mode (Playwright).** A locator must match exactly one element when you act on it. If it
 matches several, Playwright refuses, and we say so as `TARGET_AMBIGUOUS`.
 

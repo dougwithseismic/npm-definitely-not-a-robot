@@ -17,6 +17,12 @@ export interface HitTest {
     covering?: string
     /** True when the point is outside what the target's scrolling panels or frame show. */
     clipped?: boolean
+    /**
+     * When clipped by a panel that scrolls with the wheel, or by its frame: the area they show,
+     * in top-level viewport pixels, including any part off screen. The mouse moves over it and
+     * turns the wheel there. Without it, a clipped target is scrolled into view instantly.
+     */
+    clip?: Box
 }
 
 /** An element the driver can measure and bring into view. */

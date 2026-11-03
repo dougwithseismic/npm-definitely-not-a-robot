@@ -207,6 +207,25 @@ describe.each(Object.entries(backends))('on %s', (name, start) => {
             expect(y).toBe(max)
         }))
 
+    it('wheels a scrolling panel to a target hidden inside it, with the mouse over the panel', () =>
+        onFixture(async (page) => {
+            await page.evaluate(() => {
+                document.body.insertAdjacentHTML(
+                    'beforeend',
+                    `<div id="panel" style="position:fixed;left:900px;top:100px;width:300px;height:200px;overflow:auto;background:white;z-index:100">
+                      <div style="height:1000px"><button id="deep" style="margin-top:600px">Deep</button></div>
+                    </div>`
+                )
+            })
+            const human = createHuman(page, fast)
+            await human.click('#deep')
+            const log = await events(page)
+            const wheels = log.filter((e) => e.type === 'wheel')
+            expect(wheels.length).toBeGreaterThan(0)
+            expect(wheels.every((e) => e.x >= 900 && e.y >= 100 && e.y < 300)).toBe(true)
+            expect(log.find((e) => e.type === 'click')?.target).toBe('deep')
+        }))
+
     it('takes element handles and waits for late elements', () =>
         onFixture(async (page) => {
             const human = createHuman(page, fast)

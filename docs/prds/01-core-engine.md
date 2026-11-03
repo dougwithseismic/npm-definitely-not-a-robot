@@ -135,6 +135,9 @@ Shipped 2026-11-03.
     `ElementRef.caretToEnd`, the course correction re-aims, `createHuman` only accepts a page
     (or anything with `{ driver }`) at compile time, `scroll({ to })` no longer accepts points.
 - **Open**: Puppeteer driver (PRD 06). Targets in scrolling panels and iframes are scrolled with
-  `scrollIntoViewIfNeeded`, not the wheel over the panel (parking lot). A parent-page element
+  `scrollIntoViewIfNeeded`, not the wheel over the panel (done 2026-11-03: the hit test reports
+  the clip of wheel-scrollable panels and frames, and the cursor wheels over it; a panel mostly
+  off screen waits for the page to scroll first, and a frame's clip doesn't include panels in the
+  parent page around it, so those fall back to the instant scroll). A parent-page element
   covering an iframe isn't detected (cross-origin frames can't see their parent). Email and
   number inputs don't support moving the caret, so typing there lands where the click did.

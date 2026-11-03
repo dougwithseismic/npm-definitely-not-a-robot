@@ -4,6 +4,14 @@ What's new, newest first. Each entry says what you can do now.
 
 ## 2026-11-03
 
+### Scrolling lists, panels and iframes turn with the wheel · Improved
+- When a target is hidden inside something that scrolls on its own (an inbox list, a chat, an
+  app's main area or an iframe), the cursor now moves over it and turns the wheel until the target
+  shows, as a person would. It used to jump the panel there in one go, so the page saw a scroll
+  with no wheel and no mouse over the panel.
+- Panels that don't scroll with the wheel still get there, as before.
+- Try it: the scrolling-list clip in the README's "See it" section, or "See every feature" on the website.
+
 ### Videos on the website show a picture before they play · Improved
 - Every video on the website now shows its first frame straight away, on slow connections, with
   reduced motion on, and in full-page screenshots. Before, each card was a blank box until its

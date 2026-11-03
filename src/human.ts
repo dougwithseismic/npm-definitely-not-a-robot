@@ -15,7 +15,7 @@ import {
 import { type BezierMotionOptions, bezierMotion, type MotionStrategy } from './motion'
 import type { Action, HumanPlugin, PluginContext } from './plugins'
 import { defaultTiming, type Preset, type PresetName, presets, type Timing } from './presets'
-import { createRandom, randomSeed, streamSeed } from './random'
+import { createRandom, type Random, randomSeed, streamSeed } from './random'
 import { type ScrollStrategy, type WheelScrollOptions, wheelScroll } from './scroll'
 import { type NaturalTypingOptions, naturalTyping, needsShift, type TypingStrategy } from './typing'
 
@@ -262,8 +262,13 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     // cover that takes a while to go) can't change what the actions after it do.
     let actions = 0
     let random = createRandom(streamSeed(seed, 1))
+    // Aims so far in this action, numbering the side streams their wheeling draws from.
+    let aims = 0
 
     let position: Point | null = null
+    // Pages read every move while a mouse button is down (drawing, reordering a list), so even
+    // instant mode sends them all then.
+    let held = false
     let queue: Promise<unknown> = Promise.resolve()
     let ready: Promise<void> | undefined
 
@@ -274,6 +279,16 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     /** Wait a human-scale duration, scaled by speed. */
     const wait = (ms: number) => (instant ? Promise.resolve() : realSleep(ms / speed))
     const between = ([min, max]: [number, number]) => random.range(min, max)
+    /** Run `body` drawing from `stream`, leaving the action's own stream where it was. */
+    async function drawingFrom<T>(stream: Random, body: () => Promise<T>): Promise<T> {
+        const own = random
+        random = stream
+        try {
+            return await body()
+        } finally {
+            random = own
+        }
+    }
 
     // ---- low-level playback ----
 
@@ -351,18 +366,28 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
         return last
     }
 
-    /** How much of [start, start + size) shows between the edges of a viewport `length` long. */
-    const shown = (start: number, size: number, length: number) =>
-        Math.min(start + size, length - EDGE) - Math.max(start, EDGE)
+    /** How much of [start, start + size) lies within [from, from + length). */
+    const overlap = (start: number, size: number, from: number, length: number) =>
+        Math.min(start + size, from + length) - Math.max(start, from)
     /** Enough of it must show to aim at comfortably. */
     const enough = (shownPx: number, size: number) => shownPx >= Math.min(size, 8)
 
-    function visiblePart(box: Box, viewport: Size): Box | null {
-        const width = shown(box.x, box.width, viewport.width)
-        const height = shown(box.y, box.height, viewport.height)
+    /** The part of `box` inside `area`, or null when too little of it is. */
+    function within(box: Box, area: Box): Box | null {
+        const width = overlap(box.x, box.width, area.x, area.width)
+        const height = overlap(box.y, box.height, area.y, area.height)
         if (!enough(width, box.width) || !enough(height, box.height)) return null
-        return { x: Math.max(box.x, EDGE), y: Math.max(box.y, EDGE), width, height }
+        return { x: Math.max(box.x, area.x), y: Math.max(box.y, area.y), width, height }
     }
+
+    /** The part of `box` on screen, clear of the very edges. */
+    const visiblePart = (box: Box, viewport: Size) =>
+        within(box, {
+            x: EDGE,
+            y: EDGE,
+            width: viewport.width - 2 * EDGE,
+            height: viewport.height - 2 * EDGE,
+        })
 
     async function playWheel(dx: number, dy: number): Promise<void> {
         const steps = scrolling.plan({ dx, dy, random })
@@ -379,27 +404,49 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
 
     /** Scroll with the wheel until the element shows, falling back to an instant scroll. */
     async function bringIntoView(ref: ElementRef, viewport: Size): Promise<Box | null> {
-        let box = await ref.box()
-        for (let attempt = 0; attempt < 6 && box; attempt++) {
-            if (visiblePart(box, viewport)) return box
-            await ensurePosition()
+        const box = await ref.box()
+        if (!box || visiblePart(box, viewport)) return box
+        // Hidden inside a panel or a frame: wheel over that first, as a person would.
+        const { clip } = await ref.hitTest(boxCenter(box), box)
+        const panel = clip ? await wheelOver(ref, box, clip, viewport) : box
+        if (visiblePart(panel, viewport)) return panel
+        // Then the page, wherever the mouse is.
+        const page = await wheelOver(ref, panel, { x: 0, y: 0, ...viewport }, viewport)
+        if (visiblePart(page, viewport)) return page
+        await ref.scrollIntoView()
+        return settle(ref)
+    }
+
+    /**
+     * Turn the wheel over `area` (a scrolling panel, a frame or the whole page) until the target
+     * sits in the middle of the part of it on screen, moving the mouse there first if it isn't.
+     * Resolves to the target's new box, or to `box` itself when the wheel moved nothing: an area
+     * mostly off screen (the page has to scroll first), one that doesn't scroll with the wheel, or
+     * a wheel that scrolled something else.
+     */
+    async function wheelOver(ref: ElementRef, box: Box, area: Box, viewport: Size): Promise<Box> {
+        const shows = visiblePart(area, viewport)
+        if (!shows || shows.width * shows.height < (area.width * area.height) / 2) return box
+        for (let attempt = 0; attempt < 6; attempt++) {
             // Wheel each axis that doesn't show enough, bringing the centre to a comfortable spot.
             const center = boxCenter(box)
-            const dy = enough(shown(box.y, box.height, viewport.height), box.height)
+            const dy = enough(overlap(box.y, box.height, shows.y, shows.height), box.height)
                 ? 0
-                : center.y - viewport.height * random.range(0.35, 0.55)
-            const dx = enough(shown(box.x, box.width, viewport.width), box.width)
+                : center.y - (shows.y + shows.height * random.range(0.35, 0.55))
+            const dx = enough(overlap(box.x, box.width, shows.x, shows.width), box.width)
                 ? 0
-                : center.x - viewport.width / 2
+                : center.x - (shows.x + shows.width / 2)
+            if (!dx && !dy) break
+            if (!isInside(await ensurePosition(), shows)) {
+                const size = Math.min(shows.width, shows.height)
+                await travel({ point: placeInBox(shows, pickSpot(random)), size })
+            }
             await playWheel(dx, dy)
             const after = await settle(ref)
-            // The wheel scrolled something else (or nothing): stop and use the fallback.
             if (!after || (after.x === box.x && after.y === box.y)) break
             box = after
         }
-        if (box && visiblePart(box, viewport)) return box
-        await ref.scrollIntoView()
-        return settle(ref)
+        return box
     }
 
     async function waitVisible(ref: ElementRef, timeout: number): Promise<void> {
@@ -455,32 +502,63 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
         )
         const viewport = await driver.viewport()
         let box = await bringIntoView(ref, viewport)
-        // One draw per aim: how often the loop below retries depends on the clock, and a seed
-        // must replay the same way however long the page took.
+        // One draw per aim: how often the loop below goes round depends on the clock, and a seed
+        // must replay the same way however long the page took. Wheeling a panel from in there
+        // draws from a side stream instead.
         const spot = pickSpot(random)
+        const aside = createRandom(streamSeed(random.seed, ++aims))
         let last: HitTest | undefined
+        // What the target's scrolling panels and frame show, as the last hit test said.
+        let clip: Box | undefined
+        let wheeled = false
         let scrolledInside = false
         while (true) {
             const visible = box ? visiblePart(box, viewport) : null
             if (box && visible) {
-                const point = placeInBox(visible, spot)
-                last = await ref.hitTest(point, box)
-                // `force` goes ahead when something covers the target, never when it's clipped:
-                // then the press would land on whatever the panel or frame shows instead.
-                if (last.ok || (opts.force && !last.clipped)) {
-                    return { point, size: Math.min(visible.width, visible.height), ref }
+                const shows = clip ? within(visible, clip) : visible
+                if (shows) {
+                    const point = placeInBox(shows, spot)
+                    last = await ref.hitTest(point, box)
+                    // `force` goes ahead when something covers the target, never when it's
+                    // clipped: then the press would land on whatever the panel or frame shows.
+                    if (last.ok || (opts.force && !last.clipped)) {
+                        return { point, size: Math.min(shows.width, shows.height), ref }
+                    }
+                    // Partly hidden inside a panel or a frame: aim at the part it shows.
+                    if (last.clip) {
+                        const learned = !clip
+                        clip = last.clip
+                        if (learned) continue
+                    }
                 }
-                if (last.clipped && !scrolledInside) {
+                if (!shows || last?.clipped) {
                     // Scrolled out of sight inside a panel or a frame, which the page wheel
-                    // doesn't reach. Scroll it into place, then aim again.
-                    scrolledInside = true
-                    await ref.scrollIntoView()
-                    box = await settle(ref)
-                    continue
+                    // doesn't reach. Wheel it into place over the panel, as a person would; if
+                    // that can't, scroll it there instantly.
+                    if (clip && !wheeled) {
+                        wheeled = true
+                        const [from, area] = [box, clip]
+                        const after = await drawingFrom(aside, () =>
+                            wheelOver(ref, from, area, viewport)
+                        )
+                        if (after !== from) {
+                            box = after
+                            continue
+                        }
+                    }
+                    if (!scrolledInside) {
+                        scrolledInside = true
+                        await ref.scrollIntoView()
+                        box = await settle(ref)
+                        clip = undefined
+                        continue
+                    }
                 }
             }
             if (Date.now() > deadline) break
             await realSleep(100)
+            // The panel may have grown or moved by now: the next hit test says what it shows.
+            clip = undefined
             box = await ref.box()
         }
         if (last?.covering && !last.clipped) {
@@ -504,23 +582,28 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     const pathTo = (from: Point, to: Aim) =>
         motion.plan({ from, to: to.point, targetSize: to.size, random })
 
-    /** Travel along a planned path to an aimed point. Instant mode sends a few points along it. */
-    const travel = (from: Point, to: Aim) => {
-        const path = pathTo(from, to)
-        return playPath(instant ? runs(path, INSTANT_EVENTS).map((run) => run.at(-1)!) : path)
+    /**
+     * Travel from wherever the mouse is now (aiming may have moved it over a panel to wheel it)
+     * along a planned path to an aimed point. Instant mode sends a few points along it, unless a
+     * button is held.
+     */
+    const travel = async (to: Aim) => {
+        const path = pathTo(await ensurePosition(), to)
+        const quick = instant && !held
+        return playPath(quick ? runs(path, INSTANT_EVENTS).map((run) => run.at(-1)!) : path)
     }
 
     async function moveTo(target: Target, opts: MoveOptions = {}, verb?: string): Promise<Aim> {
-        const from = await ensurePosition()
+        await ensurePosition()
         const aimed = await aim(target, opts, verb)
-        await travel(from, aimed)
+        await travel(aimed)
         // If the element moved while we travelled (layout shift, animation), aim again and
         // correct course, with the same visibility and cover checks as the first time.
         if (aimed.ref) {
             const box = await aimed.ref.box()
             if (box && !isInside(aimed.point, box)) {
                 const again = await aim(target, opts, verb)
-                await travel(aimed.point, again)
+                await travel(again)
                 return again
             }
         }
@@ -621,6 +704,7 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
     const queued: Runner = (action, body) => {
         const task = queue.then(async () => {
             random = createRandom(streamSeed(seed, ++actions))
+            aims = 0
             // A failed setup is retried on the next action instead of failing every one after it.
             ready ??= setupPlugins().catch((error) => {
                 ready = undefined
@@ -659,16 +743,18 @@ export function createHuman<P>(page: P, options: HumanOptions = {}): Human<P> {
             ),
         drag: (from, to, opts) =>
             run({ type: 'drag', target: from }, async () => {
-                const start = await moveTo(from, opts, 'drag')
+                await moveTo(from, opts, 'drag')
                 await wait(between(timing.hesitation))
                 await driver.mouseDown('left', 1)
-                await wait(random.range(80, 200))
-                // What's being dragged may cover the drop target, so skip the cover check. Pages read
-                // every move while a button is down (drawing, reordering a list), so even in instant
-                // mode a drag sends the whole path.
-                const drop = await aim(to, { ...opts, force: true }, 'drop on')
-                await playPath(pathTo(start.point, drop))
-                await wait(random.range(60, 150))
+                held = true
+                try {
+                    await wait(random.range(80, 200))
+                    // What's being dragged may cover the drop target, so skip the cover check.
+                    await travel(await aim(to, { ...opts, force: true }, 'drop on'))
+                    await wait(random.range(60, 150))
+                } finally {
+                    held = false
+                }
                 await driver.mouseUp('left', 1)
             }),
         type: ((a: Target, b?: string, opts?: TypeOptions) => {
