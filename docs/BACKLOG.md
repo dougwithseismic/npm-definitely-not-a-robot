@@ -58,9 +58,9 @@ database backups (no server-side product). "Can pay" means sponsorship.
       `scrollIntoViewIfNeeded`. A person would move over the panel and turn the wheel; do that
       (needs the clipping box from the driver, see PRD 01 notes).
       (building since 2026-11-03, autopilot session)
-- [~] Use-case and gallery cards are blank until their video loads (`preload="none"`), which shows
+- [x] Use-case and gallery cards are blank until their video loads (`preload="none"`), which shows
       on slow connections and in full-page screenshots. Give each video a poster frame.
-      (building since 2026-11-03, autopilot session)
+      (shipped 2026-11-03, PR 14)
 - [x] Typing into an email or number field that already has text lands where the click did,
       because those inputs don't allow moving the caret. Select the text and press the right
       arrow, which leaves the caret at the end on every platform. (fixed 2026-11-03, PR 13)
